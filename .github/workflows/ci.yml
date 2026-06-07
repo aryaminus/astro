@@ -154,6 +154,25 @@ jobs:
               sys.exit(1)
           print(f"All {len(modes)} modes OK")
           PY
+      - name: Input tolerance (lon/longitude/date/time aliases must not silently produce a wrong chart)
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'skills/astrology/scripts')
+          import astro_engine
+          def asc(d): return astro_engine.calculate_full_profile(dict(d))['summary']['big_three']['ascendant']
+          canon = {"year":1990,"month":6,"day":15,"hour":14,"minute":30,"lat":40.7128,"lng":-74.006,"tz":"America/New_York"}
+          want = asc(canon)
+          # `lon` was once silently ignored (lng->0.0) and gave a WRONG ascendant.
+          variants = {
+              "lon":       {"year":1990,"month":6,"day":15,"hour":14,"minute":30,"lat":40.7128,"lon":-74.006,"tz":"America/New_York"},
+              "longitude": {"year":1990,"month":6,"day":15,"hour":14,"minute":30,"latitude":40.7128,"longitude":-74.006,"tz":"America/New_York"},
+              "iso":       {"date":"1990-06-15","time":"14:30","lat":40.7128,"lon":-74.006,"tz":"America/New_York"},
+          }
+          bad = {k: asc(v) for k, v in variants.items() if asc(v) != want}
+          assert not bad, f"alias variants disagree with canonical asc {want!r}: {bad}"
+          print(f"input tolerance OK: lon/longitude/date+time all give asc={want}")
+          PY
 
   api-smoke:
     name: REST API smoke (31 endpoints)

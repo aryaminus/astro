@@ -2710,7 +2710,43 @@ def life_phase(birth_dt):
         notes.append("Jupiter Return (~every 12 yrs): a cycle of growth, opportunity and expansion opens.")
     return {"current_age":round(age,1),"active_milestones":notes}
 
+def _normalize_birth(d):
+    """Make input forgiving without changing the canonical schema.
+
+    LLMs frequently emit `lon`/`longitude` instead of `lng`, or an ISO
+    `date`/`time` string instead of numeric year/month/day/hour/minute.
+    Previously `lon` was silently ignored (lng defaulted to 0.0 → a wrong
+    ascendant), and `date`/`time` raised KeyError. We coerce these aliases to
+    the canonical fields so a guessed shape still produces a correct chart.
+    Recurses into a `partner` dict (synastry/compatibility/composite). Pure
+    stdlib; canonical fields always win when both are present.
+    """
+    if not isinstance(d, dict):
+        return d
+    if "lng" not in d:
+        for alias in ("lon", "long", "longitude"):
+            if alias in d:
+                d["lng"] = d[alias]; break
+    if "lat" not in d and "latitude" in d:
+        d["lat"] = d["latitude"]
+    if "year" not in d and isinstance(d.get("date"), str):
+        try:
+            y, mo, dy = d["date"].strip().split("T")[0].split("-")[:3]
+            d["year"], d["month"], d["day"] = int(y), int(mo), int(dy)
+        except Exception:
+            pass
+    if "hour" not in d and isinstance(d.get("time"), str):
+        try:
+            hh, mm = (d["time"].strip().split(":") + ["0"])[:2]
+            d["hour"], d["minute"] = int(hh), int(mm)
+        except Exception:
+            pass
+    if isinstance(d.get("partner"), dict):
+        _normalize_birth(d["partner"])
+    return d
+
 def calculate_full_profile(data):
+    data = _normalize_birth(data)
     mode=data.get("mode","natal")
     birth_utc, tinfo = to_utc(data)
     jd=julian_day(birth_utc)
