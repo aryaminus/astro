@@ -831,7 +831,15 @@ def vedic_chart(jd, lat, lng, birth_dt, time_known=True):
     if delta == 11:   sade_sati_phase = "rising (Saturn in the sign before your Moon sign)"
     elif delta == 0:  sade_sati_phase = "peak (Saturn transiting your natal Moon sign directly)"
     elif delta == 1:  sade_sati_phase = "setting (Saturn in the sign after your Moon sign)"
+    
+    # Tithi Calculation (Hindu Lunar Day)
+    tithi_val = (lons["Moon"] - lons["Sun"]) % 360
+    tithi_index = int(tithi_val / 12) + 1
+    paksha = "Shukla" if tithi_index <= 15 else "Krishna"
+    tithi_num = tithi_index if tithi_index <= 15 else tithi_index - 15
+    
     return {
+        "tithi": f"{paksha} Paksha, Tithi {tithi_num}",
         "system":"Vedic / Jyotisha — Lahiri sidereal, whole-sign (rashi) houses",
         "ayanamsha_deg":round(ayan,4),
         "lagna":{"sign":lagna_sign,"deg_in_sign":lagna_deg,"lord":RASHI_LORDS[lagna_sign]},
@@ -1479,6 +1487,13 @@ def calculate_full_profile(data):
             "input":{k:data.get(k) for k in
                      ("name","year","month","day","hour","minute","lat","lng","tz","gender")},
             "time_info":tinfo,
+            "summary": {
+                "big_three": {
+                    "sun": sign_of(body_longitudes(jd)[0]["Sun"])[0],
+                    "moon": sign_of(body_longitudes(jd)[0]["Moon"])[0],
+                    "ascendant": sign_of(ascendant_mc(jd, lat, lng)[0])[0]
+                }
+            },
             "mode":mode}
 
     if mode=="transit":

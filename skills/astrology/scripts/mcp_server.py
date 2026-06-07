@@ -147,6 +147,32 @@ def get_profile(name: str) -> str:
     except Exception as e:
         return f"Error loading profile: {e}"
 
+@mcp.tool()
+def geocode_city(city_name: str) -> str:
+    """
+    Retrieve the latitude and longitude for a given city name.
+    Use this to look up coordinates if the user only provides a city name.
+    """
+    import urllib.request, json, urllib.parse
+    query = urllib.parse.quote(city_name)
+    url = f"https://geocoding-api.open-meteo.com/v1/search?name={query}&count=1&format=json"
+    try:
+        req = urllib.request.Request(url, headers={'User-Agent': 'Astro-MCP'})
+        with urllib.request.urlopen(req) as response:
+            data = json.loads(response.read().decode())
+            if not data.get("results"):
+                return f"Error: City '{city_name}' not found."
+            res = data["results"][0]
+            return json.dumps({
+                "city": res.get("name"),
+                "country": res.get("country"),
+                "lat": res.get("latitude"),
+                "lng": res.get("longitude"),
+                "timezone": res.get("timezone")
+            }, indent=2)
+    except Exception as e:
+        return f"Error geocoding city: {e}"
+
 if __name__ == "__main__":
     # Ensure sys.stdout is cleanly reserved for the MCP protocol when running locally.
     # To monetize and host this as an API, change transport to "sse" or run via FastMCP CLI:
