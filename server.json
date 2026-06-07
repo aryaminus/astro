@@ -1,0 +1,105 @@
+{
+  "$schema": "https://cdn.modelcontextprotocol.io/schema/server.json",
+  "name": "io.github.aryaminus.astro",
+  "display_name": "Astrology Engine",
+  "description": "Trustworthy multi-tradition astrology. 19 calculation modes (natal, transit, synastry, compatibility, composite, solar/lunar/planetary return, navamsa, varga D2-D60, panchang, moon phase, numerology, progressions, planetary hours, transit-natal aspects) across 3 traditions (Western tropical, Vedic/Jyotisha sidereal, Chinese BaZi). Deterministic ephemeris engine — zero hallucinated positions.",
+  "version": "2.4.0",
+  "homepage": "https://github.com/aryaminus/astro",
+  "repository": {
+    "url": "https://github.com/aryaminus/astro",
+    "source": "github"
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "aryaminus",
+      "url": "https://github.com/aryaminus"
+    }
+  ],
+  "categories": ["divination", "lifestyle", "education"],
+  "tools": [
+    {
+      "name": "get_astrology_chart",
+      "description": "Calculate an astrological chart (Western, Vedic, BaZi) based on birth data."
+    },
+    {
+      "name": "get_astrology_reference",
+      "description": "Retrieve authentic interpretation guidelines for a specific astrological system."
+    },
+    {
+      "name": "save_profile",
+      "description": "Save a user's birth profile for future sessions."
+    },
+    {
+      "name": "get_profile",
+      "description": "Retrieve a saved birth profile."
+    },
+    {
+      "name": "geocode_city",
+      "description": "Retrieve latitude, longitude, and timezone for a given city name."
+    },
+    {
+      "name": "get_solar_return",
+      "description": "Calculate a solar return chart for annual birthday forecasts."
+    },
+    {
+      "name": "get_lunar_return",
+      "description": "Calculate a lunar return chart for monthly emotional cycle tracking."
+    },
+    {
+      "name": "get_compatibility",
+      "description": "Calculate detailed 0-100 compatibility scoring between two people."
+    },
+    {
+      "name": "get_navamsa",
+      "description": "Calculate the Vedic Navamsa (D9) divisional chart."
+    },
+    {
+      "name": "get_panchang",
+      "description": "Calculate complete Vedic Panchang elements: Tithi, Nakshatra, Yoga, Karana."
+    },
+    {
+      "name": "get_moon_phase",
+      "description": "Get moon phase name, illumination %, age, and upcoming lunar events."
+    },
+    {
+      "name": "get_numerology",
+      "description": "Calculate Life Path number, Personal Year, Expression, and Soul Urge numbers."
+    },
+    {
+      "name": "get_composite_chart",
+      "description": "Calculate a midpoint composite chart — the relationship as a third entity."
+    },
+    {
+      "name": "get_progressions",
+      "description": "Calculate secondary progressions (1 day = 1 year of life)."
+    },
+    {
+      "name": "get_planetary_return",
+      "description": "Calculate a planetary return chart for any planet."
+    },
+    {
+      "name": "get_varga",
+      "description": "Calculate a Vedic divisional chart (D2 through D60)."
+    },
+    {
+      "name": "get_planetary_hours",
+      "description": "Calculate Chaldean planetary hours for a given day and location."
+    },
+    {
+      "name": "get_transit_aspects",
+      "description": "Get detailed transit-to-natal aspects with impact ratings."
+    }
+  ],
+  "installation": {
+    "type": "python",
+    "command": "python3",
+    "args": ["skills/astrology/scripts/mcp_server.py"],
+    "dependencies": ["mcp"],
+    "requirements": "requirements.txt"
+  },
+  "remote": {
+    "transport": "sse",
+    "url": "https://astro-api-a2rc.onrender.com/mcp/sse"
+  }
+}

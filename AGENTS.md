@@ -61,7 +61,20 @@ ln -sfn "$PWD/skills/astrology" ~/.agents/skills/astrology
 
 ### Operational endpoints (no auth, no PII)
 
-`GET /health` · `GET /ready` · `GET /version` · `GET /metrics` · `GET /pricing` · `GET /docs` · `GET /openapi.json`
+`GET /health` · `GET /ready` · `GET /version` · `GET /metrics` · `GET /pricing` · `GET /docs` · `GET /openapi.json` · `GET /.well-known/mcp/server-card.json`
+
+## Marketplace listings
+
+| Registry | Status | URL |
+|----------|--------|-----|
+| Smithery | Listed | [smithery.ai](https://smithery.ai) (search "astrology") |
+| Official MCP Registry | `server.json` ready | [registry.modelcontextprotocol.io](https://registry.modelcontextprotocol.io) |
+| Glama.ai | Auto-indexes GitHub | [glama.ai/mcp/servers](https://glama.ai/mcp/servers) |
+| PulseMCP | Auto-aggregates official registry | [pulsemcp.com](https://www.pulsemcp.com) |
+| Claude Plugin Marketplace | Listed | `/plugin marketplace add aryaminus/astro` in Claude Code |
+| Poke Recipe | MCP SSE connected | `https://astro-api-a2rc.onrender.com/mcp/sse` |
+
+> **To submit to the Official MCP Registry:** `brew install mcp-publisher && mcp-publisher login github && mcp-publisher publish`
 
 ### One-click deploy
 

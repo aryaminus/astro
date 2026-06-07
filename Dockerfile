@@ -19,6 +19,7 @@ COPY skills /app/skills
 COPY openapi.yaml /app/openapi.yaml
 COPY AGENTS.md /app/AGENTS.md
 COPY README.md /app/README.md
+COPY .well-known /app/.well-known
 
 # Profile persistence directory
 RUN mkdir -p /data/profiles && chown -R 1000:1000 /data

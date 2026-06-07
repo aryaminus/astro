@@ -14,6 +14,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Separate `astro-mcp` Render service (MCP is now mounted into the main API).
 
+## [2.4.0] - 2026-06-07
+
+### Added
+- **`server.json`** — official MCP Registry manifest (`registry.modelcontextprotocol.io`).
+- **`.well-known/mcp/server-card.json`** — Smithery-compatible server card served at the cloud endpoint.
+- **Poke quick-connect** — no self-hosting needed, use `https://astro-api-a2rc.onrender.com/mcp/sse` directly.
+- **Marketplace listings table** in AGENTS.md (Smithery, Official Registry, Glama, PulseMCP, Claude Plugin Marketplace, Poke).
+
+### Changed
+- One-line paste prompt now includes public MCP SSE endpoint for MCP-capable hosts.
+- `docs/cloud-setup.md` Poke section rewritten — connect directly, no deploy step needed.
+- `Dockerfile` includes `.well-known/` for server card hosting.
+
 ## [2.3.0] - 2026-06-07
 
 ### Added

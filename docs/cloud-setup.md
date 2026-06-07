@@ -15,7 +15,7 @@ SET YOURSELF UP now using whatever you're capable of — try in this order, don'
    - `npx skills add aryaminus/astro -g` — installs the skill on Claude Code, Cursor, Codex, Gemini CLI + 50+ hosts (engine at skills/astrology/scripts/astro_engine.py)
    - latest packaged release (needs only curl + unzip): `curl -L -o astrology.skill https://github.com/aryaminus/astro/releases/latest/download/astrology.skill && unzip astrology.skill` — engine then at scripts/astro_engine.py
    Then run it: `python3 <path>/astro_engine.py --json '{"year":1990,"month":6,"day":15,"hour":14,"minute":30,"lat":40.7128,"lng":-74.0060,"tz":"America/New_York"}'`. Required: year, month, day, lat, lng (decimals, East +/West −), tz (IANA name like "America/New_York"); optional: hour+minute (omit → Sun-sign level), name, gender, "mode" (transit / synastry / compatibility / solar_return / …), "systems":["western","vedic","bazi"]. Look up the user's city's lat/lng/tz yourself.
-2. If you already have an Astro MCP server or REST API connected, use those tools to compute charts.
+2. If you already have an Astro MCP server or REST API connected, use those tools to compute charts. Public MCP SSE endpoint: `https://astro-api-a2rc.onrender.com/mcp/sse` (~30s cold start after idle).
 3. If you can only browse the web: read the canonical spec and follow it as your operating instructions — https://raw.githubusercontent.com/aryaminus/astro/main/skills/astrology/SKILL.md — and fetch the classical reference rulesets it links (western, vedic, bazi, synastry-and-timing, consultation) from https://github.com/aryaminus/astro/tree/main/skills/astrology/references
 4. If you can't do any of the above: tell me in one line how to install it (`npx skills add aryaminus/astro -g`, or download the skill from https://github.com/aryaminus/astro/releases/latest for claude.ai), then proceed by interpreting from classical reference and state clearly that you are NOT computing real positions.
 
@@ -38,20 +38,9 @@ Now ask me for my birth details (date — and ideally exact time + city) and let
 
 ## Option 2: Poke (Apple Messages, WhatsApp, Telegram, RCS)
 
-Astro runs as an MCP server that Poke connects to. You need a deployed instance first.
+Astro runs as an MCP server that Poke connects to. No self-hosting needed — use the public cloud endpoint.
 
-### Deploy the MCP server
-
-One-click to Render (free tier): connect [aryaminus/astro](https://github.com/aryaminus/astro) → New → Blueprint. Your public URL will be `https://astro-api-xxxx.onrender.com`. The MCP SSE endpoint is at `/mcp/sse`. Free tier spins down after 15 min idle; first request takes ~30s.
-
-Or self-host:
-```bash
-docker compose up --build
-# MCP SSE is at /mcp/sse on the API server, or standalone:
-ASTRO_MCP_TRANSPORT=sse python -m skills.astrology.scripts.mcp_server
-```
-
-### Add to Poke
+### Quick connect
 
 **Via web app:**
 1. Go to [poke.com/integrations/new](https://poke.com/integrations/new)
@@ -64,18 +53,22 @@ ASTRO_MCP_TRANSPORT=sse python -m skills.astrology.scripts.mcp_server
 npx poke@latest mcp add https://astro-api-a2rc.onrender.com/mcp/sse -n "Astro"
 ```
 
+> **Cold start:** The server spins down after 15 min idle. First message may take ~30s; subsequent messages are instant.
+
 ### Create a Poke Recipe (shareable)
 
-```bash
-npx poke@latest tunnel http://localhost:8765/sse -n "Astro" --recipe
-```
-
-Or in [Kitchen](https://poke.com/kitchen):
+In [Kitchen](https://poke.com/kitchen):
 1. Create recipe → name it "Astrology"
 2. Onboarding context: `Your birth date (year/month/day), birth time, and birth city`
 3. Prefilled first message: `I'd like an astrology reading. Ask me for my birth details.`
-4. Add the Astro MCP integration
+4. Add the Astro MCP integration (the one you created above)
 5. Publish → share the link
+
+Or via CLI if self-hosting:
+```bash
+ASTRO_MCP_TRANSPORT=sse python -m skills.astrology.scripts.mcp_server &
+npx poke@latest tunnel http://localhost:8765/sse -n "Astro" --recipe
+```
 
 ### Use it
 

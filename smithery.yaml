@@ -8,7 +8,3 @@ startCommand:
       command: "python3",
       args: ["skills/astrology/scripts/mcp_server.py"]
     })
-
-# Cloud MCP SSE endpoint (no install needed):
-# https://astro-api-a2rc.onrender.com/mcp/sse
-# Free Render tier — ~30s cold start after idle.

@@ -35,7 +35,7 @@ if _SCRIPTS_DIR not in sys.path:
     sys.path.insert(0, _SCRIPTS_DIR)
 import astro_engine  # noqa: E402
 
-VERSION = "2.3.0"
+VERSION = "2.4.0"
 
 # ── Logging ──────────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -57,6 +57,12 @@ app = FastAPI(
     ),
     version=VERSION,
 )
+
+from fastapi.staticfiles import StaticFiles
+
+_WELL_KNOWN_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), ".well-known")
+if os.path.isdir(_WELL_KNOWN_DIR):
+    app.mount("/.well-known", StaticFiles(directory=_WELL_KNOWN_DIR, html=True), name="well-known")
 
 app.add_middleware(
     CORSMiddleware,

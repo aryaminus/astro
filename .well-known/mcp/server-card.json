@@ -1,0 +1,30 @@
+{
+  "serverInfo": {
+    "name": "Astrology Engine",
+    "version": "2.4.0",
+    "description": "Trustworthy multi-tradition astrology. 19 modes, 3 traditions, 18 MCP tools. Deterministic ephemeris — zero hallucinated positions.",
+    "repository": "https://github.com/aryaminus/astro",
+    "homepage": "https://github.com/aryaminus/astro",
+    "license": "MIT"
+  },
+  "tools": [
+    {"name": "get_astrology_chart", "description": "Calculate an astrological chart based on birth data."},
+    {"name": "get_astrology_reference", "description": "Retrieve interpretation guidelines for an astrological system."},
+    {"name": "save_profile", "description": "Save a birth profile for future sessions."},
+    {"name": "get_profile", "description": "Retrieve a saved birth profile."},
+    {"name": "geocode_city", "description": "Get lat/lng/timezone for a city name."},
+    {"name": "get_solar_return", "description": "Calculate solar return chart for annual forecasts."},
+    {"name": "get_lunar_return", "description": "Calculate lunar return chart for monthly forecasts."},
+    {"name": "get_compatibility", "description": "Calculate 0-100 compatibility scoring between two people."},
+    {"name": "get_navamsa", "description": "Calculate Vedic Navamsa (D9) chart."},
+    {"name": "get_panchang", "description": "Calculate Vedic Panchang elements."},
+    {"name": "get_moon_phase", "description": "Get moon phase and upcoming lunar events."},
+    {"name": "get_numerology", "description": "Calculate Life Path, Personal Year, Expression numbers."},
+    {"name": "get_composite_chart", "description": "Calculate midpoint composite relationship chart."},
+    {"name": "get_progressions", "description": "Calculate secondary progressions."},
+    {"name": "get_planetary_return", "description": "Calculate planetary return for any planet."},
+    {"name": "get_varga", "description": "Calculate Vedic divisional chart D2-D60."},
+    {"name": "get_planetary_hours", "description": "Calculate Chaldean planetary hours."},
+    {"name": "get_transit_aspects", "description": "Get transit-to-natal aspects with impact ratings."}
+  ]
+}
