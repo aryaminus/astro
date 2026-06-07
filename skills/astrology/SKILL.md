@@ -83,7 +83,8 @@ the engine in `western` mode and keep it light. Scale depth to what they asked f
 ### 2 — Run the engine
 
 ```bash
-python3 ${CLAUDE_SKILL_DIR}/scripts/astro_engine.py --json '<birth_data_json>'
+SKILL_DIR="<absolute path of the directory containing the SKILL.md you just Read>"
+python3 "${SKILL_DIR}/scripts/astro_engine.py" --json '<birth_data_json>'
 ```
 
 Input JSON (full schema is documented at the top of the script):

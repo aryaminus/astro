@@ -11,6 +11,36 @@ chart data. This skill **decouples the calculation from the interpretation**.
 A deterministic engine computes the sky; the model only does the synthesis
 and counsel a calculator can't.
 
+## Installation
+
+**Claude Code (recommended):**
+```
+/plugin marketplace add aryaminus/astro
+/plugin install astrology
+```
+
+**Codex, Cursor, Copilot, Gemini CLI, or any of 50+ [Agent Skills](https://agentskills.io) hosts:**
+```
+npx skills add aryaminus/astro -g
+```
+(`-g` installs globally for your user. Drop it to scope per-project.)
+
+**Claude Desktop, Cursor, Zed, Devin (MCP Protocol):**
+Requires `pip install mcp`. Configure your MCP host:
+```json
+{
+  "mcpServers": {
+    "astrology": {
+      "command": "python3",
+      "args": ["/absolute/path/to/skills/astrology/scripts/mcp_server.py"]
+    }
+  }
+}
+```
+
+**ChatGPT Custom Actions (OpenAPI):**
+Paste the contents of `openapi.yaml` into your Custom GPT's Action schema, and update the URL to point to your hosted instance.
+
 ## What it does
 
 **Core readings:**

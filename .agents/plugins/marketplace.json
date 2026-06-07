@@ -1,0 +1,20 @@
+{
+  "name": "astrology-skill",
+  "interface": {
+    "displayName": "Astrology"
+  },
+  "plugins": [
+    {
+      "name": "astrology",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Lifestyle"
+    }
+  ]
+}

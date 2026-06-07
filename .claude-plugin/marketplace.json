@@ -1,0 +1,23 @@
+{
+  "name": "astrology-skill",
+  "owner": {
+    "name": "aryaminus",
+    "url": "https://github.com/aryaminus"
+  },
+  "metadata": {
+    "description": "Marketplace hosting the Astrology skill plugin."
+  },
+  "plugins": [
+    {
+      "name": "astrology",
+      "description": "Trustworthy multi-tradition astrology. Casts mathematically real charts (Western tropical, Vedic/Jyotish sidereal, Chinese BaZi) from birth data via a deterministic ephemeris engine.",
+      "version": "1.0.0",
+      "author": {
+        "name": "aryaminus"
+      },
+      "source": "./",
+      "category": "lifestyle",
+      "homepage": "https://github.com/aryaminus/astro"
+    }
+  ]
+}

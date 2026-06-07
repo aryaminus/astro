@@ -1,0 +1,57 @@
+openapi: 3.1.0
+info:
+  title: Astrology API
+  description: Trustworthy multi-tradition astrology. Casts mathematically real charts (Western tropical, Vedic/Jyotish sidereal, Chinese BaZi) from birth data via a deterministic ephemeris engine.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+paths:
+  /chart:
+    post:
+      operationId: getAstroChart
+      summary: Retrieve astrological chart calculations
+      description: Generates a JSON chart based on birth data using Western, Vedic, or BaZi systems.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - year
+                - month
+                - day
+              properties:
+                year:
+                  type: integer
+                month:
+                  type: integer
+                day:
+                  type: integer
+                hour:
+                  type: integer
+                minute:
+                  type: integer
+                lat:
+                  type: number
+                lng:
+                  type: number
+                tz:
+                  type: string
+                time_known:
+                  type: boolean
+                systems:
+                  type: array
+                  items:
+                    type: string
+                    enum: [western, vedic, bazi]
+                gender:
+                  type: string
+                  enum: [female, male]
+      responses:
+        "200":
+          description: Successful chart generation
+          content:
+            application/json:
+              schema:
+                type: object

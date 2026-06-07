@@ -1,0 +1,13 @@
+{
+  "name": "astrology-skill",
+  "version": "1.0.0",
+  "description": "Trustworthy multi-tradition astrology. Casts mathematically real charts (Western tropical, Vedic/Jyotish sidereal, Chinese BaZi) from birth data via a deterministic ephemeris engine.",
+  "settings": [
+    {
+      "name": "Extension Directory",
+      "description": "Extension installation directory (auto-set by Gemini CLI)",
+      "envVar": "GEMINI_EXTENSION_DIR",
+      "sensitive": false
+    }
+  ]
+}
