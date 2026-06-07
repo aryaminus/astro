@@ -801,6 +801,39 @@ app.mount("/mcp", _mcp_sse_app)
 log.info("MCP SSE endpoint mounted at /mcp/sse")
 
 
+@app.post("/streamable-mcp")
+@app.options("/streamable-mcp")
+async def mcp_streamable_http(request: Request):
+    if request.method == "OPTIONS":
+        return JSONResponse({"status": "ok"})
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse({"jsonrpc": "2.0", "id": None, "error": {"code": -32700, "message": "Parse error"}}, status_code=400)
+    method = body.get("method")
+    req_id = body.get("id")
+    if method == "initialize":
+        return JSONResponse({
+            "jsonrpc": "2.0",
+            "id": req_id,
+            "result": {
+                "protocolVersion": "2024-11-05",
+                "capabilities": {
+                    "tools": {"listChanged": False},
+                },
+                "serverInfo": {"name": "Astrology Engine", "version": VERSION}
+            }
+        })
+    if method == "notifications/initialized":
+        return Response(status_code=204)
+    if method == "tools/list":
+        _tool_defs = []
+        for _t in _mcp_mod.mcp._tool_manager._tools.values():
+            _tool_defs.append({"name": _t.name, "description": _t.description, "inputSchema": _t.parameters})
+        return JSONResponse({"jsonrpc": "2.0", "id": req_id, "result": {"tools": _tool_defs}})
+    return JSONResponse({"jsonrpc": "2.0", "id": req_id, "error": {"code": -32601, "message": f"Unknown method: {method}"}}, status_code=400)
+
+
 # ── Entrypoint ──────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     import uvicorn
