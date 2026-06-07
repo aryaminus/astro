@@ -100,7 +100,7 @@ jobs:
           sys.path.insert(0, 'skills/astrology/scripts'); sys.path.insert(0, '.')
           import skills.astrology.scripts.api as a
           api_paths = {r.path for r in a.app.routes
-                       if hasattr(r, 'path') and not r.path.startswith(('/openapi', '/docs', '/redoc'))}
+                        if hasattr(r, 'path') and not r.path.startswith(('/openapi', '/docs', '/redoc', '/mcp', '/streamable-mcp', '/.well-known'))}
           spec_paths = set(spec['paths'])
           missing = api_paths - spec_paths
           extra = spec_paths - api_paths
