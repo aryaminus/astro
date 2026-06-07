@@ -17,9 +17,8 @@ info:
 servers:
   - url: http://localhost:8000
     description: Local development
-  - url: https://astrology-api.onrender.com
-    description: Render cloud (free tier)
-    description: Production (replace with your hosted URL)
+  - url: https://your-app.onrender.com
+    description: Your hosted instance — replace with your Render/Docker deployment URL
 
 security:
   - ApiKeyAuth: []
@@ -351,6 +350,14 @@ paths:
       responses:
         "200": { description: Profile data }
         "404": { description: Profile not found }
+    delete:
+      tags: [Profiles]
+      operationId: deleteProfile
+      summary: Delete a saved profile
+      parameters: [{ name: name, in: path, required: true, schema: { type: string } }]
+      responses:
+        "200": { description: Deleted }
+        "404": { description: Not found }
 
   /geocode:
     get:
@@ -512,17 +519,3 @@ paths:
           schema: { type: string }
       responses:
         "200": { description: Session cleared }
-
-  /profile/{name}:
-    delete:
-      tags: [Profiles]
-      operationId: deleteProfile
-      summary: Delete a saved profile
-      parameters:
-        - name: name
-          in: path
-          required: true
-          schema: { type: string }
-      responses:
-        "200": { description: Deleted }
-        "404": { description: Not found }

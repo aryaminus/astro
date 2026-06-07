@@ -11,7 +11,7 @@ astrology/
 ├── SKILL.md                       # orchestration + anti-Barnum trust discipline (v2.0)
 ├── scripts/astro_engine.py        # deterministic ephemeris engine (~2930 lines, 19 modes)
 ├── scripts/mcp_server.py          # MCP server (18 tools, stdio + SSE)
-├── scripts/api.py                 # FastAPI REST server (27 endpoints, auth + billing headers)
+├── scripts/api.py                 # FastAPI REST server (31 endpoints, auth + billing headers)
 ├── references/                    # grounded classical rulesets (the meaning layer)
 │   ├── western.md                 # Big Three, planets, houses, aspects, medical
 │   ├── vedic.md                   # Lagna, dasha, yogas, remedies, Namakaran, Guna Milan
@@ -37,7 +37,7 @@ astrology/
 |-------|------|-----------------|-----------|
 | CLI | `astro_engine.py --json` | 19 modes | stdin |
 | MCP | `mcp_server.py` | 18 tools | stdio / SSE |
-| REST | `api.py` | 27 endpoints | HTTP |
+| REST | `api.py` | 31 endpoints | HTTP |
 | Skill | `SKILL.md` | Agent integration | Claude/Cursor/Copilot |
 
 ### Mode examples

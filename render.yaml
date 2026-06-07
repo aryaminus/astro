@@ -44,11 +44,10 @@ services:
         value: "sse"
       - key: ASTRO_MCP_HOST
         value: "0.0.0.0"
-      - key: ASTRO_MCP_PORT
-        fromService:
-          type: web
-          name: astro-mcp
-          property: port
+      # Render injects $PORT and routes external traffic to it; the server binds
+      # to $PORT automatically. Do NOT pin ASTRO_MCP_PORT here or routing breaks.
+      - key: PYTHON_VERSION
+        value: "3.11.0"
       - key: ASTRO_LOG_LEVEL
         value: "INFO"
     startCommand: "python -m skills.astrology.scripts.mcp_server"

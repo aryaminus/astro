@@ -1,11 +1,11 @@
-# Astro
+# Astro — Multi-Tradition Astrology Engine for AI Agents
 
-> Trustworthy multi-tradition astrology for AI agents. The engine computes; the model interprets.
+> Trustworthy birth charts, transits, and synastry across Western, Vedic/Jyotish, and Chinese BaZi. The engine computes; the model interprets.
 
 [![MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![MCP](https://img.shields.io/badge/MCP-18_tools-blueviolet)](https://modelcontextprotocol.io)
-[![REST](https://img.shields.io/badge/REST-27_endpoints-orange)](https://astro-api.onrender.com/docs)
+[![REST](https://img.shields.io/badge/REST-31_endpoints-orange)](openapi.yaml)
 [![Deploy](https://img.shields.io/badge/Deploy-Render-46a2f1)](render.yaml)
 
 ---
@@ -97,7 +97,7 @@ astro/
 │   ├── SKILL.md                    # runtime spec the model reads
 │   ├── scripts/astro_engine.py     # deterministic engine (~2930 lines)
 │   ├── scripts/mcp_server.py       # MCP wrapper (18 tools, stdio + SSE)
-│   ├── scripts/api.py              # REST API (27 endpoints)
+│   ├── scripts/api.py              # REST API (31 endpoints)
 │   └── references/                 # 8 classical rulesets
 │       ├── western.md · vedic.md · bazi.md · tibetan.md
 │       ├── health.md · synastry-and-timing.md
@@ -112,7 +112,7 @@ astro/
 
 **Free by default.** No auth, no rate limits. Set `ASTRO_API_KEY` to gate, `ASTRO_RATE_LIMIT` to throttle.
 
-**Render (one-click, free tier):** Connect this repo → New → Blueprint. `render.yaml` provisions everything. Public URL like `https://astro-api.onrender.com`. Try it: `curl https://astro-api.onrender.com/health`
+**Render (one-click, free tier):** Connect this repo → New → Blueprint. `render.yaml` provisions everything and gives you a public URL like `https://<your-app>.onrender.com`. Verify with `curl https://<your-app>.onrender.com/health`.
 
 **Docker:**
 ```bash

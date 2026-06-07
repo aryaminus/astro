@@ -38,11 +38,18 @@ if _SCRIPTS_DIR not in sys.path:
 # Import the core engine
 import astro_engine  # noqa: E402
 
+# Network bind config. Cloud hosts (Render, Cloudflare) inject the port to bind
+# via $PORT, so prefer it; ASTRO_MCP_PORT lets you override explicitly for local
+# runs. host/port are set on the FastMCP constructor (its `run()` does NOT accept
+# them as kwargs — they live in mcp.settings).
+_MCP_HOST = os.environ.get("ASTRO_MCP_HOST", "0.0.0.0")
+_MCP_PORT = int(os.environ.get("ASTRO_MCP_PORT") or os.environ.get("PORT") or "8765")
+
 # Initialize the MCP server
 mcp = FastMCP(
     "Astrology Engine",
-    host=os.environ.get("ASTRO_MCP_HOST", "0.0.0.0"),
-    port=int(os.environ.get("ASTRO_MCP_PORT", "8765")),
+    host=_MCP_HOST,
+    port=_MCP_PORT,
 )
 
 @mcp.tool()
@@ -471,16 +478,17 @@ if __name__ == "__main__":
     # Transport is env-driven so the same image works for stdio (local) and
     # sse/http (cloud). Default to stdio for backward compatibility.
     transport = os.environ.get("ASTRO_MCP_TRANSPORT", "stdio").lower()
-    if transport not in ("stdio", "sse", "http", "streamable-http"):
+    # Normalize friendly aliases to the literals FastMCP.run accepts.
+    if transport in ("http", "streamable-http", "streamable_http"):
+        transport = "streamable-http"
+    if transport not in ("stdio", "sse", "streamable-http"):
         print(f"Unknown ASTRO_MCP_TRANSPORT={transport!r}, falling back to stdio", file=sys.stderr)
         transport = "stdio"
-    if transport == "streamable-http":
-        transport = "http"
     logging.basicConfig(level=logging.INFO)
-    _host = os.environ.get("ASTRO_MCP_HOST", "0.0.0.0")
-    _port = int(os.environ.get("ASTRO_MCP_PORT", "8765"))
     logging.getLogger("astrology-mcp").info(
         "Starting Astrology MCP server (transport=%s, host=%s, port=%s)",
-        transport, _host, _port,
+        transport, _MCP_HOST, _MCP_PORT,
     )
-    mcp.run(transport=transport, host=_host, port=_port)
+    # host/port are configured on the FastMCP constructor above (mcp.settings);
+    # run() only accepts transport + mount_path.
+    mcp.run(transport=transport)

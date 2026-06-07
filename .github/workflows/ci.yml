@@ -45,6 +45,25 @@ jobs:
           import skills.astrology.scripts.api as a
           print('api OK,', sum(1 for r in a.app.routes if hasattr(r, 'path')), 'routes')
           "
+      - name: MCP server boots (SSE transport)
+        run: |
+          # Actually exercise mcp.run() — py_compile/import never reach the
+          # __main__ block, so a bad run() call (e.g. host/port kwargs) shipped
+          # undetected. Boot over SSE, confirm it binds, then stop it.
+          ASTRO_MCP_TRANSPORT=sse PORT=8767 \
+            python -m skills.astrology.scripts.mcp_server > /tmp/mcp.log 2>&1 &
+          MCP_PID=$!
+          ok=0
+          for i in $(seq 1 15); do
+            sleep 1
+            if ! kill -0 "$MCP_PID" 2>/dev/null; then
+              echo "FAIL: MCP server exited early"; cat /tmp/mcp.log; exit 1
+            fi
+            code=$(curl -s -o /dev/null -m 2 -w "%{http_code}" "http://127.0.0.1:8767/sse" || true)
+            if [ "$code" = "200" ]; then echo "MCP SSE up after ${i}s (HTTP 200)"; ok=1; break; fi
+          done
+          kill "$MCP_PID" 2>/dev/null || true
+          [ "$ok" = "1" ] || { echo "FAIL: MCP server did not serve /sse"; cat /tmp/mcp.log; exit 1; }
 
   openapi:
     name: OpenAPI spec validates
@@ -54,18 +73,41 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - name: Install pyyaml
-        run: pip install pyyaml
-      - name: Validate
+      - name: Install pyyaml + fastapi
+        run: pip install pyyaml -r requirements.txt
+      - name: Validate (structure, no duplicate keys, parity with api.py)
         run: |
-          python -c "
+          python - <<'PY'
           import yaml, sys
+          # Reject duplicate mapping keys (safe_load silently keeps the last,
+          # which once dropped the GET /profile/{name} operation from the spec).
+          class StrictLoader(yaml.SafeLoader): pass
+          def _no_dup(loader, node, deep=False):
+              seen = set()
+              for k, _ in node.value:
+                  key = loader.construct_object(k, deep=deep)
+                  if key in seen:
+                      raise ValueError(f'duplicate key in openapi.yaml: {key!r}')
+                  seen.add(key)
+              return yaml.SafeLoader.construct_mapping(loader, node, deep)
+          StrictLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _no_dup)
           with open('openapi.yaml') as f:
-              spec = yaml.safe_load(f)
+              spec = yaml.load(f, Loader=StrictLoader)
           assert spec['openapi'].startswith('3.'), 'must be OpenAPI 3.x'
           assert 'paths' in spec and len(spec['paths']) >= 25, 'must declare paths'
-          print(f'openapi.yaml OK: {spec[\"info\"][\"version\"]} with {len(spec[\"paths\"])} paths')
-          "
+
+          # Parity: every api.py route URL must be documented, and vice versa.
+          sys.path.insert(0, 'skills/astrology/scripts'); sys.path.insert(0, '.')
+          import skills.astrology.scripts.api as a
+          api_paths = {r.path for r in a.app.routes
+                       if hasattr(r, 'path') and not r.path.startswith(('/openapi', '/docs', '/redoc'))}
+          spec_paths = set(spec['paths'])
+          missing = api_paths - spec_paths
+          extra = spec_paths - api_paths
+          assert not missing, f'paths in api.py but missing from openapi.yaml: {sorted(missing)}'
+          assert not extra, f'paths in openapi.yaml but not in api.py: {sorted(extra)}'
+          print(f'openapi.yaml OK: v{spec["info"]["version"]}, {len(spec_paths)} paths, parity with api.py verified')
+          PY
 
   engine-smoke:
     name: Engine smoke (19 modes)
@@ -114,7 +156,7 @@ jobs:
           PY
 
   api-smoke:
-    name: REST API smoke (27 endpoints)
+    name: REST API smoke (31 endpoints)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
