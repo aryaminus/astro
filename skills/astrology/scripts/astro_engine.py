@@ -40,18 +40,60 @@ Input JSON (natal):
   }
 
 Other modes (set "mode"):
-  "natal"           (default) — full chart, per "systems"
+  "natal"           (default) — full chart, per "systems"; includes aspect patterns,
+                                Part of Fortune, Vertex, moon phase, equal houses,
+                                navamsa, and panchang automatically
   "transit"  + "transit_date" — current sky vs the natal chart
   "synastry" + "partner": {…} — relationship comparison of two charts
+  "compatibility" + "partner": {…} — detailed 0-100 compatibility scoring with subscores
   "astrocartography"          — planet lines on the globe (relocation)
   "horary"     + (lat/lng at the moment)  — chart of the moment a question is asked
-  "event"                       — chart for any "moment of inception" (corporate, pet, wedding, app launch). Same data shape as natal; pass `subject` and `kind`.
+  "event"                       — chart for any "moment of inception"
+  "solar_return" + "target_year" — annual solar return chart
+  "lunar_return" + "target_year" + "target_month" — monthly lunar return chart
+  "navamsa"                     — Vedic D9 navamsa chart with vargottama detection
+  "panchang"                    — complete Vedic panchang (Tithi, Nakshatra, Yoga, Karana)
+  "moon_phase"                  — current moon phase + upcoming phases
+  "numerology"                  — Life Path, Personal Year, Expression, Soul Urge
+                                (pass "full_name" for name-based numbers)
+  "composite"  + "partner": {…} — midpoint relationship chart
+  "progressions" + "target_age" — secondary progressions (1 day = 1 year)
+  "planetary_return" + "planet" + "target_year" — return chart for any planet
+  "varga" + "varga"             — Vedic divisional chart (D2-D60)
+  "planetary_hours"             — Chaldean planetary hours for the day
+  "transit_natal_aspects" + "transit_date" — detailed transit-to-natal aspect listing
+
+Extra natal options:
+  "include_numerology": true    — adds numerology block to natal output
+  "full_name": "..."            — full name for numerology Expression/Soul Urge
 
 Specialty lookups (callable directly, not via JSON mode):
   namakaran(moon_lon_sidereal)            — name syllables from birth nakshatra
   anatomy_chart(planets_block)            — body regions and afflicted systems
   horary(question_utc, lat, lng, text)    — cast + basic signals of a horary chart
   astrocartography(jd, lat, lng)          — planet lines for relocation
+  detect_aspect_patterns(lons, ayan=0)    — Grand Trine, T-Square, Yod, etc.
+  solar_return(natal_jd, year, lat, lng)  — annual solar return
+  lunar_return(natal_jd, year, month, lat, lng) — monthly lunar return
+  compatibility_score(jdA, jdB)           — detailed compatibility scoring
+  part_of_fortune(sun, moon, asc, sect)   — Lot of Fortune (day/night)
+  vertex(jd, lat, lng)                    — Vertex (fated encounters)
+  moon_phase(jd)                          — 8-phase lunar cycle data
+  navamsa_chart(jd, lat, lng)             — D9 divisional chart
+  panchang_elements(jd)                   — Tithi, Nakshatra, Yoga, Karana
+  numerology(year, month, day, name)      — Life Path, Personal Year, etc.
+  equal_houses(asc_lon)                   — Equal house cusps
+  composite_chart(jdA, jdB, latA, lngA, latB, lngB) — midpoint relationship chart
+  black_moon_lilith(jd)                   — Mean BML position
+  secondary_progressions(jd, age, lat, lng) — 1 day = 1 year
+  planetary_return(jd, planet, year, lat, lng) — any planet's return
+  compute_arabic_parts(lons, asc, sect)   — 10 Arabic Parts / Lots
+  fixed_star_conjunctions(lons, orb)      — 23 fixed stars
+  mangal_dosha(jd, lat, lng)             — Kuja/Mars dosha check
+  kaalsarpa_dosha(jd, lat, lng)          — Kaalsarpa dosha check
+  varga_chart(jd, varga, lat, lng)       — D2–D60 divisional charts
+  transit_to_natal_aspects(natal_jd, transit_jd) — detailed transit aspects
+  planetary_hours(jd, lat, lng)          — Chaldean planetary hours
 """
 
 from __future__ import annotations
@@ -796,6 +838,11 @@ def western_chart(jd, lat, lng, time_known=True):
         "big_three":{"sun":planets["Sun"]["sign"],"moon":planets["Moon"]["sign"],"rising":asc_sign},
         "ascendant":{"sign":asc_sign,"deg_in_sign":asc_deg,"abs_lon":round(asc_lon,3)},
         "midheaven":{"sign":mc_sign,"deg_in_sign":mc_deg,"abs_lon":round(mc_lon,3)},
+        "descendant":{"sign":SIGNS[(asc_idx+6)%12],"deg_in_sign":round(asc_deg,2),
+                      "abs_lon":round(norm360(asc_lon+180),3)},
+        "imum_coeli":{"sign":SIGNS[(int(mc_lon//30)+6)%12],"deg_in_sign":round(mc_deg,2),
+                      "abs_lon":round(norm360(mc_lon+180),3)},
+        "chart_ruler": SIGN_DATA[asc_sign]["ruler"],
         "planets":planets,
         "houses":houses,
         "aspects":compute_aspects(lons)[:24],
@@ -1131,7 +1178,1204 @@ def synastry(jdA, jdB):
             "note":"Harmony index is a coarse heuristic, not a verdict; read the actual aspects — Sun/Moon/Venus/Mars contacts matter most."}
 
 # ═════════════════════════════════════════════════════════════════════════════
-#  SECTION I — ASTROCARTOGRAPHY (relocation / planet lines on the globe)
+#  SECTION H — ASPECT PATTERNS (Grand Trine, T-Square, Yod, Stellium, etc.)
+# ═════════════════════════════════════════════════════════════════════════════
+
+def detect_aspect_patterns(lons, ayan=0.0):
+    """Detect classical Western multi-planet configurations in the chart.
+    Returns list of patterns with type, involved planets, tightness score (0-100),
+    and interpretation key. Inspired by RoxyAPI's pattern detection."""
+    bodies = ["Sun","Moon","Mercury","Venus","Mars","Jupiter","Saturn",
+              "Uranus","Neptune","Pluto"]
+    L = {b: norm360(lons[b] - ayan) for b in bodies if b in lons}
+    aspects_list = compute_aspects(lons, ayan, bodies)
+    patterns = []
+
+    def has_aspect(a, b, asp_type=None):
+        for asp in aspects_list:
+            if (asp["a"]==a and asp["b"]==b) or (asp["a"]==b and asp["b"]==a):
+                if asp_type is None or asp["aspect"]==asp_type:
+                    return asp
+        return None
+
+    def orb_sum(planets_in_pattern):
+        total = 0; count = 0
+        for i in range(len(planets_in_pattern)):
+            for j in range(i+1, len(planets_in_pattern)):
+                a = has_aspect(planets_in_pattern[i], planets_in_pattern[j])
+                if a:
+                    total += a["orb"]; count += 1
+        return total / count if count else 99
+
+    def tightness(avg_orb, max_orb=8.0):
+        return max(0, min(100, round(100 * (1 - avg_orb / max_orb))))
+
+    signs_of = {b: sign_of(L[b])[0] for b in L}
+    elements_of = {b: SIGN_DATA.get(signs_of.get(b,""),{}).get("element","") for b in L}
+    modalities_of = {b: SIGN_DATA.get(signs_of.get(b,""),{}).get("modality","") for b in L}
+
+    found_trines = []
+    for i in range(len(bodies)):
+        for j in range(i+1, len(bodies)):
+            for k in range(j+1, len(bodies)):
+                a, b, c = bodies[i], bodies[j], bodies[k]
+                ab = has_aspect(a, b, "trine")
+                bc = has_aspect(b, c, "trine")
+                ac = has_aspect(a, c, "trine")
+                if ab and bc and ac:
+                    elems = {elements_of.get(p,"") for p in [a,b,c]}
+                    is_dissociate = len(elems) > 1
+                    avg = (ab["orb"]+bc["orb"]+ac["orb"])/3
+                    found_trines.append({"planets":[a,b,c],"avg_orb":avg,
+                                         "element":elems.pop() if len(elems)==1 else "mixed",
+                                         "dissociate":is_dissociate})
+
+    for tr in found_trines:
+        a, b, c = tr["planets"]
+        for d in bodies:
+            if d in (a,b,c): continue
+            opp_to = None
+            for p in (a,b,c):
+                opp = has_aspect(d, p, "opposition")
+                if opp:
+                    opp_to = p; break
+            if opp_to:
+                sext1 = has_aspect(d, [x for x in (a,b,c) if x!=opp_to][0], "sextile")
+                sext2 = has_aspect(d, [x for x in (a,b,c) if x!=opp_to][1], "sextile")
+                if sext1 and sext2:
+                    avg = (tr["avg_orb"] + has_aspect(d, opp_to, "opposition")["orb"] +
+                           sext1["orb"] + sext2["orb"]) / 4
+                    patterns.append({"kind":"KITE","name":"Kite",
+                        "planets":[a,b,c,d],"apex":d,"base_trine":[a,b,c],
+                        "tightness":tightness(avg, 6),
+                        "interpretation":f"Kite pattern with apex {d}: the Grand Trine talent finds directed expression through {d}'s focus."})
+                    break
+
+    grand_trine_planets = set()
+    for p in patterns:
+        if p["kind"]=="KITE":
+            grand_trine_planets.update(p.get("base_trine",[]))
+    for tr in found_trines:
+        tp = set(tr["planets"])
+        if tp & grand_trine_planets == tp:
+            continue
+        avg = tr["avg_orb"]
+        patterns.append({"kind":"GRAND_TRINE","name":"Grand Trine",
+            "planets":tr["planets"],"element":tr["element"],
+            "dissociate":tr["dissociate"],"tightness":tightness(avg),
+            "interpretation":f"Grand Trine in {tr['element']}: natural talent and ease among {', '.join(tr['planets'])}, but may lack motivation."})
+
+    for i in range(len(bodies)):
+        for j in range(i+1, len(bodies)):
+            opp = has_aspect(bodies[i], bodies[j], "opposition")
+            if not opp: continue
+            for k in range(len(bodies)):
+                if k in (i,j): continue
+                sq1 = has_aspect(bodies[k], bodies[i], "square")
+                sq2 = has_aspect(bodies[k], bodies[j], "square")
+                if sq1 and sq2:
+                    mods = {modalities_of.get(bodies[k],""), modalities_of.get(bodies[i],""),
+                            modalities_of.get(bodies[j],"")}
+                    avg = (opp["orb"]+sq1["orb"]+sq2["orb"])/3
+                    is_gc = has_aspect(bodies[i], bodies[j], "opposition") is not None
+                    for extra in bodies:
+                        if extra in (bodies[i],bodies[j],bodies[k]): continue
+                        ex_sq1 = has_aspect(extra, bodies[i], "square")
+                        ex_sq2 = has_aspect(extra, bodies[j], "square")
+                        if ex_sq1 and ex_sq2:
+                            avg2 = (opp["orb"]+sq1["orb"]+sq2["orb"]+ex_sq1["orb"]+ex_sq2["orb"])/5
+                            patterns.append({"kind":"GRAND_CROSS","name":"Grand Cross",
+                                "planets":[bodies[i],bodies[j],bodies[k],extra],
+                                "modality":mods.pop() if len(mods)==1 else "mixed",
+                                "tightness":tightness(avg2, 7),
+                                "interpretation":f"Grand Cross: intense tension demanding constant action and integration among {', '.join([bodies[i],bodies[j],bodies[k],extra])}."})
+                            break
+                    patterns.append({"kind":"T_SQUARE","name":"T-Square",
+                        "planets":[bodies[i],bodies[j],bodies[k]],"apex":bodies[k],
+                        "modality":mods.pop() if len(mods)==1 else "mixed",
+                        "dissociate":False,"tightness":tightness(avg, 7),
+                        "interpretation":f"T-Square focused on {bodies[k]} in {signs_of.get(bodies[k],'')}, tension between {bodies[i]} and {bodies[j]} demands resolution at the apex."})
+
+    for i in range(len(bodies)):
+        for j in range(i+1, len(bodies)):
+            q1 = has_aspect(bodies[i], bodies[j], "quincunx")
+            if not q1: continue
+            for k in range(len(bodies)):
+                if k in (i,j): continue
+                q2 = has_aspect(bodies[k], bodies[i], "quincunx")
+                sext = has_aspect(bodies[k], bodies[j], "sextile")
+                if q2 and sext:
+                    avg = (q1["orb"]+q2["orb"]+sext["orb"])/3
+                    patterns.append({"kind":"YOD","name":"Yod (Finger of Fate)",
+                        "planets":[bodies[i],bodies[j],bodies[k]],"apex":bodies[i],
+                        "tightness":tightness(avg, 4),
+                        "interpretation":f"Yod with apex {bodies[i]} in {signs_of.get(bodies[i],'')}: a fated sense of purpose that requires constant adjustment between {bodies[j]} and {bodies[k]}."})
+                    break
+
+    for s_idx in range(12):
+        sign_start = s_idx * 30
+        sign_end = sign_start + 30
+        in_sign = [b for b in bodies if b in L and sign_start <= L[b] < sign_end]
+        if len(in_sign) >= 3:
+            orbs = [L[b] % 30 for b in in_sign]
+            spread = max(orbs) - min(orbs)
+            patterns.append({"kind":"STELLIUM","name":"Stellium",
+                "planets":in_sign,"sign":SIGNS[s_idx],
+                "planet_count":len(in_sign),"spread_deg":round(spread, 1),
+                "tightness":max(0, min(100, round(100 * (1 - spread / 30)))),
+                "interpretation":f"Stellium of {len(in_sign)} planets in {SIGNS[s_idx]} ({', '.join(in_sign)}): concentrated energy in {SIGN_DATA[SIGNS[s_idx]]['element']}/{SIGN_DATA[SIGNS[s_idx]]['modality']} affairs."})
+
+    for i in range(len(bodies)):
+        for j in range(i+1, len(bodies)):
+            opp1 = has_aspect(bodies[i], bodies[j], "opposition")
+            if not opp1:
+                continue
+            for k in range(len(bodies)):
+                if k in (i, j):
+                    continue
+                for m_idx in range(k+1, len(bodies)):
+                    if m_idx in (i, j):
+                        continue
+                    opp2 = has_aspect(bodies[k], bodies[m_idx], "opposition")
+                    if not opp2:
+                        continue
+                    sext1a = has_aspect(bodies[i], bodies[k], "sextile")
+                    sext1b = has_aspect(bodies[j], bodies[m_idx], "sextile")
+                    sext2a = has_aspect(bodies[i], bodies[m_idx], "sextile")
+                    sext2b = has_aspect(bodies[j], bodies[k], "sextile")
+                    tr1a = has_aspect(bodies[i], bodies[k], "trine")
+                    tr1b = has_aspect(bodies[j], bodies[m_idx], "trine")
+                    tr2a = has_aspect(bodies[i], bodies[m_idx], "trine")
+                    tr2b = has_aspect(bodies[j], bodies[k], "trine")
+                    if ((sext1a and tr1b and sext2b and tr2a) or
+                        (sext2a and tr2b and sext1b and tr1a)):
+                        avg = (opp1["orb"] + opp2["orb"]) / 2
+                        if sext1a: avg = (avg + sext1a["orb"]) / 2
+                        if tr1b: avg = (avg + tr1b["orb"]) / 2
+                        patterns.append({"kind": "MYSTIC_RECTANGLE", "name": "Mystic Rectangle",
+                            "planets": [bodies[i], bodies[j], bodies[k], bodies[m_idx]],
+                            "tightness": tightness(avg, 7),
+                            "interpretation": f"Mystic Rectangle: two oppositions linked by harmonious aspects, creating tension that finds productive expression through {', '.join([bodies[i], bodies[j], bodies[k], bodies[m_idx]])}."})
+
+    deduped = []
+    seen = set()
+    for p in patterns:
+        key = (p["kind"], tuple(sorted(p["planets"])))
+        if key not in seen:
+            seen.add(key); deduped.append(p)
+
+    gc_planets = {frozenset(p["planets"]) for p in deduped if p["kind"]=="GRAND_CROSS"}
+    ts_to_remove = []
+    for idx, p in enumerate(deduped):
+        if p["kind"] == "T_SQUARE":
+            ts_set = frozenset(p["planets"])
+            if gc_planets and any(ts_set.issubset(gc) for gc in gc_planets):
+                ts_to_remove.append(idx)
+    kite_trines = {frozenset(p.get("base_trine",[])) for p in deduped if p["kind"]=="KITE"}
+    gt_to_remove = []
+    for idx, p in enumerate(deduped):
+        if p["kind"] == "GRAND_TRINE":
+            gt_set = frozenset(p["planets"])
+            if any(gt_set == kt for kt in kite_trines):
+                gt_to_remove.append(idx)
+    for idx in sorted(ts_to_remove + gt_to_remove, reverse=True):
+        if idx < len(deduped):
+            deduped.pop(idx)
+
+    return sorted(deduped, key=lambda x: -x["tightness"])
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SECTION H2 — SOLAR & LUNAR RETURNS
+# ═════════════════════════════════════════════════════════════════════════════
+
+def solar_return(natal_jd, target_year, lat, lng):
+    """Find the exact moment in target_year when the transiting Sun returns
+    to its natal ecliptic longitude, then cast a chart for that moment.
+    This is the foundational technique for annual forecasting in Western astrology."""
+    natal_lons, _, backend = body_longitudes(natal_jd)
+    natal_sun_lon = natal_lons["Sun"]
+
+    approx_jan = julian_day(datetime(target_year, 1, 1, 0, 0))
+    low = approx_jan - 2
+    high = approx_jan + 367
+
+    for _ in range(60):
+        mid = (low + high) / 2
+        t_lons = tropical_longitudes(mid)
+        if _HAS_SWE:
+            try:
+                t_lons_s, _, _ = body_longitudes(mid)
+                t_lons = t_lons_s
+            except Exception:
+                pass
+        t_sun = t_lons["Sun"]
+        diff = norm180(t_sun - natal_sun_lon)
+        if abs(diff) < 0.001:
+            break
+        if diff > 0:
+            high = mid
+        else:
+            low = mid
+
+    sr_jd = (low + high) / 2
+    sr_dt_utc = datetime(2000, 1, 1) + timedelta(days=sr_jd - 2451544.5)
+
+    sr_chart = western_chart(sr_jd, lat, lng, True)
+    sr_lons, sr_speed, _ = body_longitudes(sr_jd)
+
+    return {
+        "system": "Solar Return (Western Tropical)",
+        "target_year": target_year,
+        "return_moment_utc": sr_dt_utc.strftime("%Y-%m-%d %H:%M"),
+        "julian_day": round(sr_jd, 5),
+        "natal_sun_lon": round(natal_sun_lon, 3),
+        "return_sun_lon": round(sr_lons["Sun"], 3),
+        "precision": "arcsecond" if _HAS_SWE else "~1 arcmin",
+        "chart": sr_chart,
+        "note": "Solar Return chart: cast for the moment the Sun returns to its exact natal longitude. Read for annual themes — house placement of the SR Sun shows the year's focus area."
+    }
+
+def lunar_return(natal_jd, target_year, target_month, lat, lng):
+    """Find the moment in the target month when the transiting Moon returns
+    to its natal ecliptic longitude. Monthly forecasting technique."""
+    natal_lons, _, backend = body_longitudes(natal_jd)
+    natal_moon_lon = natal_lons["Moon"]
+
+    approx_start = julian_day(datetime(target_year, target_month, 1, 0, 0))
+    low = approx_start - 2
+    high = approx_start + 32
+
+    for _ in range(80):
+        mid = (low + high) / 2
+        t_lons = tropical_longitudes(mid)
+        if _HAS_SWE:
+            try:
+                t_lons_s, _, _ = body_longitudes(mid)
+                t_lons = t_lons_s
+            except Exception:
+                pass
+        t_moon = t_lons["Moon"]
+        diff = norm180(t_moon - natal_moon_lon)
+        if abs(diff) < 0.005:
+            break
+        if diff > 0:
+            high = mid
+        else:
+            low = mid
+
+    lr_jd = (low + high) / 2
+    lr_dt_utc = datetime(2000, 1, 1) + timedelta(days=lr_jd - 2451544.5)
+
+    lr_chart = western_chart(lr_jd, lat, lng, True)
+
+    return {
+        "system": "Lunar Return (Western Tropical)",
+        "target_year": target_year,
+        "target_month": target_month,
+        "return_moment_utc": lr_dt_utc.strftime("%Y-%m-%d %H:%M"),
+        "natal_moon_lon": round(natal_moon_lon, 3),
+        "chart": lr_chart,
+        "note": "Lunar Return chart: cast for the moment the Moon returns to its natal position (~every 27.3 days). Read for monthly emotional themes and domestic focus."
+    }
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SECTION H3 — COMPATIBILITY SCORING (weighted synastry breakdown)
+# ═════════════════════════════════════════════════════════════════════════════
+
+def compatibility_score(jdA, jdB):
+    """Detailed compatibility scoring with category breakdown.
+    Returns 0-100 overall score plus romantic/emotional/intellectual/physical/spiritual subscores."""
+    lonsA, _, _ = body_longitudes(jdA)
+    lonsB, _, _ = body_longitudes(jdB)
+
+    def score_pair(pA, pB, weight=1.0):
+        sep = abs(norm180(lonsA[pA] - lonsB[pB]))
+        pts = 0; best_asp = "none"; orb = 0
+        for asp, (ang, max_orb, _) in ASPECTS.items():
+            d = abs(sep - ang)
+            if d <= max_orb:
+                quality = 1.0 if asp in ("conjunction","trine","sextile") else -0.7
+                if asp == "conjunction" and pA in ("Mars","Saturn") and pB in ("Mars","Saturn"):
+                    quality = -0.3
+                pts = quality * weight * (1 - d/max_orb)
+                best_asp = asp; orb = d
+                break
+        return pts, best_asp, round(orb, 2)
+
+    romantic, _, _ = score_pair("Venus", "Mars", 2.0)
+    romantic += score_pair("Venus", "Venus", 1.0)[0]
+    romantic += score_pair("Mars", "Venus", 1.5)[0] if score_pair("Venus", "Mars", 0)[1] == "none" else 0
+
+    emotional, _, _ = score_pair("Moon", "Moon", 2.0)
+    emotional += score_pair("Moon", "Venus", 1.5)[0]
+    emotional += score_pair("Sun", "Moon", 1.5)[0]
+    emotional += score_pair("Moon", "Sun", 1.5)[0]
+
+    intellectual, _, _ = score_pair("Mercury", "Mercury", 2.0)
+    intellectual += score_pair("Mercury", "Sun", 1.0)[0]
+    intellectual += score_pair("Mercury", "Jupiter", 1.0)[0]
+
+    physical, _, _ = score_pair("Mars", "Mars", 1.5)
+    physical += score_pair("Sun", "Sun", 1.0)[0]
+    physical += score_pair("Venus", "Mars", 1.5)[0]
+
+    spiritual, _, _ = score_pair("North Node", "North Node", 1.0)
+    spiritual += score_pair("North Node", "Sun", 1.0)[0]
+    spiritual += score_pair("North Node", "Moon", 1.0)[0]
+    spiritual += score_pair("Neptune", "Venus", 0.5)[0]
+
+    def normalize(raw, max_possible=5.0):
+        return max(0, min(100, round(50 + (raw / max_possible) * 50)))
+
+    sub = {
+        "romantic": normalize(romantic, 5.0),
+        "emotional": normalize(emotional, 7.0),
+        "intellectual": normalize(intellectual, 4.0),
+        "physical": normalize(physical, 4.0),
+        "spiritual": normalize(spiritual, 3.5),
+    }
+    overall = round(sum(sub.values()) / len(sub))
+    if overall >= 80: desc = "Exceptional"
+    elif overall >= 65: desc = "Strong"
+    elif overall >= 50: desc = "Moderate"
+    elif overall >= 35: desc = "Challenging"
+    else: desc = "Difficult"
+
+    signA = {p: sign_of(lonsA[p])[0] for p in ["Sun","Moon","Venus","Mars"]}
+    signB = {p: sign_of(lonsB[p])[0] for p in ["Sun","Moon","Venus","Mars"]}
+    elemA = [SIGN_DATA[signA[p]]["element"] for p in ["Sun","Moon","Venus","Mars"]]
+    elemB = [SIGN_DATA[signB[p]]["element"] for p in ["Sun","Moon","Venus","Mars"]]
+    shared = len(set(elemA) & set(elemB))
+
+    return {
+        "overall_score": overall,
+        "description": desc,
+        "breakdown": sub,
+        "element_harmony": {"shared_elements": shared, "personA": elemA, "personB": elemB},
+        "key_contacts": [
+            {"pair": "Sun-Moon", "aspect": score_pair("Sun", "Moon")[1],
+             "note": "Core identity meets emotional needs"},
+            {"pair": "Venus-Mars", "aspect": score_pair("Venus", "Mars")[1],
+             "note": "Love language meets desire style"},
+            {"pair": "Moon-Moon", "aspect": score_pair("Moon", "Moon")[1],
+             "note": "Emotional compatibility at the gut level"},
+        ],
+        "note": "Score is a heuristic from planetary geometry, not a verdict. Two 'difficult' charts can build something extraordinary; two 'exceptional' charts still need work."
+    }
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SECTION H4 — PART OF FORTUNE, VERTEX, MOON PHASE, CALCULATED POINTS
+# ═════════════════════════════════════════════════════════════════════════════
+
+def part_of_fortune(sun_lon, moon_lon, asc_lon, is_day_chart=True):
+    """Calculate the Part of Fortune (Lot of Fortune).
+    Day chart: Asc + Moon - Sun. Night chart: Asc + Sun - Moon."""
+    if is_day_chart:
+        pof = asc_lon + moon_lon - sun_lon
+    else:
+        pof = asc_lon + sun_lon - moon_lon
+    pof = norm360(pof)
+    sign, idx, deg = sign_of(pof)
+    return {"longitude": round(pof, 3), "sign": sign, "degree": round(deg, 2),
+            "sect": "day" if is_day_chart else "night",
+            "meaning": "The Part of Fortune represents the intersection of spirit (Sun), soul (Moon), and body (Ascendant) — a point of natural prosperity, joy, and physical well-being in the chart."}
+
+def vertex(jd, lat, lng):
+    """Calculate the Vertex — the 'point of fated encounters' in the chart.
+    It's the intersection of the prime vertical with the ecliptic in the western hemisphere."""
+    d = jd - 2451543.5
+    eps = obliquity(d)
+    gmst_val = gmst_deg(jd)
+    ramc = norm360(gmst_val + lng)
+    # Vertex formula: arctan(-cos(RAMC) / (sin(eps)*tan(lat) + cos(eps)*sin(RAMC)))
+    num = -_cos(ramc)
+    den = _sin(eps) * _tan(lat) + _cos(eps) * _sin(ramc)
+    v_lon = norm360(_atan2(num, den))
+    sign, idx, deg = sign_of(v_lon)
+    return {"longitude": round(v_lon, 3), "sign": sign, "degree": round(deg, 2),
+            "meaning": "The Vertex is the 'electric ascendant' — a point of fated encounters, significant relationships, and destined events, especially in synastry."}
+
+def moon_phase(jd):
+    """Calculate the Moon's phase: name, illumination fraction, age in days since New Moon,
+    and the lunation cycle position."""
+    lons, _, _ = body_longitudes(jd)
+    sun_lon = lons["Sun"]
+    moon_lon = lons["Moon"]
+
+    elongation = norm360(moon_lon - sun_lon)
+    synodic_period = 29.53059
+    age = (elongation / 360.0) * synodic_period
+    illumination = (1 - _cos(elongation)) / 2.0
+
+    if elongation < 45: phase_name = "New Moon"
+    elif elongation < 90: phase_name = "Waxing Crescent"
+    elif elongation < 135: phase_name = "First Quarter"
+    elif elongation < 180: phase_name = "Waxing Gibbous"
+    elif elongation < 225: phase_name = "Full Moon"
+    elif elongation < 270: phase_name = "Waning Gibbous"
+    elif elongation < 315: phase_name = "Last Quarter"
+    else: phase_name = "Waning Crescent"
+
+    cycle_positions = {
+        "New Moon": "initiation, new beginnings, planting seeds",
+        "Waxing Crescent": "setting intentions, building momentum, taking first steps",
+        "First Quarter": "crisis in action, commitment, overcoming obstacles",
+        "Waxing Gibbous": "refinement, adjustment, perfecting the approach",
+        "Full Moon": "culmination, revelation, harvest, illumination",
+        "Waning Gibbous": "dissemination, sharing wisdom, gratitude",
+        "Last Quarter": "release, letting go, restructuring, forgiveness",
+        "Waning Crescent": "surrender, rest, reflection, preparation for renewal",
+    }
+    moon_sign, _, moon_deg = sign_of(moon_lon)
+
+    return {
+        "phase": phase_name,
+        "illumination": round(illumination * 100, 1),
+        "age_days": round(age, 2),
+        "elongation_deg": round(elongation, 2),
+        "moon_sign": moon_sign,
+        "moon_degree": moon_deg,
+        "cycle_meaning": cycle_positions.get(phase_name, ""),
+        "note": f"The Moon is in {phase_name} phase at {round(illumination*100,1)}% illumination in {moon_sign}. {cycle_positions.get(phase_name,'')}."
+    }
+
+def upcoming_moon_phases(jd, count=4):
+    """Find the next N major lunar phase transitions (New Moon, First Quarter, Full Moon, Last Quarter)."""
+    phases_target = [0.0, 90.0, 180.0, 270.0]
+    phase_names = {0.0: "New Moon", 90.0: "First Quarter", 180.0: "Full Moon", 270.0: "Last Quarter"}
+    results = []
+    current_jd = jd
+
+    for _ in range(count * 3):
+        if len(results) >= count:
+            break
+        lons = tropical_longitudes(current_jd)
+        if _HAS_SWE:
+            try:
+                lons, _, _ = body_longitudes(current_jd)
+            except Exception:
+                pass
+        elong = norm360(lons["Moon"] - lons["Sun"])
+
+        for target in phases_target:
+            diff = norm360(target - elong)
+            if diff < 0.5 or diff > 359.5:
+                dt_utc = datetime(2000, 1, 1) + timedelta(days=current_jd - 2451544.5)
+                name = phase_names[target]
+                already = any(r["phase"] == name for r in results)
+                if not already:
+                    results.append({"phase": name, "date_utc": dt_utc.strftime("%Y-%m-%d %H:%M"),
+                                    "julian_day": round(current_jd, 4)})
+                    break
+
+        current_jd += 7.0
+
+    results.sort(key=lambda x: x["julian_day"])
+    return results[:count]
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SECTION H5 — NAVAMSA (D9) DIVISIONAL CHART
+# ═════════════════════════════════════════════════════════════════════════════
+
+def navamsa_chart(jd, lat, lng, time_known=True):
+    """Calculate the Navamsa (D9) — the most important Vedic divisional chart.
+    Each 30° sign is divided into 9 equal parts of 3°20' (one pada).
+    The Navamsa reveals the soul's potential and strengths in relationships,
+    marriage, and dharma. Essential for assessing planetary strength (vargottama)."""
+    lons, speed, backend = body_longitudes(jd)
+    ayan = ayanamsha_lahiri(jd)
+    asc_lon, mc_lon = ascendant_mc(jd, lat, lng, ayan) if time_known else (norm360(lons["Sun"]-ayan), 0)
+
+    navamsa_lons = {}
+    names = ["Sun","Moon","Mercury","Venus","Mars","Jupiter","Saturn","North Node","South Node"]
+    for nm in names:
+        sid_lon = norm360(lons[nm] - ayan)
+        sign_idx = int(sid_lon // 30)
+        deg_in_sign = sid_lon % 30
+        pada = int(deg_in_sign // (30.0/9.0))  # 0-8
+        sign_element = SIGN_DATA[SIGNS[sign_idx]]["element"]
+
+        element_navamsa_start = {
+            "Fire": 0,    # Aries (0°) starts fire navamsas
+            "Earth": 3,   # Capricorn starts earth navamsas
+            "Air": 6,     # Libra starts air navamsas
+            "Water": 9,   # Cancer starts water navamsas
+        }
+        navamsa_sign_idx = (element_navamsa_start.get(sign_element, 0) + pada) % 12
+        navamsa_deg = (deg_in_sign % (30.0/9.0)) * 9.0
+        navamsa_lon = navamsa_sign_idx * 30 + navamsa_deg
+        navamsa_lons[nm] = navamsa_lon
+
+    v_name = {"North Node": "Rahu", "South Node": "Ketu"}
+    planets = {}
+    for nm in names:
+        vnm = v_name.get(nm, nm)
+        n_lon = navamsa_lons[nm]
+        n_sign, n_idx, n_deg = sign_of(n_lon)
+        is_vargottama = (sign_of(norm360(lons[nm] - ayan))[0] == n_sign)
+        planets[vnm] = {
+            "sign": n_sign, "deg_in_sign": round(n_deg, 2),
+            "abs_lon": round(n_lon, 3),
+            "rashi_lord": RASHI_LORDS[n_sign],
+            "vargottama": is_vargottama,
+            "vargottama_note": f"{vnm} is vargottama (same sign in D1 and D9) — its strength is amplified." if is_vargottama else ""
+        }
+
+    asc_sign, _, asc_deg = sign_of(asc_lon)
+    d9_asc_sign, _, d9_asc_deg = sign_of(navamsa_lons.get("Sun", asc_lon))
+
+    return {
+        "system": "Navamsa (D9) — Vedic Divisional Chart",
+        "note": "The Navamsa is the 'soul chart' — it reveals the inner strength of each planet and the dharmic path. Vargottama planets (same sign in D1 and D9) are powerfully strengthened.",
+        "navamsa_lagna": {"sign": d9_asc_sign, "note": "Navamsa Ascendant sign (approximate from D1 Ascendant)"},
+        "planets": planets,
+        "vargottama_count": sum(1 for p in planets.values() if p["vargottama"]),
+    }
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SECTION H6 — KARANA & YOGA (complete Panchang elements)
+# ═════════════════════════════════════════════════════════════════════════════
+
+KARANAS = [
+    "Bava","Balava","Kaulava","Taitila","Gara","Vanija","Vishti",
+    "Shakuni","Chatushpada","Naga","Kinstughna"
+]
+KARANA_NATURE = {
+    "Bava":"auspicious — good for beginnings, travel, financial matters",
+    "Balava":"auspicious — good for religious activities, learning, ceremonies",
+    "Kaulava":"auspicious — good for relationships, family, agreements",
+    "Taitila":"mixed — acceptable for routine work, avoid major beginnings",
+    "Gara":"mixed — good for hard work, discipline, avoid leisure",
+    "Vanija":"auspicious for commerce — good for trade, business deals",
+    "Vishti":"inauspicious (Bhadra) — avoid all auspicious activities",
+    "Shakuni":"mixed — good for healing, legal matters, resolving disputes",
+    "Chatushpada":"auspicious — good for stability, completion, endings",
+    "Naga":"inauspicious — associated with hidden matters, avoid beginnings",
+    "Kinstughna":"auspicious — the 'pinch of goodness', brief but positive window",
+}
+
+SOLAR_YOGAS = [
+    "Vishkambha","Priti","Ayushman","Saubhagya","Shobhana","Atiganda",
+    "Sukarma","Dhriti","Shula","Ganda","Vriddhi","Dhruva","Vyaghata",
+    "Harshana","Vajra","Siddhi","Vyatipata","Variyana","Parigha","Shiva",
+    "Siddha","Sadhya","Shubha","Shukla","Brahma","Indra","Vaidhriti"
+]
+YOGA_NATURE = {
+    "Vishkambha":"mixed — supports endurance and overcoming obstacles",
+    "Priti":"auspicious — love, harmony, pleasant interactions",
+    "Ayushman":"auspicious — longevity, health, vitality",
+    "Saubhagya":"auspicious — good fortune, success, marriage",
+    "Shobhana":"auspicious — beauty, refinement, auspicious ceremonies",
+    "Atiganda":"inauspicious — obstacles, complications, avoid new ventures",
+    "Sukarma":"auspicious — good actions, charity, virtuous deeds",
+    "Dhriti":"auspicious — patience, steadfastness, perseverance",
+    "Shula":"inauspicious — pain, sharp conflict, surgical procedures only",
+    "Ganda":"inauspicious — moral challenges, avoid major decisions",
+    "Vriddhi":"auspicious — growth, increase, expansion",
+    "Dhruva":"auspicious — stability, permanence, firm decisions",
+    "Vyaghata":"inauspicious — obstacles, aggression, accidents",
+    "Harshana":"auspicious — joy, happiness, celebrations",
+    "Vajra":"mixed — powerful but rigid, good for decisive action",
+    "Siddhi":"auspicious — accomplishment, perfection, success",
+    "Vyatipata":"inauspicious — disasters, avoid all activities",
+    "Variyana":"auspicious — comfort, wealth, increase",
+    "Parigha":"mixed — obstacles that can be overcome with effort",
+    "Shiva":"highly auspicious — spiritual activities, meditation, worship",
+    "Siddha":"auspicious — accomplishment, perfection, spiritual merit",
+    "Sadhya":"auspicious — attainable goals, achievable ambitions",
+    "Shubha":"highly auspicious — purity, auspicious for all activities",
+    "Shukla":"auspicious — brightness, clarity, intellectual pursuits",
+    "Brahma":"highly auspicious — creation, knowledge, spiritual growth",
+    "Indra":"auspicious — power, authority, leadership activities",
+    "Vaidhriti":"mixed — restrictive, good for introspection only",
+}
+
+def panchang_elements(jd):
+    """Complete Vedic Panchang elements: Tithi, Nakshatra, Yoga, Karana."""
+    lons, _, _ = body_longitudes(jd)
+    ayan = ayanamsha_lahiri(jd)
+    sun_lon = lons["Sun"]
+    moon_lon = lons["Moon"]
+
+    tithi_val = norm360(moon_lon - sun_lon)
+    tithi_index = int(tithi_val / 12)  # 0-29
+    paksha = "Shukla" if tithi_index < 15 else "Krishna"
+    tithi_num = tithi_index + 1 if tithi_index < 15 else tithi_index - 14
+    tithi_names = [
+        "Pratipada","Dwitiya","Tritiya","Chaturthi","Panchami","Shashti",
+        "Saptami","Ashtami","Navami","Dashami","Ekadashi","Dwadashi",
+        "Trayodashi","Chaturdashi","Purnima/Amavasya"
+    ]
+    tithi_name = tithi_names[min(tithi_num - 1, 14)]
+
+    karana_index = int(tithi_val / 6)  # 0-59 karanas in full cycle
+    if karana_index == 0:
+        karana_name = KARANAS[10]  # Kinstughna
+    elif karana_index <= 7:
+        karana_name = KARANAS[(karana_index - 1) % 7]
+    elif karana_index >= 52:
+        karana_name = KARANAS[7 + (karana_index - 52)]
+    else:
+        karana_name = KARANAS[(karana_index - 1) % 7]
+
+    moon_lon_sid = norm360(moon_lon - ayan)
+    sun_lon_sid = norm360(sun_lon - ayan)
+    yoga_lon = norm360(moon_lon_sid + sun_lon_sid)
+    yoga_index = int(yoga_lon / (360.0 / 27)) % 27
+    yoga_name = SOLAR_YOGAS[yoga_index]
+
+    nak_i = int(moon_lon_sid // NAK_ARC) % 27
+    nk = NAKSHATRAS[nak_i]
+
+    return {
+        "tithi": {"num": tithi_num, "name": tithi_name, "paksha": paksha,
+                  "note": f"{paksha} Paksha, Tithi {tithi_num} ({tithi_name})"},
+        "nakshatra": {"name": nk["name"], "lord": nk["lord"], "pada": int((moon_lon_sid % NAK_ARC)//(NAK_ARC/4))+1},
+        "yoga": {"name": yoga_name, "nature": YOGA_NATURE.get(yoga_name, ""),
+                 "note": f"Sun-Moon combined longitude determines the Yoga"},
+        "karana": {"name": karana_name, "nature": KARANA_NATURE.get(karana_name, ""),
+                   "note": f"Half-tithi Karana: {karana_name}"},
+    }
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SECTION H7 — NUMEROLOGY (Life Path, Expression, Soul Urge)
+# ═════════════════════════════════════════════════════════════════════════════
+
+NUMEROLOGY_MEANINGS = {
+    1: {"keyword": "Leadership", "nature": "independent, pioneering, self-determined, original",
+        "challenge": "avoid stubbornness, excessive self-reliance, dismissing others' input",
+        "careers": "entrepreneur, CEO, inventor, freelancer, any pioneering role"},
+    2: {"keyword": "Cooperation", "nature": "diplomatic, sensitive, harmonious, supportive",
+        "challenge": "avoid indecision, over-sensitivity, dependency on others' approval",
+        "careers": "mediator, counselor, diplomat, healer, team-building roles"},
+    3: {"keyword": "Expression", "nature": "creative, joyful, communicative, artistic",
+        "challenge": "avoid scattering energy, superficiality, emotional dramatization",
+        "careers": "writer, performer, artist, teacher, communicator, entertainer"},
+    4: {"keyword": "Foundation", "nature": "practical, disciplined, organized, reliable",
+        "challenge": "avoid rigidity, overwork, stubbornness, excessive routine",
+        "careers": "engineer, architect, accountant, project manager, builder"},
+    5: {"keyword": "Freedom", "nature": "versatile, adventurous, curious, dynamic",
+        "challenge": "avoid restlessness, overindulgence, inconsistency, escapism",
+        "careers": "travel, sales, marketing, journalism, any role requiring adaptability"},
+    6: {"keyword": "Responsibility", "nature": "nurturing, harmonious, compassionate, artistic",
+        "challenge": "avoid self-sacrifice to the point of martyrdom, controlling behavior",
+        "careers": "teacher, healer, counselor, hospitality, design, community service"},
+    7: {"keyword": "Wisdom", "nature": "analytical, spiritual, introspective, perceptive",
+        "challenge": "avoid isolation, overthinking, skepticism, emotional detachment",
+        "careers": "researcher, philosopher, scientist, spiritual teacher, analyst"},
+    8: {"keyword": "Power", "nature": "ambitious, authoritative, business-minded, strategic",
+        "challenge": "avoid workaholism, materialism, power struggles, neglecting personal life",
+        "careers": "executive, finance, real estate, law, management, entrepreneurship"},
+    9: {"keyword": "Humanitarian", "nature": "compassionate, generous, idealistic, wise",
+        "challenge": "avoid emotional detachment, self-righteousness, over-giving without boundaries",
+        "careers": "nonprofit, healing, teaching, arts, philanthropy, global causes"},
+    11: {"keyword": "Master Intuitive", "nature": "visionary, inspired, spiritually gifted, idealistic",
+         "challenge": "avoid nervous tension, self-doubt, living too much in the abstract",
+         "careers": "spiritual teacher, artist, healer, innovator, inspirational leader"},
+    22: {"keyword": "Master Builder", "nature": "visionary architect, practical idealist, transformative leader",
+         "challenge": "avoid being overwhelmed by the scope of your visions",
+         "careers": "large-scale projects, architecture, global business, system design"},
+    33: {"keyword": "Master Teacher", "nature": "compassionate healer, selfless service, spiritual upliftment",
+         "challenge": "avoid self-sacrifice without boundaries, carrying others' burdens",
+         "careers": "healing, teaching, spiritual leadership, humanitarian work"},
+}
+
+def _reduce(n):
+    while n > 9 and n not in (11, 22, 33):
+        n = sum(int(d) for d in str(n))
+    return n
+
+def numerology(year, month, day, full_name=""):
+    """Calculate core numerology: Life Path, Personal Year, and (if name provided) Expression & Soul Urge."""
+    life_path = _reduce(_reduce(day) + _reduce(month) + _reduce(year))
+    personal_year = _reduce(day + month + sum(int(d) for d in str(year)))
+    lp_meaning = NUMEROLOGY_MEANINGS.get(life_path, {"keyword": str(life_path), "nature": "", "challenge": "", "careers": ""})
+
+    result = {
+        "life_path": {"number": life_path,
+                      "meaning": lp_meaning.get("keyword",""),
+                      "nature": lp_meaning.get("nature",""),
+                      "challenge": lp_meaning.get("challenge",""),
+                      "vocations": lp_meaning.get("careers","")},
+        "personal_year": {"number": personal_year,
+                          "note": f"Personal Year {personal_year} themes: {NUMEROLOGY_MEANINGS.get(personal_year,{}).get('keyword','cycle')}"},
+        "birth_date_numbers": {"day": _reduce(day), "month": _reduce(month), "year": _reduce(year)},
+    }
+
+    if full_name:
+        letter_values = {c: v for c in "abcdefghijklmnopqrstuvwxyz"
+                        for v in [1,2,3,4,5,6,7,8,9]
+                        if (ord(c) - ord('a')) % 9 + 1 == v}
+        letter_map = {}
+        for c in "abcdefghijklmnopqrstuvwxyz":
+            letter_map[c] = (ord(c) - ord('a')) % 9 + 1
+        vowels = set("aeiou")
+        name_clean = full_name.lower().replace(" ", "")
+        expression = _reduce(sum(letter_map.get(c, 0) for c in name_clean))
+        soul_urge = _reduce(sum(letter_map.get(c, 0) for c in name_clean if c in vowels))
+        result["expression"] = {"number": expression,
+                                "note": f"Full name reveals talents and abilities: {NUMEROLOGY_MEANINGS.get(expression,{}).get('keyword','')}"}
+        result["soul_urge"] = {"number": soul_urge,
+                               "note": f"Vowels reveal inner motivation: {NUMEROLOGY_MEANINGS.get(soul_urge,{}).get('keyword','')}"}
+
+    return result
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SECTION H8 — EQUAL HOUSE SYSTEM OPTION
+# ═════════════════════════════════════════════════════════════════════════════
+
+def equal_houses(asc_lon):
+    """Equal house system: each house = 30° starting from the Ascendant degree.
+    Simpler than Placidus, commonly used alongside whole-sign."""
+    houses = {}
+    for hnum in range(1, 13):
+        cusp_lon = norm360(asc_lon + (hnum - 1) * 30)
+        sign, idx, deg = sign_of(cusp_lon)
+        houses[hnum] = {"sign": sign, "cusp_degree": round(deg, 2),
+                        "abs_lon": round(cusp_lon, 3),
+                        "ruler": SIGN_DATA[sign]["ruler"],
+                        "meaning": HOUSE_MEANINGS[hnum]}
+    return houses
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SECTION H9 — COMPOSITE CHART (midpoint of two natal charts)
+# ═════════════════════════════════════════════════════════════════════════════
+
+def composite_chart(jdA, jdB, latA, lngA, latB, lngB):
+    """Midpoint composite chart — the relationship as a third entity.
+    Each planet is the midpoint of its positions in both charts."""
+    lonsA, speedA, backend = body_longitudes(jdA)
+    lonsB, speedB, _ = body_longitudes(jdB)
+    names = ["Sun","Moon","Mercury","Venus","Mars","Jupiter","Saturn",
+             "Uranus","Neptune","Pluto","North Node","South Node","Chiron"]
+    mid_lat = (latA + latB) / 2
+    mid_lng = (lngA + lngB) / 2
+    ascA, mcA = ascendant_mc(jdA, latA, lngA)
+    ascB, mcB = ascendant_mc(jdB, latB, lngB)
+    comp_asc = midpoint_lon(ascA, ascB)
+    comp_mc = midpoint_lon(mcA, mcB)
+    planets = {}
+    for nm in names:
+        if nm in lonsA and nm in lonsB:
+            mid = midpoint_lon(lonsA[nm], lonsB[nm])
+            sign, idx, deg = sign_of(mid)
+            retro = speedA.get(nm, 0) < 0 or speedB.get(nm, 0) < 0
+            house = whole_sign_house(mid, comp_asc)
+            planets[nm] = {"longitude": round(mid, 3), "sign": sign,
+                           "degree_in_sign": round(deg, 2), "house": house,
+                           "retrograde": retro,
+                           "dignity": dignity_western(nm, sign)}
+    asc_sign, _, asc_deg = sign_of(comp_asc)
+    mc_sign, _, mc_deg = sign_of(comp_mc)
+    houses = {}
+    asc_idx = int(comp_asc // 30)
+    for hnum in range(1, 13):
+        s = SIGNS[(asc_idx + hnum - 1) % 12]
+        houses[hnum] = {"sign": s, "ruler": SIGN_DATA[s]["ruler"],
+                        "meaning": HOUSE_MEANINGS[hnum]}
+    aspects = compute_aspects({nm: planets[nm]["longitude"] for nm in planets})[:20]
+    return {
+        "system": "Composite Chart (midpoint method)",
+        "note": "The composite chart represents the relationship itself as a third entity. Each planet is the midpoint of its positions in both natal charts.",
+        "ascendant": {"sign": asc_sign, "degree": round(asc_deg, 2)},
+        "midheaven": {"sign": mc_sign, "degree": round(mc_deg, 2)},
+        "chart_ruler": SIGN_DATA[asc_sign]["ruler"],
+        "descendant": {"sign": SIGNS[(asc_idx + 6) % 12],
+                       "degree": round(asc_deg, 2)},
+        "imum_coeli": {"sign": SIGNS[(int(comp_mc // 30) + 6) % 12],
+                       "degree": round(mc_deg, 2)},
+        "planets": planets, "houses": houses, "aspects": aspects}
+
+def midpoint_lon(a, b):
+    mid = (a + b) / 2
+    diff = abs(a - b)
+    if diff > 180:
+        mid = norm360(mid + 180)
+    return norm360(mid)
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SECTION H10 — BLACK MOON LILITH (Mean)
+# ═════════════════════════════════════════════════════════════════════════════
+
+def black_moon_lilith(jd):
+    """Mean Black Moon Lilith — the empty focus of the Moon's orbit.
+    Represents the shadow self, repressed desires, and primal wildness.
+    Approximation using lunar apogee cycle (~8.85 year period)."""
+    T = (jd - 2451545.0) / 36525.0
+    lilith_lon = norm360(119.0524 + 406.6057 * T + 0.0107 * T * T)
+    sign, idx, deg = sign_of(lilith_lon)
+    return {"longitude": round(lilith_lon, 3), "sign": sign,
+            "degree_in_sign": round(deg, 2),
+            "meaning": "Black Moon Lilith represents the shadow self — repressed desires, primal instincts, and where one rejects conformity. It reveals where raw authenticity meets social conditioning."}
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SECTION H11 — SECONDARY PROGRESSIONS (1 day = 1 year)
+# ═════════════════════════════════════════════════════════════════════════════
+
+def secondary_progressions(natal_jd, target_age, lat, lng):
+    """Secondary progressions: 1 day after birth = 1 year of life.
+    Casts a chart for (natal_jd + target_age) days after birth."""
+    prog_jd = natal_jd + target_age
+    prog_chart = western_chart(prog_jd, lat, lng, True)
+    prog_chart["system"] = "Secondary Progressions"
+    prog_chart["target_age"] = target_age
+    prog_chart["note"] = f"Progressed chart for age {target_age}. Each day after birth equals one year of life. The progressed Sun, Moon, and Ascendant reveal evolving identity, emotional needs, and outer persona."
+    return prog_chart
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SECTION H12 — GENERIC PLANETARY RETURN (Mercury–Saturn)
+# ═════════════════════════════════════════════════════════════════════════════
+
+def planetary_return(natal_jd, planet, target_year, lat, lng):
+    """Generic planetary return: find when transiting planet returns to natal position.
+    Works for any planet. Solar/lunar returns are special cases."""
+    natal_lons, _, backend = body_longitudes(natal_jd)
+    if planet not in natal_lons:
+        return {"error": f"Planet '{planet}' not available"}
+    natal_lon = natal_lons[planet]
+    approx_jan = julian_day(datetime(target_year, 1, 1, 0, 0))
+    periods = {"Sun": 1.0, "Moon": 0.0748, "Mercury": 0.2408,
+               "Venus": 0.6152, "Mars": 1.881, "Jupiter": 11.86,
+               "Saturn": 29.46, "Uranus": 84.01, "Neptune": 164.8, "Pluto": 248.0}
+    window = periods.get(planet, 1.0) * 367
+    low = approx_jan - 2
+    high = approx_jan + window + 2
+    for _ in range(80):
+        mid = (low + high) / 2
+        t_lons = tropical_longitudes(mid)
+        t_lon = t_lons.get(planet)
+        if t_lon is None:
+            break
+        diff = norm180(t_lon - natal_lon)
+        if abs(diff) < 0.001:
+            break
+        if diff > 0:
+            high = mid
+        else:
+            low = mid
+    ret_jd = (low + high) / 2
+    ret_utc = datetime(2000, 1, 1) + timedelta(days=ret_jd - 2451544.5)
+    ret_chart = western_chart(ret_jd, lat, lng, True)
+    return {
+        "system": f"Planetary Return ({planet})",
+        "planet": planet, "target_year": target_year,
+        "return_moment_utc": ret_utc.strftime("%Y-%m-%d %H:%M"),
+        "natal_longitude": round(natal_lon, 3),
+        "orbital_period_years": periods.get(planet, "?"),
+        "chart": ret_chart,
+        "note": f"{planet} return: the moment {planet} returns to its natal position, beginning a new {planet} cycle."}
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SECTION H13 — MORE ARABIC PARTS (Pars Spiritus, Amoris, etc.)
+# ═════════════════════════════════════════════════════════════════════════════
+
+ARABIC_PARTS = {
+    "Pars Fortuna":     {"day": ("Asc","Moon","Sun"),  "night": ("Asc","Sun","Moon"),
+                         "meaning": "Natural prosperity, joy, physical well-being"},
+    "Pars Spiritus":    {"day": ("Asc","Sun","Moon"),  "night": ("Asc","Moon","Sun"),
+                         "meaning": "The soul's purpose, spiritual calling, inner vision"},
+    "Pars Amoris":      {"day": ("Asc","Venus","Sun"), "night": ("Asc","Sun","Venus"),
+                         "meaning": "Love nature, romantic destiny, capacity for intimacy"},
+    "Pars Fidei":       {"day": ("Asc","Moon","Saturn"),"night": ("Asc","Saturn","Moon"),
+                         "meaning": "Faith, religion, philosophical convictions, trust"},
+    "Pars Valetudinis": {"day": ("Asc","Moon","Mars"), "night": ("Asc","Mars","Moon"),
+                         "meaning": "Health vulnerabilities, physical constitution"},
+    "Pars Magistrix":   {"day": ("Asc","Jupiter","Sun"),"night": ("Asc","Sun","Jupiter"),
+                         "meaning": "Career authority, professional recognition, vocation"},
+    "Pars Victus":      {"day": ("Asc","Moon","Mercury"),"night": ("Asc","Mercury","Moon"),
+                         "meaning": "Daily life, livelihood, routine patterns"},
+    "Pars Sororis":     {"day": ("Asc","Venus","Moon"), "night": ("Asc","Moon","Venus"),
+                         "meaning": "Sisters, close female friends, feminine bonds"},
+    "Pars Fratris":     {"day": ("Asc","Jupiter","Saturn"),"night": ("Asc","Saturn","Jupiter"),
+                         "meaning": "Brothers, close male friends, masculine bonds"},
+    "Pars Nuptiae":     {"day": ("Asc","Venus","Saturn"),"night": ("Asc","Saturn","Venus"),
+                         "meaning": "Marriage, committed partnerships, vows"},
+}
+
+def compute_arabic_parts(lons, asc_lon, is_day_chart=True):
+    """Compute configured Arabic Parts / Hermetic Lots."""
+    sect = "day" if is_day_chart else "night"
+    results = {}
+    for name, cfg in ARABIC_PARTS.items():
+        formula = cfg[sect]
+        vals = []
+        for key in formula:
+            if key == "Asc":
+                vals.append(asc_lon)
+            elif key in lons:
+                vals.append(lons[key])
+            else:
+                break
+        if len(vals) == 3:
+            part_lon = norm360(vals[0] + vals[1] - vals[2])
+            sign, idx, deg = sign_of(part_lon)
+            results[name] = {"longitude": round(part_lon, 3), "sign": sign,
+                             "degree_in_sign": round(deg, 2),
+                             "sect_used": sect, "meaning": cfg["meaning"]}
+    return results
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SECTION H14 — FIXED STARS (23 brightest with magnitude)
+# ═════════════════════════════════════════════════════════════════════════════
+
+FIXED_STARS = {
+    "Regulus":     {"lon": 150.0,  "mag": 1.4, "nature": "Mars/Jupiter", "meaning": "Royalty, success, then downfall if revenge-seeking"},
+    "Spica":       {"lon": 204.0,  "mag": 1.0, "nature": "Venus/Mars", "meaning": "Gifts, talent, wealth, potential for brilliance"},
+    "Sirius":      {"lon": 104.0,  "mag": -1.5,"nature": "Jupiter/Mars", "meaning": "Fame, honor, wealth, loyalty, devotion to duty"},
+    "Canopus":     {"lon": 55.0,   "mag": -0.7,"nature": "Saturn/Jupiter", "meaning": "Travel, voyages, positions of authority"},
+    "Arcturus":    {"lon": 197.0,  "mag": -0.05,"nature": "Jupiter/Venus", "meaning": "Prosperity through travel, honors, self-determination"},
+    "Vega":        {"lon": 285.0,  "mag": 0.03,"nature": "Venus/Mercury", "meaning": "Artistic talent, charisma, idealism"},
+    "Capella":     {"lon": 80.0,   "mag": 0.08,"nature": "Mars/Mercury", "meaning": "Honor, wealth, public position, independence"},
+    "Rigel":       {"lon": 283.0,  "mag": 0.13,"nature": "Jupiter/Saturn", "meaning": "Benevolence, honor, lasting fame through inventive mind"},
+    "Procyon":     {"lon": 116.0,  "mag": 0.34,"nature": "Mercury/Mars", "meaning": "Quick rise followed by potential sudden fall"},
+    "Betelgeuse":  {"lon": 89.0,   "mag": 0.5, "nature": "Mars/Mercury", "meaning": "Military honor, ambition, but potential for rashness"},
+    "Altair":      {"lon": 303.0,  "mag": 0.77,"nature": "Mars/Jupiter", "meaning": "Boldness, ambition, courage, sudden fortune"},
+    "Aldebaran":   {"lon": 70.0,   "mag": 0.85,"nature": "Mars", "meaning": "Honor, integrity, public prominence, but potential for failure"},
+    "Antares":     {"lon": 250.0,  "mag": 1.1, "nature": "Mars/Jupiter", "meaning": "Obsessive focus, extremes, military honor or downfall"},
+    "Pollux":      {"lon": 116.5,  "mag": 1.1, "nature": "Mars", "meaning": "Shrewdness, courage, boxing/martial skill, but cunning"},
+    "Fomalhaut":   {"lon": 354.0,  "mag": 1.2, "nature": "Venus/Mercury", "meaning": "Spiritual gifts, fame, idealism, but vulnerability to deceit"},
+    "Deneb":       {"lon": 325.0,  "mag": 1.25,"nature": "Venus/Mercury", "meaning": "Intelligence, artistic talent, changeable fortune"},
+    "Algol":       {"lon": 46.0,   "mag": 2.1, "nature": "Saturn/Jupiter", "meaning": "Intense passion, confronting the shadow, potential for violence or transformation"},
+    "Achernar":    {"lon": 15.0,   "mag": 0.5, "nature": "Jupiter", "meaning": "Success in public office, religious authority"},
+    "Alcyone":     {"lon": 60.0,   "mag": 3.0, "nature": "Moon/Mars", "meaning": "Emotional depth, vision, but potential for blindness or obsession"},
+    "Alphecca":    {"lon": 232.0,  "mag": 2.2, "nature": "Venus/Mercury", "meaning": "Artistic talent, honor, fame, but shame if dishonorable"},
+    "Algorab":     {"lon": 186.0,  "mag": 3.1, "nature": "Saturn/Mars", "meaning": "Destruction, cunning, deceit, but also forensic intelligence"},
+    "Deneb Algedi":{"lon": 336.0,  "mag": 2.9, "nature": "Saturn/Jupiter", "meaning": "Legal authority, business acumen, but potential for hardship"},
+    "Alkaid":      {"lon": 200.0,  "mag": 1.9, "nature": "Mars/Moon", "meaning": "Mourning, loss, but also intellectual achievement through sorrow"},
+}
+
+def fixed_star_conjunctions(lons, max_orb=2.0):
+    """Check which planets conjunct fixed stars (within orb degrees)."""
+    results = []
+    for star, data in FIXED_STARS.items():
+        star_lon = data["lon"]
+        for planet, p_lon in lons.items():
+            if planet in ("North Node","South Node","Chiron"):
+                continue
+            diff = abs(norm180(star_lon - p_lon))
+            if diff <= max_orb:
+                results.append({"star": star, "planet": planet,
+                                "orb": round(diff, 2),
+                                "magnitude": data["mag"],
+                                "nature": data["nature"],
+                                "meaning": data["meaning"]})
+    results.sort(key=lambda x: x["orb"])
+    return results
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SECTION H15 — VEDIC DOSHAS (Mangal Dosha, Kaalsarpa Dosha)
+# ═════════════════════════════════════════════════════════════════════════════
+
+def mangal_dosha(jd, lat, lng, time_known=True):
+    """Check for Mangal (Kuja/Mars) Dosha — Mars in 1st, 2nd, 4th, 7th, 8th, or 12th house."""
+    lons, _, _ = body_longitudes(jd)
+    ayan = ayanamsha_lahiri(jd)
+    mars_sid = norm360(lons["Mars"] - ayan)
+    if time_known:
+        asc_lon, _ = ascendant_mc(jd, lat, lng, ayan)
+    else:
+        asc_lon = norm360(lons["Sun"] - ayan)
+    asc_idx = int(asc_lon // 30)
+    mars_idx = int(mars_sid // 30)
+    mars_house = ((mars_idx - asc_idx) % 12) + 1
+    dosha_houses = [1, 2, 4, 7, 8, 12]
+    has_dosha = mars_house in dosha_houses
+    cancellations = []
+    mars_sign = SIGNS[mars_idx]
+    if mars_sign in ("Aries", "Scorpio"):
+        cancellations.append("Mars in own sign (Aries/Scorpio)")
+    if mars_sign == "Capricorn":
+        cancellations.append("Mars in exaltation (Capricorn)")
+    if mars_house in (2, 4) and mars_sign in ("Cancer", "Leo"):
+        cancellations.append("Mars in Cancer/Leo in 2nd/4th — partial cancellation")
+    return {"has_mangal_dosha": has_dosha,
+            "mars_house": mars_house,
+            "mars_sign": mars_sign,
+            "severity": "high" if mars_house in (1, 7, 8) else "moderate" if has_dosha else "none",
+            "cancellations": cancellations,
+            "note": "Mangal Dosha occurs when Mars occupies houses 1, 2, 4, 7, 8, or 12 from the ascendant. It affects marriage compatibility and can be cancelled by sign placements." if has_dosha else "No Mangal Dosha detected."}
+
+def kaalsarpa_dosha(jd, lat, lng, time_known=True):
+    """Check for Kaalsarpa Dosha — all planets hemmed between Rahu and Ketu."""
+    lons, _, _ = body_longitudes(jd)
+    ayan = ayanamsha_lahiri(jd)
+    rahu_sid = norm360(lons["North Node"] - ayan)
+    ketu_sid = norm360(rahu_sid + 180)
+    check_bodies = ["Sun","Moon","Mercury","Venus","Mars","Jupiter","Saturn"]
+    between_count = 0
+    outside_count = 0
+    for b in check_bodies:
+        b_lon = norm360(lons[b] - ayan)
+        if rahu_sid < ketu_sid:
+            in_arc = rahu_sid < b_lon < ketu_sid
+        else:
+            in_arc = b_lon > rahu_sid or b_lon < ketu_sid
+        if in_arc:
+            between_count += 1
+        else:
+            outside_count += 1
+    has_kaalsarpa = outside_count == 0 and between_count == 7
+    partial = outside_count <= 1 and between_count >= 6
+    rahu_sign = SIGNS[int(rahu_sid // 30)]
+    direction = "rightward (Anulikta)" if rahu_sid < ketu_sid else "leftward (Viloma)"
+    return {"has_kaalsarpa": has_kaalsarpa,
+            "partial_kaalsarpa": partial and not has_kaalsarpa,
+            "rahu_sign": rahu_sign,
+            "direction": direction,
+            "severity": "full" if has_kaalsarpa else "partial" if partial else "none",
+            "note": "Kaalsarpa Dosha: all planets hemmed between Rahu and Ketu, indicating karmic intensity and life obstacles." if has_kaalsarpa else "No Kaalsarpa Dosha detected." if not partial else "Partial Kaalsarpa — most planets between Rahu and Ketu."}
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SECTION H16 — ADDITIONAL VEDIC VARGAS (D2, D3, D10, D12)
+# ═════════════════════════════════════════════════════════════════════════════
+
+def varga_chart(jd, varga, lat=0, lng=0, time_known=True):
+    """Compute a Vedic divisional chart (Varga).
+    D2=Hora (wealth), D3=Drekkana (siblings), D10=Dasamsa (career), D12=Dwadashamsa (parents)."""
+    lons, _, backend = body_longitudes(jd)
+    ayan = ayanamsha_lahiri(jd)
+    if time_known:
+        asc_lon, _ = ascendant_mc(jd, lat, lng, ayan)
+    else:
+        asc_lon = norm360(lons["Sun"] - ayan)
+
+    varga_info = {
+        "D2":  {"divisions": 2,  "name": "Hora", "meaning": "Wealth, resources, financial patterns"},
+        "D3":  {"divisions": 3,  "name": "Drekkana", "meaning": "Siblings, courage, self-effort"},
+        "D4":  {"divisions": 4,  "name": "Chaturthamsa", "meaning": "Property, fixed assets, fortune"},
+        "D7":  {"divisions": 7,  "name": "Saptamsa", "meaning": "Children, progeny, creativity"},
+        "D10": {"divisions": 10, "name": "Dasamsa", "meaning": "Career, profession, public status"},
+        "D12": {"divisions": 12, "name": "Dwadashamsa", "meaning": "Parents, ancestry, lineage"},
+        "D16": {"divisions": 16, "name": "Shodasamsa", "meaning": "Vehicles, comforts, luxuries"},
+        "D20": {"divisions": 20, "name": "Vimsamsa", "meaning": "Spiritual pursuits, devotion"},
+        "D24": {"divisions": 24, "name": "Chaturvimsamsa", "meaning": "Education, learning, knowledge"},
+        "D30": {"divisions": 30, "name": "Trimsamsa", "meaning": "Misfortunes, health challenges"},
+        "D40": {"divisions": 40, "name": "Khavedamsa", "meaning": "Auspicious/inauspicious events"},
+        "D45": {"divisions": 45, "name": "Akshavedamsa", "meaning": "Overall character, conduct"},
+        "D60": {"divisions": 60, "name": "Shashtiamsa", "meaning": "Karmic legacy, past life influences"},
+    }
+    v = varga.upper()
+    if v not in varga_info:
+        return {"error": f"Varga {v} not supported. Available: {list(varga_info.keys())}"}
+    info = varga_info[v]
+    d = info["divisions"]
+    pada_arc = 30.0 / d
+    elements = ["Fire", "Earth", "Air", "Water"]
+    element_starts = {"Fire": "Aries", "Earth": "Capricorn", "Air": "Libra", "Water": "Cancer"}
+    sign_idx_map = {s: i for i, s in enumerate(SIGNS)}
+
+    varga_lons = {}
+    names = ["Sun","Moon","Mercury","Venus","Mars","Jupiter","Saturn","North Node","South Node"]
+    for nm in names:
+        sid_lon = norm360(lons[nm] - ayan)
+        sign_idx = int(sid_lon // 30)
+        deg_in_sign = sid_lon % 30
+        pada = int(deg_in_sign / pada_arc)
+        elem_idx = sign_idx % 4
+        elem = elements[elem_idx]
+        base_sign_idx = sign_idx_map[element_starts[elem]]
+        varga_sign_idx = (base_sign_idx + pada) % 12
+        varga_lon = varga_sign_idx * 30 + (deg_in_sign % pada_arc)
+        sign = SIGNS[varga_sign_idx]
+        varga_lons[nm] = {"longitude": round(varga_lon, 3), "sign": sign,
+                          "degree_in_sign": round(deg_in_sign % pada_arc, 2)}
+
+    asc_pada = int((asc_lon % 30) / pada_arc)
+    asc_elem_idx = int(asc_lon // 30) % 4
+    asc_elem = elements[asc_elem_idx]
+    asc_base = sign_idx_map[element_starts[asc_elem]]
+    varga_asc_idx = (asc_base + asc_pada) % 12
+    varga_asc_sign = SIGNS[varga_asc_idx]
+
+    return {"system": f"Varga {v} ({info['name']})",
+            "note": info["meaning"],
+            "varga": v, "divisions": d,
+            "varga_lagna": varga_asc_sign,
+            "planets": varga_lons,
+            "backend": backend}
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SECTION H17 — TRANSIT-TO-NATAL ASPECTS (detailed)
+# ═════════════════════════════════════════════════════════════════════════════
+
+def transit_to_natal_aspects(natal_jd, transit_jd):
+    """Detailed listing of transit-to-natal aspects with impact rating.
+    Used for 'what's happening to me right now' readings."""
+    natal_lons, _, _ = body_longitudes(natal_jd)
+    trans_lons, trans_speed, _ = body_longitudes(transit_jd)
+    bodies = ["Sun","Moon","Mercury","Venus","Mars","Jupiter","Saturn",
+              "Uranus","Neptune","Pluto","North Node"]
+    results = []
+    for t_p in bodies:
+        if t_p not in trans_lons:
+            continue
+        for n_p in bodies:
+            if n_p not in natal_lons:
+                continue
+            sep = abs(norm180(trans_lons[t_p] - natal_lons[n_p]))
+            for asp, (ang, orb, desc) in ASPECTS.items():
+                d = abs(sep - ang)
+                if d <= orb:
+                    applying = (trans_speed.get(t_p, 0) < 0) if asp in ("conjunction","opposition") else None
+                    speed_val = trans_speed.get(t_p, 0)
+                    if speed_val != 0:
+                        future_sep = abs(norm180(norm360(trans_lons[t_p] + speed_val * 0.1) - natal_lons[n_p]))
+                        applying = future_sep < sep
+                    impact = "high" if asp in ("conjunction","opposition","square") and d < 2 else \
+                             "moderate" if asp in ("conjunction","opposition","square","trine") else "low"
+                    results.append({
+                        "transit_planet": t_p, "natal_planet": n_p,
+                        "aspect": asp, "orb": round(d, 2),
+                        "applying": applying,
+                        "impact": impact,
+                        "retrograde": trans_speed.get(t_p, 0) < 0,
+                        "meaning": desc})
+    results.sort(key=lambda x: (0 if x["impact"]=="high" else 1 if x["impact"]=="moderate" else 2, x["orb"]))
+    return {"transit_aspects": results[:30],
+            "high_impact_count": sum(1 for r in results if r["impact"]=="high"),
+            "note": "Transit-to-natal aspects show current planetary weather affecting the natal chart. High-impact aspects with tight orbs are most significant."}
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SECTION H18 — PLANETARY HOURS (standalone, not just horary)
+# ═════════════════════════════════════════════════════════════════════════════
+
+def planetary_hours(jd, lat, lng):
+    """Calculate the planetary hours for a given day and location.
+    Each day and night is divided into 12 hours, each ruled by a planet
+    following the Chaldean order: Saturn→Jupiter→Mars→Sun→Venus→Mercury→Moon."""
+    dt_utc = datetime(2000,1,1) + timedelta(days=jd - 2451544.5)
+    chaldean = ["Saturn","Jupiter","Mars","Sun","Venus","Mercury","Moon"]
+    weekday_ruler = chaldean[dt_utc.weekday()]
+    obliquity_rad = math.radians(23.4393 - 0.0130 * ((jd - 2451545.0) / 36525.0))
+    lat_rad = math.radians(lat)
+    sun_lon = tropical_longitudes(jd).get("Sun", 0)
+    sun_dec = math.asin(math.sin(obliquity_rad) * math.sin(math.radians(sun_lon)))
+    cos_ha_rise = -math.tan(lat_rad) * math.tan(sun_dec)
+    cos_ha_rise = max(-1, min(1, cos_ha_rise))
+    ha_rise = math.degrees(math.acos(cos_ha_rise))
+    day_length_hours = 2 * ha_rise / 15.0
+    night_length_hours = 24.0 - day_length_hours
+    day_hour_len = day_length_hours / 12.0
+    night_hour_len = night_length_hours / 12.0
+    sunrise_offset = 12.0 - ha_rise / 15.0
+    sunrise_h = int(sunrise_offset)
+    sunrise_m = int((sunrise_offset - sunrise_h) * 60)
+    hour_idx_start = dt_utc.weekday()
+    hours = []
+    for h in range(24):
+        is_day = h < 12
+        ruler_idx = (hour_idx_start + h) % 7
+        hour_len = day_hour_len if is_day else night_hour_len
+        hours.append({"hour": h + 1, "ruler": chaldean[ruler_idx],
+                       "is_daytime": is_day,
+                       "approx_duration_min": round(hour_len * 60)})
+    return {"date_utc": dt_utc.strftime("%Y-%m-%d"),
+            "weekday_ruler": weekday_ruler,
+            "sunrise_approx_utc": f"{sunrise_h:02d}:{sunrise_m:02d}",
+            "day_length": f"{int(day_length_hours)}h {int((day_length_hours % 1) * 60)}m",
+            "night_length": f"{int(night_length_hours)}h {int((night_length_hours % 1) * 60)}m",
+            "hours": hours,
+            "note": "Planetary hours follow the Chaldean sequence. Day hours run sunrise-to-sunset, night hours sunset-to-sunrise. The hour ruler colors the energy of actions taken in that hour."}
 # ═════════════════════════════════════════════════════════════════════════════
 
 def _ra_from_lon(lon_deg, eps_deg):
@@ -1541,6 +2785,84 @@ def calculate_full_profile(data):
         result["event_chart"]=event_chart(data)
         return result
 
+    if mode=="solar_return":
+        target_year=data.get("target_year", birth_local.year + 1)
+        result["solar_return"]=solar_return(jd, target_year, lat, lng)
+        result["natal_sun_sign"]=sign_of(body_longitudes(jd)[0]["Sun"])[0]
+        return result
+
+    if mode=="lunar_return":
+        target_year=data.get("target_year", birth_local.year)
+        target_month=data.get("target_month", birth_local.month)
+        result["lunar_return"]=lunar_return(jd, target_year, target_month, lat, lng)
+        return result
+
+    if mode=="compatibility":
+        p=data["partner"]
+        p_utc,_=to_utc(p); jdB=julian_day(p_utc)
+        result["compatibility"]=compatibility_score(jd, jdB)
+        result["personA"]={"big_three":western_chart(jd,lat,lng,time_known)["big_three"]}
+        result["personB"]={"big_three":western_chart(jdB,p.get("lat",0),p.get("lng",0),
+                                                      p.get("time_known",True))["big_three"]}
+        result["synastry"]=synastry(jd,jdB)
+        return result
+
+    if mode=="navamsa":
+        result["navamsa"]=navamsa_chart(jd, lat, lng, time_known)
+        result["vedic_brief"]=vedic_chart(jd,lat,lng,birth_local,time_known)
+        return result
+
+    if mode=="numerology":
+        result["numerology"]=numerology(data["year"],data["month"],data["day"],
+                                        data.get("full_name",""))
+        return result
+
+    if mode=="moon_phase":
+        result["moon_phase"]=moon_phase(jd)
+        result["upcoming_moon_phases"]=upcoming_moon_phases(jd, count=4)
+        return result
+
+    if mode=="panchang":
+        result["panchang"]=panchang_elements(jd)
+        result["vedic_brief"]=vedic_chart(jd,lat,lng,birth_local,time_known)
+        return result
+
+    if mode=="composite":
+        p=data["partner"]
+        p_utc,_=to_utc(p); jdB=julian_day(p_utc)
+        result["composite"]=composite_chart(jd, jdB, lat, lng, p.get("lat",0), p.get("lng",0))
+        result["personA"]={"big_three":western_chart(jd,lat,lng,time_known)["big_three"]}
+        result["personB"]={"big_three":western_chart(jdB,p.get("lat",0),p.get("lng",0),
+                                                      p.get("time_known",True))["big_three"]}
+        return result
+
+    if mode=="progressions":
+        target_age=data.get("target_age", 30)
+        result["progressions"]=secondary_progressions(jd, target_age, lat, lng)
+        return result
+
+    if mode=="planetary_return":
+        planet=data.get("planet","Jupiter")
+        target_year=data.get("target_year", birth_local.year + 1)
+        result["planetary_return"]=planetary_return(jd, planet, target_year, lat, lng)
+        return result
+
+    if mode=="varga":
+        varga=data.get("varga","D10")
+        result["varga"]=varga_chart(jd, varga, lat, lng, time_known)
+        return result
+
+    if mode=="planetary_hours":
+        result["planetary_hours"]=planetary_hours(jd, lat, lng)
+        return result
+
+    if mode=="transit_natal_aspects":
+        tdate=data.get("transit_date")
+        tdt=datetime.strptime(tdate,"%Y-%m-%d") if tdate else TODAY
+        tjd=julian_day(tdt)
+        result["transit_natal_aspects"]=transit_to_natal_aspects(jd, tjd)
+        return result
+
     # natal (default)
     result["charts"]={}
     if "western" in systems:
@@ -1553,6 +2875,41 @@ def calculate_full_profile(data):
         try: result["charts"]["bazi"]=bazi_chart(jd,birth_local,data.get("gender","unknown"),lat)
         except Exception as e: result["charts"]["bazi"]={"error":repr(e)}
     result["life_phase"]=life_phase(birth_local)
+
+    if "western" in systems and time_known:
+        try:
+            lons, _, _ = body_longitudes(jd)
+            asc_lon, _ = ascendant_mc(jd, lat, lng)
+            sun_lon = lons["Sun"]
+            is_day = 90 <= norm360(asc_lon - sun_lon) <= 270
+            result["special_points"]={
+                "part_of_fortune": part_of_fortune(sun_lon, lons["Moon"], asc_lon, is_day),
+                "vertex": vertex(jd, lat, lng),
+                "moon_phase_at_birth": moon_phase(jd),
+                "black_moon_lilith": black_moon_lilith(jd),
+            }
+            result["arabic_parts"]=compute_arabic_parts(lons, asc_lon, is_day)
+            result["aspect_patterns"]=detect_aspect_patterns(lons)
+            result["fixed_star_conjunctions"]=fixed_star_conjunctions(lons)
+            result["equal_houses"]=equal_houses(asc_lon)
+        except Exception:
+            pass
+
+    if "vedic" in systems:
+        try:
+            result["panchang"]=panchang_elements(jd)
+            result["navamsa"]=navamsa_chart(jd, lat, lng, time_known)
+            result["mangal_dosha"]=mangal_dosha(jd, lat, lng, time_known)
+            result["kaalsarpa_dosha"]=kaalsarpa_dosha(jd, lat, lng, time_known)
+        except Exception:
+            pass
+
+    if data.get("include_numerology"):
+        try: result["numerology"]=numerology(data["year"],data["month"],data["day"],
+                                              data.get("full_name",""))
+        except Exception:
+            pass
+
     return result
 
 

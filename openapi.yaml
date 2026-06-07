@@ -1,134 +1,371 @@
 openapi: 3.1.0
 info:
   title: Astrology API
-  description: Trustworthy multi-tradition astrology. Casts mathematically real charts (Western tropical, Vedic/Jyotish sidereal, Chinese BaZi) from birth data via a deterministic ephemeris engine.
-  version: 1.0.0
+  description: >
+    Trustworthy multi-tradition astrology API. 19 calculation modes across 3 traditions
+    (Western tropical, Vedic/Jyotisha sidereal, Chinese BaZi). Deterministic ephemeris engine.
+    Zero hallucinated positions. Includes aspect patterns, Arabic Parts, fixed stars, dignities,
+    Black Moon Lilith, Mangal Dosha, Kaalsarpa Dosha, composite charts, progressions,
+    planetary returns, divisional charts (D2-D60), planetary hours, and numerology.
+  version: 2.0.0
+  contact:
+    name: Astrology API Support
+    url: https://github.com/aryaminus/astro
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
 servers:
   - url: http://localhost:8000
+    description: Local development
+  - url: https://astrology-api.yourdomain.com
+    description: Production (replace with your hosted URL)
+
+security:
+  - ApiKeyAuth: []
+  - {}
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: "Optional. Free tier: no key needed. Set ASTRO_API_KEY env var on server to require keys."
+
+  schemas:
+    BirthData:
+      type: object
+      required: [year, month, day]
+      properties:
+        year: { type: integer, example: 1990 }
+        month: { type: integer, example: 6 }
+        day: { type: integer, example: 15 }
+        hour: { type: integer, default: 12, example: 14 }
+        minute: { type: integer, default: 0, example: 30 }
+        lat: { type: number, default: 0.0, example: 40.7128 }
+        lng: { type: number, default: 0.0, example: -74.006 }
+        tz: { type: string, default: "UTC", example: "America/New_York" }
+        time_known: { type: boolean, default: false }
+        systems: { type: array, items: { type: string, enum: [western, vedic, bazi] }, default: [western, vedic, bazi] }
+        gender: { type: string, enum: [female, male] }
+        target_year: { type: integer, example: 2026 }
+        target_month: { type: integer, example: 6 }
+        target_age: { type: integer, example: 35 }
+        planet: { type: string, example: "Jupiter", description: "For planetary_return mode" }
+        varga: { type: string, example: "D10", description: "Vedic divisional chart code (D2-D60)" }
+        full_name: { type: string, example: "John Doe", description: "For numerology name calculations" }
+        transit_date: { type: string, format: date, example: "2026-06-01" }
+
+    PartnerData:
+      type: object
+      required: [year, month, day]
+      properties:
+        year: { type: integer }
+        month: { type: integer }
+        day: { type: integer }
+        hour: { type: integer, default: 12 }
+        minute: { type: integer, default: 0 }
+        lat: { type: number, default: 0.0 }
+        lng: { type: number, default: 0.0 }
+        tz: { type: string, default: "UTC" }
+        time_known: { type: boolean, default: true }
+
+    PartnerRequest:
+      allOf:
+        - $ref: '#/components/schemas/BirthData'
+        - type: object
+          properties:
+            partner:
+              $ref: '#/components/schemas/PartnerData'
+
+    NumerologyRequest:
+      type: object
+      required: [year, month, day]
+      properties:
+        year: { type: integer }
+        month: { type: integer }
+        day: { type: integer }
+        full_name: { type: string, default: "" }
+
+    ProfileRequest:
+      type: object
+      required: [name, year, month, day]
+      properties:
+        name: { type: string }
+        year: { type: integer }
+        month: { type: integer }
+        day: { type: integer }
+        hour: { type: integer, default: 12 }
+        minute: { type: integer, default: 0 }
+        lat: { type: number, default: 0.0 }
+        lng: { type: number, default: 0.0 }
+        tz: { type: string, default: "UTC" }
+
 paths:
   /chart:
     post:
-      operationId: getAstroChart
-      summary: Retrieve astrological chart calculations
-      description: Generates a JSON chart based on birth data using Western, Vedic, or BaZi systems.
+      tags: [Charts]
+      operationId: getChart
+      summary: Universal chart endpoint
+      description: Accepts any mode via the `mode` field. The universal entry point.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - year
-                - month
-                - day
-              properties:
-                year:
-                  type: integer
-                month:
-                  type: integer
-                day:
-                  type: integer
-                hour:
-                  type: integer
-                minute:
-                  type: integer
-                lat:
-                  type: number
-                lng:
-                  type: number
-                tz:
-                  type: string
-                time_known:
-                  type: boolean
-                systems:
-                  type: array
-                  items:
-                    type: string
-                    enum: [western, vedic, bazi]
-                gender:
-                  type: string
-                  enum: [female, male]
+              allOf:
+                - $ref: '#/components/schemas/BirthData'
+                - type: object
+                  properties:
+                    mode:
+                      type: string
+                      default: natal
+                      enum: [natal, transit, synastry, compatibility, composite, astrocartography, horary, event, solar_return, lunar_return, planetary_return, navamsa, varga, panchang, moon_phase, numerology, progressions, planetary_hours, transit_natal_aspects]
       responses:
         "200":
-          description: Successful chart generation
-          content:
-            application/json:
-              schema:
-                type: object
+          description: Chart data
+
+  /chart/natal:
+    post:
+      tags: [Charts]
+      operationId: getNatalChart
+      summary: Full natal chart
+      description: "Complete birth chart with aspect patterns, Arabic Parts, fixed stars, dignities, BML, Moon phase, equal houses, navamsa, panchang, Mangal Dosha, Kaalsarpa Dosha."
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/BirthData' } } } }
+      responses:
+        "200": { description: Natal chart data }
+
+  /chart/transit:
+    post:
+      tags: [Charts]
+      operationId: getTransitChart
+      summary: Transit chart
+      description: "Current sky vs natal chart. Set transit_date or defaults to today."
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/BirthData' } } } }
+      responses:
+        "200": { description: Transit data }
+
+  /chart/synastry:
+    post:
+      tags: [Relationships]
+      operationId: getSynastryChart
+      summary: Synastry chart
+      description: Relationship comparison between two natal charts.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/PartnerRequest' } } } }
+      responses:
+        "200": { description: Synastry data }
+
+  /chart/compatibility:
+    post:
+      tags: [Relationships]
+      operationId: getCompatibility
+      summary: Compatibility scoring
+      description: "0-100 score with romantic/emotional/intellectual/physical/spiritual subscores."
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/PartnerRequest' } } } }
+      responses:
+        "200": { description: Compatibility data }
+
+  /chart/composite:
+    post:
+      tags: [Relationships]
+      operationId: getCompositeChart
+      summary: Composite chart
+      description: Midpoint composite chart representing the relationship as a third entity.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/PartnerRequest' } } } }
+      responses:
+        "200": { description: Composite chart data }
+
+  /chart/solar-return:
+    post:
+      tags: [Returns]
+      operationId: getSolarReturn
+      summary: Solar return chart
+      description: Annual solar return for birthday forecasts. Set target_year.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/BirthData' } } } }
+      responses:
+        "200": { description: Solar return data }
+
+  /chart/lunar-return:
+    post:
+      tags: [Returns]
+      operationId: getLunarReturn
+      summary: Lunar return chart
+      description: Monthly lunar return. Set target_year and target_month.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/BirthData' } } } }
+      responses:
+        "200": { description: Lunar return data }
+
+  /chart/planetary-return:
+    post:
+      tags: [Returns]
+      operationId: getPlanetaryReturn
+      summary: Planetary return chart
+      description: "Return chart for any planet (Mercury, Venus, Mars, Jupiter, Saturn, etc.). Set planet and target_year."
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/BirthData' } } } }
+      responses:
+        "200": { description: Planetary return data }
+
+  /chart/navamsa:
+    post:
+      tags: [Vedic]
+      operationId: getNavamsa
+      summary: Navamsa D9 chart
+      description: Vedic D9 divisional chart with vargottama detection.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/BirthData' } } } }
+      responses:
+        "200": { description: Navamsa data }
+
+  /chart/varga:
+    post:
+      tags: [Vedic]
+      operationId: getVarga
+      summary: Vedic divisional chart
+      description: "Any Vedic varga (D2-D60). Set varga field. D2=Hora, D3=Drekkana, D7=Saptamsa, D10=Dasamsa, D12=Dwadashamsa."
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/BirthData' } } } }
+      responses:
+        "200": { description: Varga data }
+
+  /panchang:
+    post:
+      tags: [Vedic]
+      operationId: getPanchang
+      summary: Vedic Panchang
+      description: Complete Panchang — Tithi, Nakshatra, Yoga, Karana.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/BirthData' } } } }
+      responses:
+        "200": { description: Panchang data }
+
+  /chart/progressions:
+    post:
+      tags: [Charts]
+      operationId: getProgressions
+      summary: Secondary progressions
+      description: "Secondary progressions (1 day = 1 year). Set target_age."
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/BirthData' } } } }
+      responses:
+        "200": { description: Progressions data }
+
+  /chart/transit-aspects:
+    post:
+      tags: [Charts]
+      operationId: getTransitNatalAspects
+      summary: Transit-to-natal aspects
+      description: Detailed listing of which transiting planets aspect which natal planets, with impact ratings.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/BirthData' } } } }
+      responses:
+        "200": { description: Transit aspect data }
+
+  /astrocartography:
+    post:
+      tags: [Relocation]
+      operationId: getAstrocartography
+      summary: Astrocartography
+      description: Planet lines on the globe for relocation analysis.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/BirthData' } } } }
+      responses:
+        "200": { description: Astrocartography data }
+
+  /horary:
+    post:
+      tags: [Specialty]
+      operationId: getHoraryChart
+      summary: Horary chart
+      description: Chart of the moment for a specific question.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/BirthData' } } } }
+      responses:
+        "200": { description: Horary data }
+
+  /moon-phase:
+    post:
+      tags: [Moon]
+      operationId: getMoonPhase
+      summary: Moon phase
+      description: Lunar phase with illumination %, age, and upcoming phases.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/BirthData' } } } }
+      responses:
+        "200": { description: Moon phase data }
+
+  /planetary-hours:
+    post:
+      tags: [Timing]
+      operationId: getPlanetaryHours
+      summary: Planetary hours
+      description: Chaldean planetary hours for the day.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/BirthData' } } } }
+      responses:
+        "200": { description: Planetary hours data }
+
+  /numerology:
+    post:
+      tags: [Numerology]
+      operationId: getNumerology
+      summary: Numerology calculations
+      description: "Life Path, Personal Year, Expression, Soul Urge. Pass full_name for name-based numbers."
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/NumerologyRequest' } } } }
+      responses:
+        "200": { description: Numerology data }
+
   /profile:
     post:
+      tags: [Profiles]
       operationId: saveProfile
-      summary: Save a user's birth profile to memory
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - name
-                - year
-                - month
-                - day
-              properties:
-                name:
-                  type: string
-                year:
-                  type: integer
-                month:
-                  type: integer
-                day:
-                  type: integer
-                hour:
-                  type: integer
-                minute:
-                  type: integer
-                lat:
-                  type: number
-                lng:
-                  type: number
-                tz:
-                  type: string
+      summary: Save a birth profile
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ProfileRequest' } } } }
       responses:
-        "200":
-          description: Profile saved successfully
+        "200": { description: Profile saved }
+
   /profile/{name}:
     get:
+      tags: [Profiles]
       operationId: getProfile
-      summary: Retrieve a saved birth profile
-      parameters:
-        - name: name
-          in: path
-          required: true
-          schema:
-            type: string
+      summary: Retrieve a saved profile
+      parameters: [{ name: name, in: path, required: true, schema: { type: string } }]
       responses:
-        "200":
-          description: Saved profile data
+        "200": { description: Profile data }
+        "404": { description: Profile not found }
+
   /geocode:
     get:
+      tags: [Utility]
       operationId: geocodeCity
-      summary: Retrieve latitude and longitude for a city name
-      parameters:
-        - name: city
-          in: query
-          required: true
-          schema:
-            type: string
+      summary: Geocode a city
+      description: Convert city name to latitude, longitude, and timezone.
+      parameters: [{ name: city, in: query, required: true, schema: { type: string } }]
       responses:
-        "200":
-          description: Geocoding data
+        "200": { description: Geocoding data }
+        "404": { description: City not found }
+
   /reference/{system}:
     get:
+      tags: [Utility]
       operationId: getReference
-      summary: Retrieve the astrology interpretation guidelines for a given system
+      summary: Get interpretation guidelines
+      description: Retrieve grounding rulesets for a specific astrological tradition.
       parameters:
         - name: system
           in: path
           required: true
           schema:
             type: string
-            enum: [bazi, consultation, health, specialty-systems, synastry-and-timing, vedic, western]
+            enum: [bazi, consultation, health, specialty-systems, synastry-and-timing, tibetan, vedic, western]
       responses:
-        "200":
-          description: Markdown content of the reference guide
+        "200": { description: Reference content }
+
+  /health:
+    get:
+      tags: [Utility]
+      operationId: healthCheck
+      summary: Health check
+      security: []
+      responses:
+        "200": { description: Server status }
+
+  /pricing:
+    get:
+      tags: [Utility]
+      operationId: getPricing
+      summary: Tool pricing
+      description: List per-call prices for all tools.
+      security: []
+      responses:
+        "200": { description: Pricing table }

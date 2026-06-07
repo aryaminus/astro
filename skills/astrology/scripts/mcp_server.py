@@ -173,6 +173,280 @@ def geocode_city(city_name: str) -> str:
     except Exception as e:
         return f"Error geocoding city: {e}"
 
+@mcp.tool()
+def get_solar_return(
+    year: int, month: int, day: int, hour: int = 12, minute: int = 0,
+    lat: float = 0.0, lng: float = 0.0, tz: str = "UTC",
+    target_year: int = None
+) -> str:
+    """
+    Calculate a solar return chart — the moment the Sun returns to its natal position.
+    Essential for annual birthday forecasts and year-ahead readings.
+    """
+    params = {"year": year, "month": month, "day": day, "hour": hour, "minute": minute,
+              "lat": lat, "lng": lng, "tz": tz, "time_known": True,
+              "systems": ["western"], "mode": "solar_return"}
+    if target_year:
+        params["target_year"] = target_year
+    try:
+        result = astro_engine.calculate_full_profile(params)
+        return json.dumps(result, indent=2, default=str)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+@mcp.tool()
+def get_lunar_return(
+    year: int, month: int, day: int, hour: int = 12, minute: int = 0,
+    lat: float = 0.0, lng: float = 0.0, tz: str = "UTC",
+    target_year: int = None, target_month: int = None
+) -> str:
+    """
+    Calculate a lunar return chart — the moment the Moon returns to its natal position.
+    Used for monthly forecasts and emotional cycle tracking.
+    """
+    params = {"year": year, "month": month, "day": day, "hour": hour, "minute": minute,
+              "lat": lat, "lng": lng, "tz": tz, "time_known": True,
+              "systems": ["western"], "mode": "lunar_return"}
+    if target_year:
+        params["target_year"] = target_year
+    if target_month:
+        params["target_month"] = target_month
+    try:
+        result = astro_engine.calculate_full_profile(params)
+        return json.dumps(result, indent=2, default=str)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+@mcp.tool()
+def get_compatibility(
+    year: int, month: int, day: int, hour: int = 12, minute: int = 0,
+    lat: float = 0.0, lng: float = 0.0, tz: str = "UTC",
+    partner_year: int = None, partner_month: int = None, partner_day: int = None,
+    partner_hour: int = 12, partner_minute: int = 0,
+    partner_lat: float = 0.0, partner_lng: float = 0.0, partner_tz: str = "UTC"
+) -> str:
+    """
+    Calculate detailed compatibility scoring (0-100) between two people.
+    Returns overall score plus romantic, emotional, intellectual, physical, and spiritual subscores.
+    """
+    params = {"year": year, "month": month, "day": day, "hour": hour, "minute": minute,
+              "lat": lat, "lng": lng, "tz": tz, "time_known": True,
+              "systems": ["western"], "mode": "compatibility",
+              "partner": {"year": partner_year, "month": partner_month, "day": partner_day,
+                          "hour": partner_hour, "minute": partner_minute,
+                          "lat": partner_lat, "lng": partner_lng, "tz": partner_tz,
+                          "time_known": True}}
+    try:
+        result = astro_engine.calculate_full_profile(params)
+        return json.dumps(result, indent=2, default=str)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+@mcp.tool()
+def get_navamsa(
+    year: int, month: int, day: int, hour: int = 12, minute: int = 0,
+    lat: float = 0.0, lng: float = 0.0, tz: str = "UTC"
+) -> str:
+    """
+    Calculate the Vedic Navamsa (D9) divisional chart.
+    Reveals soul-level strengths, relationship potential, and vargottama status.
+    """
+    params = {"year": year, "month": month, "day": day, "hour": hour, "minute": minute,
+              "lat": lat, "lng": lng, "tz": tz, "time_known": True,
+              "systems": ["vedic"], "mode": "navamsa"}
+    try:
+        result = astro_engine.calculate_full_profile(params)
+        return json.dumps(result, indent=2, default=str)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+@mcp.tool()
+def get_panchang(
+    year: int, month: int, day: int, hour: int = 12, minute: int = 0,
+    lat: float = 0.0, lng: float = 0.0, tz: str = "UTC"
+) -> str:
+    """
+    Calculate complete Vedic Panchang elements: Tithi, Nakshatra, Yoga, and Karana.
+    Essential for muhurta (auspicious timing) and daily Vedic guidance.
+    """
+    params = {"year": year, "month": month, "day": day, "hour": hour, "minute": minute,
+              "lat": lat, "lng": lng, "tz": tz, "time_known": True,
+              "systems": ["vedic"], "mode": "panchang"}
+    try:
+        result = astro_engine.calculate_full_profile(params)
+        return json.dumps(result, indent=2, default=str)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+@mcp.tool()
+def get_moon_phase(
+    year: int = None, month: int = None, day: int = None,
+    hour: int = 12, minute: int = 0, tz: str = "UTC"
+) -> str:
+    """
+    Get the current moon phase (or for a specific date): name, illumination %, age,
+    and the next 4 upcoming lunar phase events (new moons, full moons, quarters).
+    """
+    from datetime import datetime as dt
+    if year and month and day:
+        params = {"year": year, "month": month, "day": day, "hour": hour, "minute": minute,
+                  "lat": 0, "lng": 0, "tz": tz, "time_known": True,
+                  "systems": ["western"], "mode": "moon_phase"}
+    else:
+        now = dt.utcnow()
+        params = {"year": now.year, "month": now.month, "day": now.day,
+                  "hour": now.hour, "minute": now.minute,
+                  "lat": 0, "lng": 0, "tz": "UTC", "time_known": True,
+                  "systems": ["western"], "mode": "moon_phase"}
+    try:
+        result = astro_engine.calculate_full_profile(params)
+        return json.dumps(result, indent=2, default=str)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+@mcp.tool()
+def get_numerology(
+    year: int, month: int, day: int, full_name: str = ""
+) -> str:
+    """
+    Calculate core numerology: Life Path number, Personal Year, and
+    (if name provided) Expression and Soul Urge numbers.
+    Master numbers 11/22/33 are preserved (not reduced).
+    """
+    params = {"year": year, "month": month, "day": day,
+              "hour": 12, "minute": 0, "lat": 0, "lng": 0, "tz": "UTC",
+              "time_known": False, "systems": ["western"], "mode": "numerology"}
+    if full_name:
+        params["full_name"] = full_name
+    try:
+        result = astro_engine.calculate_full_profile(params)
+        return json.dumps(result, indent=2, default=str)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+@mcp.tool()
+def get_composite_chart(
+    year: int, month: int, day: int, hour: int = 12, minute: int = 0,
+    lat: float = 0.0, lng: float = 0.0, tz: str = "UTC",
+    partner_year: int = None, partner_month: int = None, partner_day: int = None,
+    partner_hour: int = 12, partner_minute: int = 0,
+    partner_lat: float = 0.0, partner_lng: float = 0.0, partner_tz: str = "UTC"
+) -> str:
+    """
+    Calculate a midpoint composite chart — the relationship as a third entity.
+    Each planet is the midpoint of its positions in both charts.
+    """
+    params = {"year": year, "month": month, "day": day, "hour": hour, "minute": minute,
+              "lat": lat, "lng": lng, "tz": tz, "time_known": True,
+              "systems": ["western"], "mode": "composite",
+              "partner": {"year": partner_year, "month": partner_month, "day": partner_day,
+                          "hour": partner_hour, "minute": partner_minute,
+                          "lat": partner_lat, "lng": partner_lng, "tz": partner_tz,
+                          "time_known": True}}
+    try:
+        result = astro_engine.calculate_full_profile(params)
+        return json.dumps(result, indent=2, default=str)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+@mcp.tool()
+def get_progressions(
+    year: int, month: int, day: int, hour: int = 12, minute: int = 0,
+    lat: float = 0.0, lng: float = 0.0, tz: str = "UTC",
+    target_age: int = 30
+) -> str:
+    """
+    Calculate secondary progressions (1 day = 1 year of life).
+    Reveals evolving identity, emotional needs, and life direction.
+    """
+    params = {"year": year, "month": month, "day": day, "hour": hour, "minute": minute,
+              "lat": lat, "lng": lng, "tz": tz, "time_known": True,
+              "systems": ["western"], "mode": "progressions", "target_age": target_age}
+    try:
+        result = astro_engine.calculate_full_profile(params)
+        return json.dumps(result, indent=2, default=str)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+@mcp.tool()
+def get_planetary_return(
+    year: int, month: int, day: int, hour: int = 12, minute: int = 0,
+    lat: float = 0.0, lng: float = 0.0, tz: str = "UTC",
+    planet: str = "Jupiter", target_year: int = None
+) -> str:
+    """
+    Calculate a planetary return chart for any planet (Mercury, Venus, Mars, Jupiter, Saturn, etc.).
+    The moment the planet returns to its natal position, beginning a new cycle.
+    """
+    params = {"year": year, "month": month, "day": day, "hour": hour, "minute": minute,
+              "lat": lat, "lng": lng, "tz": tz, "time_known": True,
+              "systems": ["western"], "mode": "planetary_return",
+              "planet": planet, "target_year": target_year or year + 1}
+    try:
+        result = astro_engine.calculate_full_profile(params)
+        return json.dumps(result, indent=2, default=str)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+@mcp.tool()
+def get_varga(
+    year: int, month: int, day: int, hour: int = 12, minute: int = 0,
+    lat: float = 0.0, lng: float = 0.0, tz: str = "UTC",
+    varga: str = "D10"
+) -> str:
+    """
+    Calculate a Vedic divisional chart (Varga). D2=Hora (wealth), D3=Drekkana (siblings),
+    D7=Saptamsa (children), D9=Navamsa (marriage), D10=Dasamsa (career), D12=Dwadashamsa (parents).
+    Supports D2 through D60.
+    """
+    params = {"year": year, "month": month, "day": day, "hour": hour, "minute": minute,
+              "lat": lat, "lng": lng, "tz": tz, "time_known": True,
+              "systems": ["vedic"], "mode": "varga", "varga": varga}
+    try:
+        result = astro_engine.calculate_full_profile(params)
+        return json.dumps(result, indent=2, default=str)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+@mcp.tool()
+def get_planetary_hours(
+    year: int, month: int, day: int, hour: int = 12, minute: int = 0,
+    lat: float = 0.0, lng: float = 0.0, tz: str = "UTC"
+) -> str:
+    """
+    Calculate Chaldean planetary hours for a given day and location.
+    Each hour is ruled by a planet in sequence — useful for electional timing.
+    """
+    params = {"year": year, "month": month, "day": day, "hour": hour, "minute": minute,
+              "lat": lat, "lng": lng, "tz": tz, "time_known": True,
+              "systems": ["western"], "mode": "planetary_hours"}
+    try:
+        result = astro_engine.calculate_full_profile(params)
+        return json.dumps(result, indent=2, default=str)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+@mcp.tool()
+def get_transit_aspects(
+    year: int, month: int, day: int, hour: int = 12, minute: int = 0,
+    lat: float = 0.0, lng: float = 0.0, tz: str = "UTC",
+    transit_date: str = None
+) -> str:
+    """
+    Get detailed transit-to-natal aspects with impact ratings (high/moderate/low).
+    Shows which transiting planets are affecting which natal planets and how strongly.
+    Defaults to today's transits.
+    """
+    params = {"year": year, "month": month, "day": day, "hour": hour, "minute": minute,
+              "lat": lat, "lng": lng, "tz": tz, "time_known": True,
+              "systems": ["western"], "mode": "transit_natal_aspects",
+              "transit_date": transit_date or ""}
+    try:
+        result = astro_engine.calculate_full_profile(params)
+        return json.dumps(result, indent=2, default=str)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
 if __name__ == "__main__":
     # Ensure sys.stdout is cleanly reserved for the MCP protocol when running locally.
     # To monetize and host this as an API, change transport to "sse" or run via FastMCP CLI:

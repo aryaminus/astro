@@ -57,3 +57,20 @@ npx skills add . -g -y
 ## Rules
 - One-time setup: `npx skills add . -g -y` copies the skill into `~/.agents/skills/<name>/`. **Working-tree edits do NOT propagate automatically**. To sync after edits, re-run `npx skills add . -g -y`.
 - For live-edit on a dev machine, replace the install copy with a symlink to the working tree: `ln -sfn "$PWD/skills/astrology" ~/.agents/skills/astrology` (run from the repo root).
+
+## Capabilities (v2.0)
+
+### 19 Modes
+`natal` · `transit` · `synastry` · `compatibility` · `composite` · `astrocartography` · `horary` · `event` · `solar_return` · `lunar_return` · `planetary_return` · `navamsa` · `varga` (D2–D60) · `panchang` · `moon_phase` · `numerology` · `progressions` · `planetary_hours` · `transit_natal_aspects`
+
+### Auto-included in Natal
+Aspect patterns (Grand Trine, Kite, T-Square, Grand Cross, Yod, Mystic Rectangle, Stellium) · Part of Fortune · Vertex · Black Moon Lilith · Moon phase · 10 Arabic Parts · Fixed star conjunctions (23 stars) · Equal houses · Navamsa D9 · Panchang · Mangal Dosha · Kaalsarpa Dosha
+
+### 3 Traditions
+Western tropical · Vedic/Jyotisha (Lahiri sidereal) · Chinese BaZi (Four Pillars) + Tibetan/Buddhist qualitative
+
+### 18 MCP Tools
+`get_astrology_chart` · `get_astrology_reference` · `save_profile` · `get_profile` · `geocode_city` · `get_solar_return` · `get_lunar_return` · `get_compatibility` · `get_navamsa` · `get_panchang` · `get_moon_phase` · `get_numerology` · `get_composite_chart` · `get_progressions` · `get_planetary_return` · `get_varga` · `get_planetary_hours` · `get_transit_aspects`
+
+### Zero Dependencies
+Pure-Python ephemeris (stdlib only). Auto-upgrades to Swiss Ephemeris if `pyswisseph` is installed. No paid APIs.

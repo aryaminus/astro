@@ -7,29 +7,34 @@ description: >-
   with grounded classical rulesets and counsels like a real astrologer. Use for
   horoscopes, natal/birth-chart readings, kundli, zodiac signs, nakshatras,
   compatibility/synastry, daily & yearly transits, vimshottari dasha, four pillars
-  of destiny, lucky/auspicious timing, and "what do the stars say" questions about
-  love, career, money, timing, health, or life purpose.
+  of destiny, solar/lunar returns, navamsa/D9, panchang, moon phases, numerology,
+  aspect patterns (Grand Trine, Yod, T-Square), Part of Fortune, Vertex, and
+  "what do the stars say" questions about love, career, money, timing, health, or
+  life purpose.
 when_to_use: >-
   Activate whenever the user asks about astrology, their horoscope, sun/moon/rising
   sign, birth or natal chart, kundli/janma, zodiac, BaZi/Chinese astrology, feng-shui
-  elements, nakshatra, dasha, planetary transits, Saturn return, Sade Sati,
-  "Mercury retrograde", relationship compatibility, an auspicious date/muhurta,
-  "what's my luck this year", Tibetan or Buddhist astrology, Losar animal, Kalachakra,
-  Mewa, Chiron/wounded healer, or brings a love/career/money/crisis/health/purpose
-  question through the stars. Also activate for: "where should I move/live", relocation
-  or astrocartography, fertility/children questions, baby naming/Namakaran, family
-  conflict, past lives or South Node/Ketu karma, "will I have kids", "is my partner
-  cheating", corporate/startup/event charts, "is my business chart good", pet charts,
-  election or political astrology, medical astrology/surgical timing, Nadi astrology,
-  birth time rectification, evil eye or curse questions framed astrologically, Starseeds,
-  Galactic Center, Sirius/Pleiades, Black Moon Lilith, Pallas, planetary magic/talismans,
+  elements, nakshatra, dasha, planetary transits, Saturn return, solar return,
+  lunar return, Sade Sati, "Mercury retrograde", relationship compatibility,
+  synastry, compatibility scoring, auspicious date/muhurta, "what's my luck this
+  year", Tibetan or Buddhist astrology, Losar animal, Kalachakra, Mewa,
+  Chiron/wounded healer, navamsa, D9 chart, vargottama, panchang, tithi, yoga,
+  karana, moon phase, new moon, full moon, numerology, life path number,
+  personal year, Grand Trine, T-Square, Yod, Kite, Grand Cross, stellium,
+  Part of Fortune, Vertex, fated encounters, or brings a love/career/money/crisis/
+  health/purpose question through the stars. Also activate for: relocation or
+  astrocartography, fertility/children, baby naming/Namakaran, family conflict,
+  past lives or South Node/Ketu karma, "will I have kids", corporate/startup/event
+  charts, pet charts, election or political astrology, medical astrology/surgical
+  timing, Nadi astrology, birth time rectification, evil eye or curse questions,
+  Starseeds, Galactic Center, Black Moon Lilith, Pallas, planetary magic/talismans,
   lottery/sports betting prediction, dream interpretation via astrology, and any
   question beginning "what do the stars say about…"
 allowed-tools: Bash(python3 *)
 argument-hint: "[birth details, or a question like 'am I compatible with…']"
 metadata:
   author: getbamboo
-  version: "1.0"
+  version: "2.0"
   category: divination
 ---
 
@@ -99,9 +104,26 @@ Input JSON (full schema is documented at the top of the script):
 ```
 
 Other modes — set `"mode"`:
-- `"natal"` *(default)* — full chart(s) per `systems`.
+- `"natal"` *(default)* — full chart(s) per `systems`. Now includes aspect patterns (Grand Trine, T-Square, Yod, Mystic Rectangle, etc.), Part of Fortune, Vertex, Black Moon Lilith, moon phase, 10 Arabic Parts, fixed star conjunctions, equal houses, navamsa D9, panchang, Mangal Dosha, and Kaalsarpa Dosha automatically.
 - `"transit"` + `"transit_date":"YYYY-MM-DD"` — what the current sky is doing to the natal chart (for "why is my life like this right now?", yearly forecasts, Mercury-retrograde questions). Defaults to today if no date.
-- `"synastry"` + `"partner":{…same fields…}` — relationship compatibility between two charts.
+- `"synastry"` + `"partner":{…same fields…}` — relationship comparison between two charts.
+- `"compatibility"` + `"partner":{…same fields…}` — detailed 0-100 compatibility scoring with romantic/emotional/intellectual/physical/spiritual subscores plus synastry aspects.
+- `"composite"` + `"partner":{…same fields…}` — midpoint composite chart representing the relationship as a third entity.
+- `"solar_return"` + `"target_year":2026` — annual solar return chart (the moment the Sun returns to its natal position). Powerful for birthday forecasts.
+- `"lunar_return"` + `"target_year":2026` + `"target_month":6` — monthly lunar return chart (the moment the Moon returns to its natal position).
+- `"planetary_return"` + `"planet":"Jupiter"` + `"target_year":2026` — return chart for any planet (Mercury, Venus, Mars, Jupiter, Saturn, etc.).
+- `"navamsa"` — Vedic D9 divisional chart with vargottama detection. Reveals soul-level strengths and relationship potential.
+- `"varga"` + `"varga":"D10"` — any Vedic divisional chart (D2 Hora, D3 Drekkana, D7 Saptamsa, D10 Dasamsa, D12 Dwadashamsa, D16–D60).
+- `"panchang"` — complete Vedic panchang: Tithi, Nakshatra, Yoga (27 solar yogas), Karana (11 karanas) with nature classifications.
+- `"moon_phase"` — current lunar phase, illumination %, age, and upcoming 4 phase events (new/full moons, quarters).
+- `"numerology"` — Life Path number, Personal Year, and (with `"full_name"`) Expression and Soul Urge numbers. Master numbers (11/22/33) preserved.
+- `"progressions"` + `"target_age":35` — secondary progressions (1 day = 1 year). The progressed chart reveals evolving identity, emotional needs, and life direction.
+- `"planetary_hours"` — Chaldean planetary hours for the day. Day/night hours ruled by planets in sequence — useful for electional timing.
+- `"transit_natal_aspects"` + `"transit_date":"2026-06-01"` — detailed listing of which transiting planets aspect which natal planets, with impact ratings and applying/separating status.
+
+Extra natal options:
+- `"include_numerology": true` + optional `"full_name"` — adds a numerology block to the default natal output.
+- `"house_system": "equal"` — uses equal house system (30° from Ascendant) instead of whole-sign.
 
 Pick the systems that fit the request. Western for psychology/personality; Vedic for
 timing, karma, and life-events (dashas); BaZi for elemental balance, luck cycles, and
@@ -124,8 +146,28 @@ Read the chart through the **reference rulesets**, not from vibes. Use the `get_
 | Natal / personality / Big Three | `western.md` |
 | Karma, dasha, "when will X happen", Kundli | `vedic.md` |
 | BaZi, Chinese astrology, luck pillars | `bazi.md` |
-| Compatibility / synastry | `synastry-and-timing.md` |
+| Compatibility / synastry / love match | `synastry-and-timing.md` |
+| Compatibility score / "how compatible are we" | `synastry-and-timing.md` + use mode `"compatibility"` |
 | Transits, forecasting, "why is life like this now" | `synastry-and-timing.md` + `vedic.md` |
+| Solar return / birthday forecast / year ahead | `synastry-and-timing.md` + use mode `"solar_return"` |
+| Lunar return / monthly forecast | `synastry-and-timing.md` + use mode `"lunar_return"` |
+| Navamsa / D9 / soul chart / marriage potential | `vedic.md` + use mode `"navamsa"` |
+| Panchang / tithi / auspicious day | `vedic.md` + use mode `"panchang"` |
+| Moon phase / new moon / full moon timing | `synastry-and-timing.md` + use mode `"moon_phase"` |
+| Numerology / life path number / personal year | Use mode `"numerology"` |
+| Aspect patterns / Grand Trine / Yod / T-Square / Mystic Rectangle | `western.md` (natal output includes `aspect_patterns`) |
+| Part of Fortune / Vertex / fated encounters | `western.md` (natal output includes `special_points`) |
+| Arabic Parts / Lots / Pars Spiritus / Pars Amoris | `western.md` (natal output includes `arabic_parts`) |
+| Fixed stars / Regulus / Spica / Sirius / Algol | `western.md` (natal output includes `fixed_star_conjunctions`) |
+| Black Moon Lilith / shadow self | `western.md` (natal output includes `special_points.black_moon_lilith`) |
+| Mangal Dosha / Kuja Dosha / Mars Dosha | `vedic.md` (natal output includes `mangal_dosha`) |
+| Kaalsarpa Dosha / Rahu-Ketu axis | `vedic.md` (natal output includes `kaalsarpa_dosha`) |
+| Divisional charts / D2 Hora / D3 Drekkana / D10 Dasamsa | `vedic.md` + use mode `"varga"` |
+| Composite chart / relationship chart | `synastry-and-timing.md` + use mode `"composite"` |
+| Progressed chart / secondary progressions | `synastry-and-timing.md` + use mode `"progressions"` |
+| Planetary return / Jupiter return / Saturn return | `synastry-and-timing.md` + use mode `"planetary_return"` |
+| Planetary hours / Chaldean hours / electional timing | `specialty-systems.md §3` + use mode `"planetary_hours"` |
+| Transit-to-natal / "what's affecting me now" | `synastry-and-timing.md` + use mode `"transit_natal_aspects"` |
 | Auspicious date / quick Muhurta guide | `synastry-and-timing.md §C` |
 | Electional astrology (deep) | `specialty-systems.md §3` |
 | Horary / Prasna / "will X happen" | `specialty-systems.md §2` |
