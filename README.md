@@ -55,6 +55,7 @@ npx skills add aryaminus/astro -g
 | **Codex, Cursor, Copilot, Gemini CLI, 50+ hosts** | `npx skills add aryaminus/astro -g` | `npx skills update astrology -g` |
 | **claude.ai** | [Download `.skill`](https://github.com/aryaminus/astro/releases/latest/download/astrology.skill) → Settings → Capabilities → Skills → + | Re-download |
 | **ChatGPT** | Copy [`openapi.yaml`](openapi.yaml) into Custom GPT → Actions → Import | Manual |
+| **Poke** (Messages/WhatsApp/Telegram) | [Add as MCP integration](https://poke.com/integrations/new) → URL: `https://your-render-url.onrender.com/sse` | — |
 | **Claude Desktop / Zed** | `npx @smithery/cli install astrology --client claude` | Re-run |
 | **Manual / dev** | `git clone https://github.com/aryaminus/astro.git && ln -sfn "$(pwd)/astro/skills/astrology" ~/.agents/skills/astrology` | `git pull` |
 

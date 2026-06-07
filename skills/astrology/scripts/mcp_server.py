@@ -477,10 +477,10 @@ if __name__ == "__main__":
     if transport == "streamable-http":
         transport = "http"
     logging.basicConfig(level=logging.INFO)
+    _host = os.environ.get("ASTRO_MCP_HOST", "0.0.0.0")
+    _port = int(os.environ.get("ASTRO_MCP_PORT", "8765"))
     logging.getLogger("astrology-mcp").info(
         "Starting Astrology MCP server (transport=%s, host=%s, port=%s)",
-        transport,
-        os.environ.get("ASTRO_MCP_HOST", "0.0.0.0"),
-        os.environ.get("ASTRO_MCP_PORT", "8765"),
+        transport, _host, _port,
     )
-    mcp.run(transport=transport)
+    mcp.run(transport=transport, host=_host, port=_port)

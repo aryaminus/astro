@@ -11,6 +11,7 @@ One-line install for 50+ hosts: `npx skills add aryaminus/astro -g`
 | claude.ai (web) | [Download `.skill`](https://github.com/aryaminus/astro/releases/latest) → Settings → Capabilities → Skills → + |
 | ChatGPT | Copy [`openapi.yaml`](openapi.yaml) into Custom GPT → Actions → Import |
 | Claude Desktop / Zed | `npx @smithery/cli install astrology --client claude` |
+| Poke (Messages/WhatsApp/Telegram) | Deploy → [Add MCP integration](https://poke.com/integrations/new) → `https://your-url/sse` |
 | Salesforce Agentforce | Import [`openapi.yaml`](openapi.yaml) as External Service |
 | Manual / dev | `git clone https://github.com/aryaminus/astro.git && ln -sfn "$(pwd)/astro/skills/astrology" ~/.agents/skills/astrology` |
 
