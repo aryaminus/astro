@@ -1,0 +1,17 @@
+# Astro Agent Rules
+
+You are an AI agent operating in the `astro` repository. Follow these strict rules to ensure the integrity of the astrology engine and ecosystem integrations:
+
+## 1. Core Architecture (Zero-Dependency)
+- The heart of the project is `skills/astrology/scripts/astro_engine.py`.
+- **CRITICAL:** Do NOT introduce external dependencies (e.g., `pandas`, `numpy`, `swisseph`, `flatlib`) to the core engine. It uses pure Python math to calculate planetary ephemeris deterministically. 
+
+## 2. Integrations & Modifying Code
+- If you modify `astro_engine.py`, you must ensure that its core output (`calculate_full_profile`) remains compatible with the REST API (`api.py`) and the MCP wrapper (`mcp_server.py`).
+- The `mcp` SDK and `fastapi` are ONLY allowed as wrappers in their respective files (`api.py` and `mcp_server.py`). They must not be imported into the core engine.
+
+## 3. Marketplace & Deployments
+- This skill is universally deployed. If you add a new astrology parameter (e.g., House Systems), you must update `openapi.yaml` to reflect the new input parameter.
+- See `AGENTS.md` for information on how this skill is distributed across OpenClaw, Cursor, Claude Code, and Smithery.
+
+@AGENTS.md

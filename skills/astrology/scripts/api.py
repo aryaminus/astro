@@ -47,7 +47,7 @@ async def generate_chart(request: ChartRequest):
     Generate an astrological chart based on the provided inputs.
     Requires a valid API key in the Authorization header if ASTRO_API_KEY is configured.
     """
-    params = request.dict(exclude_none=True)
+    params = request.model_dump(exclude_none=True)
     try:
         # Call the core programmatic engine
         result = astro_engine.calculate_full_profile(params)

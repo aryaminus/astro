@@ -1,0 +1,29 @@
+# Astro Engine
+
+> A deterministic, multi-tradition astrology ephemeris engine designed for AI Agents and LLMs.
+
+## Overview
+Astro is a zero-dependency Python library that calculates mathematically real astrological charts (Western tropical, Vedic/Jyotish sidereal, and Chinese BaZi) based on NASA JPL approximations. It decouples calculation from interpretation, providing LLMs with trustworthy celestial data to prevent hallucinations.
+
+## Usage for AI Agents
+
+Astro is universally deployable across the AI ecosystem:
+
+1. **MCP (Model Context Protocol):**
+   - Use `skills/astrology/scripts/mcp_server.py` to expose Astro as an MCP tool.
+   - Run via FastMCP: `fastmcp run skills/astrology/scripts/mcp_server.py:mcp`
+
+2. **OpenAPI / Custom GPTs / Coze:**
+   - See `openapi.yaml` for the standard REST schema.
+   - A monetization-ready FastAPI server is available at `skills/astrology/scripts/api.py`.
+
+3. **Agent Skills (OpenClaw, Cursor, Codex):**
+   - Install via CLI: `npx skills add aryaminus/astro -g`
+   - See `.agents/plugins/marketplace.json` and `skills/astrology/SKILL.md`.
+
+## Core Logic
+- `astro_engine.py`: Contains the pure math engine. Do not add external dependencies like pandas or numpy here.
+- Outputs are strictly JSON formatting the celestial bodies, houses, aspects, dignities, and dashas.
+
+## Documentation
+For complete installation and marketplace distribution guidelines, refer to `AGENTS.md` and `README.md`.
