@@ -22,7 +22,11 @@ npx skills add aryaminus/astro -g
 (`-g` installs globally for your user, available across all projects. Drop it to scope per-project.)
 
 ### Claude Desktop, Cursor, Zed, Devin (MCP Protocol)
-Configure your MCP client to spawn the server:
+You can install via Smithery (the official MCP registry):
+```bash
+npx @smithery/cli install astrology --client claude
+```
+Or configure your MCP client manually to spawn the server:
 ```json
 {
   "mcpServers": {

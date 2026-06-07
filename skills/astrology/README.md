@@ -26,7 +26,11 @@ npx skills add aryaminus/astro -g
 (`-g` installs globally for your user. Drop it to scope per-project.)
 
 **Claude Desktop, Cursor, Zed, Devin (MCP Protocol):**
-Requires `pip install mcp`. Configure your MCP host:
+Requires `pip install mcp`. You can install automatically via Smithery:
+```bash
+npx @smithery/cli install astrology --client claude
+```
+Or configure your MCP host manually:
 ```json
 {
   "mcpServers": {

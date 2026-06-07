@@ -1,0 +1,10 @@
+startCommand:
+  type: stdio
+configSchema:
+  type: object
+  properties: {}
+commandFunction: |-
+  () => ({
+    command: "python3",
+    args: ["skills/astrology/scripts/mcp_server.py"]
+  })
