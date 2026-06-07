@@ -19,11 +19,15 @@ and counsel a calculator can't.
 /plugin install astrology
 ```
 
-**Codex, Cursor, Copilot, Gemini CLI, or any of 50+ [Agent Skills](https://agentskills.io) hosts:**
+**OpenClaw, Codex, Cursor, Copilot, Gemini CLI, or any of 50+ [Agent Skills](https://agentskills.io) hosts:**
 ```
 npx skills add aryaminus/astro -g
 ```
 (`-g` installs globally for your user. Drop it to scope per-project.)
+
+**Enterprise Frameworks (CrewAI, LangGraph, Manus AI, Salesforce Agentforce):**
+- *CrewAI / LangGraph / Manus AI:* Load the server natively into your multi-agent codebases using `langchain-mcp-adapters`.
+- *Salesforce Agentforce:* Import the `openapi.yaml` directly as an External Service to bind it to your CRM agents.
 
 **Claude Desktop, Cursor, Zed, Devin (MCP Protocol):**
 Requires `pip install mcp`. You can install automatically via Smithery:

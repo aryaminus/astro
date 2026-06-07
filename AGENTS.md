@@ -15,11 +15,15 @@ Agent Skills package for trustworthy multi-tradition astrology. Installable acro
 /plugin install astrology
 ```
 
-### Agent Skills hosts (Codex, Cursor, Gemini, etc.)
+### OpenClaw, Codex, Cursor, Gemini & 50+ Agent Skills Hosts
 ```
 npx skills add aryaminus/astro -g
 ```
 (`-g` installs globally for your user, available across all projects. Drop it to scope per-project.)
+
+### Frameworks (CrewAI, LangGraph, Manus AI, Salesforce Agentforce)
+* **CrewAI / LangGraph / Manus AI:** Use the `langchain-mcp-adapters` package to load the MCP server natively into your multi-agent teams.
+* **Salesforce Agentforce:** Import the `openapi.yaml` specification directly into Salesforce as an External Service to bind the astrology API to your CRM agents.
 
 ### Claude Desktop, Cursor, Zed, Devin (MCP Protocol)
 You can install via Smithery (the official MCP registry):
