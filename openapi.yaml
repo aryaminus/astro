@@ -7,7 +7,7 @@ info:
     Zero hallucinated positions. Includes aspect patterns, Arabic Parts, fixed stars, dignities,
     Black Moon Lilith, Mangal Dosha, Kaalsarpa Dosha, composite charts, progressions,
     planetary returns, divisional charts (D2-D60), planetary hours, and numerology.
-  version: 2.4.0
+  version: 2.5.0
   contact:
     name: Astrology API Support
     url: https://github.com/aryaminus/astro

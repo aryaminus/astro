@@ -11,7 +11,7 @@
     {
       "name": "astrology",
       "description": "Trustworthy multi-tradition astrology. 19 modes, 3 traditions, zero deps. Computes mathematically real charts from birth data via a deterministic ephemeris engine.",
-      "version": "2.4.0",
+      "version": "2.5.0",
       "author": {
         "name": "aryaminus"
       },

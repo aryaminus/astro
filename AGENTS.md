@@ -67,7 +67,7 @@ ln -sfn "$PWD/skills/astrology" ~/.agents/skills/astrology
 
 | Registry | Status | URL |
 |----------|--------|-----|
-| Smithery | Listed | [smithery.ai](https://smithery.ai) (search "astrology") |
+| Smithery | Listed | [smithery.ai/servers/@aryaminus/astrology](https://smithery.ai/servers/@aryaminus/astrology) |
 | Official MCP Registry | `server.json` ready | [registry.modelcontextprotocol.io](https://registry.modelcontextprotocol.io) |
 | Glama.ai | Auto-indexes GitHub | [glama.ai/mcp/servers](https://glama.ai/mcp/servers) |
 | PulseMCP | Auto-aggregates official registry | [pulsemcp.com](https://www.pulsemcp.com) |

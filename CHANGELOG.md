@@ -14,6 +14,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Separate `astro-mcp` Render service (MCP is now mounted into the main API).
 
+## [2.5.0] - 2026-06-07
+
+### Added
+- **Smithery listing live** — [@aryaminus/astrology](https://smithery.ai/servers/@aryaminus/astrology) with gateway URL `https://astrology--aryaminus.run.tools`.
+- **Streamable HTTP MCP endpoint** at `/streamable-mcp` for Smithery/registry scanning.
+- CI excludes MCP/infrastructure routes from OpenAPI parity check.
+
+### Fixed
+- Duplicate `description` key in `openapi.yaml` servers section.
+- CI `.skill` validation uses `unzip` instead of `tar` (ZIP format since v2.1.3).
+
 ## [2.4.0] - 2026-06-07
 
 ### Added
