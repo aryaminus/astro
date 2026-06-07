@@ -72,10 +72,7 @@ The engine needs, at minimum: **date of birth**. For a full reading it wants:
 | Timezone | Correct UTC conversion | Infer from place; pass IANA name (e.g. `Asia/Kathmandu`) |
 | Gender | BaZi luck-pillar direction only | Optional; omit if unknown |
 
-**Check memory first.** If a birth profile was saved (see step 6), recall it instead
-of re-asking. If the user gives a city, *you* convert it to lat/lng and the IANA
-timezone — don't make them look it up. Ask only for what you genuinely lack, and ask
-in one friendly batch, not an interrogation.
+**Check memory first.** Use `get_profile` (if available via MCP/REST) to recall a saved profile instead of re-asking. If the user gives a city, use `geocode_city` to securely convert it to lat/lng and timezone without needing to hallucinate coordinates. Ask only for what you genuinely lack, and ask in one friendly batch, not an interrogation.
 
 If the user just wants a quick "what's my sign" answer, the date alone is enough — run
 the engine in `western` mode and keep it light. Scale depth to what they asked for.
@@ -120,8 +117,7 @@ change needed.
 
 ### 3 — Ground the interpretation
 
-Read the chart through the **reference rulesets**, not from vibes. Load the file(s)
-matching the question type:
+Read the chart through the **reference rulesets**, not from vibes. Use the `get_astrology_reference(system)` tool (if available) or read the markdown files directly to load the interpretation guidelines matching the question type:
 
 | Question type | Load |
 | --- | --- |
@@ -204,11 +200,7 @@ not just the planets.
 
 ### 6 — Remember
 
-After a real reading, offer to save the profile so future readings are instant and
-consistent. Write a memory file (type `project`) with the birth data and the computed
-Big Three / lagna / Day Master, using the shape in
-**[assets/profile-template.md](assets/profile-template.md)**, and add the one-line
-pointer to `MEMORY.md`. Never save someone else's birth data without the user asking.
+After a real reading, offer to save the profile so future readings are instant and consistent. Use the `save_profile` tool to persist the exact birth data to `~/.astro_profiles.json`. If the tool is not available, ask the user to manually write down the Big Three / lagna / Day Master. Never save someone else's birth data without the user asking.
 
 ---
 

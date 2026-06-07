@@ -104,6 +104,48 @@ async def load_profile(name: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/geocode", dependencies=[Depends(get_api_key)])
+async def geocode(city: str):
+    """Retrieve latitude and longitude for a city name."""
+    import urllib.request, json, urllib.parse
+    query = urllib.parse.quote(city)
+    url = f"https://geocoding-api.open-meteo.com/v1/search?name={query}&count=1&format=json"
+    try:
+        req = urllib.request.Request(url, headers={'User-Agent': 'Astro-API'})
+        with urllib.request.urlopen(req) as response:
+            data = json.loads(response.read().decode())
+            if not data.get("results"):
+                raise HTTPException(status_code=404, detail=f"City '{city}' not found.")
+            res = data["results"][0]
+            return {
+                "city": res.get("name"),
+                "country": res.get("country"),
+                "lat": res.get("latitude"),
+                "lng": res.get("longitude"),
+                "timezone": res.get("timezone")
+            }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/reference/{system}", dependencies=[Depends(get_api_key)])
+async def get_reference(system: str):
+    """Retrieve the astrology interpretation guidelines for a given system."""
+    import os
+    # system should be one of the files in references/ without the .md extension
+    allowed = ["bazi", "consultation", "health", "specialty-systems", "synastry-and-timing", "vedic", "western"]
+    if system not in allowed:
+        raise HTTPException(status_code=400, detail=f"System must be one of {allowed}")
+    
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    ref_path = os.path.join(script_dir, "..", "references", f"{system}.md")
+    try:
+        with open(ref_path, "r") as f:
+            return {"content": f.read()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error reading reference: {e}")
+
 if __name__ == "__main__":
     import uvicorn
     # Run the server locally

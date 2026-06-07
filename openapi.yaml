@@ -105,3 +105,30 @@ paths:
       responses:
         "200":
           description: Saved profile data
+  /geocode:
+    get:
+      operationId: geocodeCity
+      summary: Retrieve latitude and longitude for a city name
+      parameters:
+        - name: city
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Geocoding data
+  /reference/{system}:
+    get:
+      operationId: getReference
+      summary: Retrieve the astrology interpretation guidelines for a given system
+      parameters:
+        - name: system
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [bazi, consultation, health, specialty-systems, synastry-and-timing, vedic, western]
+      responses:
+        "200":
+          description: Markdown content of the reference guide
