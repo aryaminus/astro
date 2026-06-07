@@ -14,6 +14,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Separate `astro-mcp` Render service (MCP is now mounted into the main API).
 
+## [2.3.0] - 2026-06-07
+
+### Added
+- **Cloud endpoints table** in AGENTS.md — REST, MCP SSE, Swagger, Health URLs for the Render deployment.
+- **Cold start warning** documented everywhere cloud URLs appear (~30s after 15 min idle on free tier).
+- **SKILL.md cloud fallback** — engine run step now shows three paths: local engine, MCP tools, REST API.
+
+### Changed
+- All Poke/MCP SSE URLs updated from `/sse` to `/mcp/sse` (unified mount point).
+- `openapi.yaml` server URL set to actual Render instance.
+- `.skill` download instructions updated from `tar xzf` to `unzip` (ZIP format since v2.1.3).
+- `api.py` VERSION constant synced to match manifest version.
+
 ## [2.1.3] - 2026-06-07
 
 ### Fixed

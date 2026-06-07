@@ -35,7 +35,7 @@ if _SCRIPTS_DIR not in sys.path:
     sys.path.insert(0, _SCRIPTS_DIR)
 import astro_engine  # noqa: E402
 
-VERSION = "2.0.0"
+VERSION = "2.3.0"
 
 # ── Logging ──────────────────────────────────────────────────────────────────
 logging.basicConfig(

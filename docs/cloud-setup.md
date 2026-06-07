@@ -13,7 +13,7 @@ SET YOURSELF UP now using whatever you're capable of — try in this order, don'
 1. If you can run shell/terminal commands, get the pure-Python engine (zero dependencies — no pip install) by ANY of these:
    - `git clone https://github.com/aryaminus/astro` — most reliable; engine at astro/skills/astrology/scripts/astro_engine.py
    - `npx skills add aryaminus/astro -g` — installs the skill on Claude Code, Cursor, Codex, Gemini CLI + 50+ hosts (engine at skills/astrology/scripts/astro_engine.py)
-   - latest packaged release (needs only curl + tar, but requires release-CDN access — may be blocked in restricted sandboxes): `curl -L -o astrology.skill https://github.com/aryaminus/astro/releases/latest/download/astrology.skill && tar xzf astrology.skill` — engine then at scripts/astro_engine.py
+   - latest packaged release (needs only curl + unzip): `curl -L -o astrology.skill https://github.com/aryaminus/astro/releases/latest/download/astrology.skill && unzip astrology.skill` — engine then at scripts/astro_engine.py
    Then run it: `python3 <path>/astro_engine.py --json '{"year":1990,"month":6,"day":15,"hour":14,"minute":30,"lat":40.7128,"lng":-74.0060,"tz":"America/New_York"}'`. Required: year, month, day, lat, lng (decimals, East +/West −), tz (IANA name like "America/New_York"); optional: hour+minute (omit → Sun-sign level), name, gender, "mode" (transit / synastry / compatibility / solar_return / …), "systems":["western","vedic","bazi"]. Look up the user's city's lat/lng/tz yourself.
 2. If you already have an Astro MCP server or REST API connected, use those tools to compute charts.
 3. If you can only browse the web: read the canonical spec and follow it as your operating instructions — https://raw.githubusercontent.com/aryaminus/astro/main/skills/astrology/SKILL.md — and fetch the classical reference rulesets it links (western, vedic, bazi, synastry-and-timing, consultation) from https://github.com/aryaminus/astro/tree/main/skills/astrology/references
@@ -42,12 +42,12 @@ Astro runs as an MCP server that Poke connects to. You need a deployed instance 
 
 ### Deploy the MCP server
 
-One-click to Render (free tier): connect [aryaminus/astro](https://github.com/aryaminus/astro) → New → Blueprint. This gives you a public URL like `https://astro-api-xxxx.onrender.com`.
+One-click to Render (free tier): connect [aryaminus/astro](https://github.com/aryaminus/astro) → New → Blueprint. Your public URL will be `https://astro-api-xxxx.onrender.com`. The MCP SSE endpoint is at `/mcp/sse`. Free tier spins down after 15 min idle; first request takes ~30s.
 
 Or self-host:
 ```bash
 docker compose up --build
-# MCP over SSE on port 8765:
+# MCP SSE is at /mcp/sse on the API server, or standalone:
 ASTRO_MCP_TRANSPORT=sse python -m skills.astrology.scripts.mcp_server
 ```
 
@@ -56,12 +56,12 @@ ASTRO_MCP_TRANSPORT=sse python -m skills.astrology.scripts.mcp_server
 **Via web app:**
 1. Go to [poke.com/integrations/new](https://poke.com/integrations/new)
 2. Name: `Astro`
-3. MCP Server URL: `https://your-render-url.onrender.com/sse`
+3. MCP Server URL: `https://astro-api-a2rc.onrender.com/mcp/sse`
 4. Click **Create Integration**
 
 **Via CLI:**
 ```bash
-npx poke@latest mcp add https://your-render-url.onrender.com/sse -n "Astro"
+npx poke@latest mcp add https://astro-api-a2rc.onrender.com/mcp/sse -n "Astro"
 ```
 
 ### Create a Poke Recipe (shareable)

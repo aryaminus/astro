@@ -8,12 +8,23 @@ One-line install for 50+ hosts: `npx skills add aryaminus/astro -g`
 |------|---------|
 | Claude Code | `/plugin marketplace add aryaminus/astro` then `/plugin install astrology` |
 | Codex, Cursor, Copilot, Gemini CLI, 50+ hosts | `npx skills add aryaminus/astro -g` |
-| claude.ai (web) | [Download `.skill`](https://github.com/aryaminus/astro/releases/latest) → Settings → Capabilities → Skills → + |
+| claude.ai (web) | [Download `.skill`](https://github.com/aryaminus/astro/releases/latest/download/astrology.skill) → [Customize → Skills](https://claude.ai/customize/skills) → + |
 | ChatGPT | Copy [`openapi.yaml`](openapi.yaml) into Custom GPT → Actions → Import |
 | Claude Desktop / Zed | `npx @smithery/cli install astrology --client claude` |
-| Poke (Messages/WhatsApp/Telegram) | Deploy → [Add MCP integration](https://poke.com/integrations/new) → `https://your-url/sse` |
+| Poke (Messages/WhatsApp/Telegram) | Deploy → [Add MCP integration](https://poke.com/integrations/new) → `https://astro-api-a2rc.onrender.com/mcp/sse` |
 | Salesforce Agentforce | Import [`openapi.yaml`](openapi.yaml) as External Service |
 | Manual / dev | `git clone https://github.com/aryaminus/astro.git && ln -sfn "$(pwd)/astro/skills/astrology" ~/.agents/skills/astrology` |
+
+## Cloud endpoints (Render free tier)
+
+| Endpoint | URL |
+|----------|-----|
+| REST API | `https://astro-api-a2rc.onrender.com` |
+| MCP SSE | `https://astro-api-a2rc.onrender.com/mcp/sse` |
+| Swagger UI | `https://astro-api-a2rc.onrender.com/docs` |
+| Health | `https://astro-api-a2rc.onrender.com/health` |
+
+> **Cold start:** Free tier spins down after 15 min idle. First request takes ~30s; subsequent requests are fast.
 
 ## 18 MCP Tools
 
@@ -57,4 +68,4 @@ ln -sfn "$PWD/skills/astrology" ~/.agents/skills/astrology
 - **Render:** connect repo → New → Blueprint (`render.yaml` committed)
 - **Docker:** `docker compose up --build`
 - **Raw:** `uvicorn skills.astrology.scripts.api:app --host 0.0.0.0 --port 8000`
-- **MCP SSE:** `ASTRO_MCP_TRANSPORT=sse python -m skills.astrology.scripts.mcp_server`
+- **MCP SSE standalone:** `ASTRO_MCP_TRANSPORT=sse python -m skills.astrology.scripts.mcp_server`

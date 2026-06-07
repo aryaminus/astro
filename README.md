@@ -19,7 +19,7 @@ SET YOURSELF UP now using whatever you're capable of — try in this order, don'
 1. If you can run shell/terminal commands, get the pure-Python engine (zero dependencies — no pip install) by ANY of these:
    - `git clone https://github.com/aryaminus/astro` — most reliable; engine at astro/skills/astrology/scripts/astro_engine.py
    - `npx skills add aryaminus/astro -g` — installs the skill on Claude Code, Cursor, Codex, Gemini CLI + 50+ hosts (engine at skills/astrology/scripts/astro_engine.py)
-   - latest packaged release (needs only curl + tar, but requires release-CDN access — may be blocked in restricted sandboxes): `curl -L -o astrology.skill https://github.com/aryaminus/astro/releases/latest/download/astrology.skill && tar xzf astrology.skill` — engine then at scripts/astro_engine.py
+   - latest packaged release (needs only curl + unzip): `curl -L -o astrology.skill https://github.com/aryaminus/astro/releases/latest/download/astrology.skill && unzip astrology.skill` — engine then at scripts/astro_engine.py
    Then run it: `python3 <path>/astro_engine.py --json '{"year":1990,"month":6,"day":15,"hour":14,"minute":30,"lat":40.7128,"lng":-74.0060,"tz":"America/New_York"}'`. Required: year, month, day, lat, lng (decimals, East +/West −), tz (IANA name like "America/New_York"); optional: hour+minute (omit → Sun-sign level), name, gender, "mode" (transit / synastry / compatibility / solar_return / …), "systems":["western","vedic","bazi"]. Look up the user's city's lat/lng/tz yourself.
 2. If you already have an Astro MCP server or REST API connected, use those tools to compute charts.
 3. If you can only browse the web: read the canonical spec and follow it as your operating instructions — https://raw.githubusercontent.com/aryaminus/astro/main/skills/astrology/SKILL.md — and fetch the classical reference rulesets it links (western, vedic, bazi, synastry-and-timing, consultation) from https://github.com/aryaminus/astro/tree/main/skills/astrology/references
@@ -47,7 +47,7 @@ npx skills add aryaminus/astro -g
 | **Codex, Cursor, Copilot, Gemini CLI, 50+ hosts** | `npx skills add aryaminus/astro -g` | `npx skills update astrology -g` |
 | **claude.ai** | [Download `.skill`](https://github.com/aryaminus/astro/releases/latest/download/astrology.skill) → [Customize → Skills](https://claude.ai/customize/skills) → + | Re-download |
 | **ChatGPT** | Copy [`openapi.yaml`](openapi.yaml) into Custom GPT → Actions → Import | Manual |
-| **Poke** (Messages/WhatsApp/Telegram) | [Add as MCP integration](https://poke.com/integrations/new) → URL: `https://your-render-url.onrender.com/sse` | — |
+| **Poke** (Messages/WhatsApp/Telegram) | [Add as MCP integration](https://poke.com/integrations/new) → URL: `https://astro-api-a2rc.onrender.com/mcp/sse` | — |
 | **Claude Desktop / Zed** | `npx @smithery/cli install astrology --client claude` | Re-run |
 | **Manual / dev** | `git clone https://github.com/aryaminus/astro.git && ln -sfn "$(pwd)/astro/skills/astrology" ~/.agents/skills/astrology` | `git pull` |
 
@@ -107,7 +107,7 @@ astro/
 
 **Free by default.** No auth, no rate limits. Set `ASTRO_API_KEY` to gate, `ASTRO_RATE_LIMIT` to throttle.
 
-**Render (one-click, free tier):** Connect this repo → New → Blueprint. `render.yaml` provisions everything and gives you a public URL like `https://<your-app>.onrender.com`. Verify with `curl https://<your-app>.onrender.com/health`.
+**Render (one-click, free tier):** Connect this repo → New → Blueprint. `render.yaml` provisions everything. Verify with `curl https://astro-api-a2rc.onrender.com/health`. Free tier spins down after 15 min idle; first request after idle takes ~30s.
 
 **Docker:**
 ```bash
@@ -120,10 +120,12 @@ pip install -r requirements.txt
 uvicorn skills.astrology.scripts.api:app --host 0.0.0.0 --port 8000
 ```
 
-**MCP over SSE (Smithery, Cloudflare):**
+**MCP SSE (Smithery, Cloudflare, Poke):**
 ```bash
 ASTRO_MCP_TRANSPORT=sse python -m skills.astrology.scripts.mcp_server
 ```
+
+**Cloud MCP SSE (no deploy needed):** `https://astro-api-a2rc.onrender.com/mcp/sse` — free Render instance. ~30s cold start.
 
 Env vars and operational endpoints documented in [`AGENTS.md`](AGENTS.md).
 

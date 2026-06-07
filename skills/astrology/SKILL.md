@@ -34,7 +34,7 @@ allowed-tools: Bash(python3 *)
 argument-hint: "[birth details, or a question like 'am I compatible with…']"
 metadata:
   author: getbamboo
-  version: "2.2.0"
+  version: "2.3.0"
   category: divination
 ---
 
@@ -84,10 +84,25 @@ the engine in `western` mode and keep it light. Scale depth to what they asked f
 
 ### 2 — Run the engine
 
+**Local (preferred — zero latency):**
+
 ```bash
 SKILL_DIR="<absolute path of the directory containing the SKILL.md you just Read>"
 python3 "${SKILL_DIR}/scripts/astro_engine.py" --json '<birth_data_json>'
 ```
+
+**Cloud MCP (if local engine unavailable):**
+
+MCP tools (`get_astrology_chart`, `get_solar_return`, etc.) are available if an Astro MCP server is connected. Use those tool calls instead of running the engine locally.
+
+**Cloud REST (if neither local nor MCP available):**
+
+```
+POST https://astro-api-a2rc.onrender.com/chart/natal
+Content-Type: application/json
+```
+
+The cloud instance runs on Render free tier — expect ~30s cold start on first request after idle. Subsequent requests are fast.
 
 Input JSON (full schema is documented at the top of the script):
 
@@ -139,7 +154,7 @@ change needed.
 
 ### 3 — Ground the interpretation
 
-Read the chart through the **reference rulesets**, not from vibes. Use the `get_astrology_reference(system)` tool (if available) or read the markdown files directly to load the interpretation guidelines matching the question type:
+Read the chart through the **reference rulesets**, not from vibes. Use the `get_astrology_reference(system)` tool (if available via MCP) or read the markdown files directly from `references/` in the skill directory. For REST-only hosts, load from `https://raw.githubusercontent.com/aryaminus/astro/main/skills/astrology/references/<file>`.
 
 | Question type | Load |
 | --- | --- |
@@ -242,7 +257,7 @@ not just the planets.
 
 ### 6 — Remember
 
-After a real reading, offer to save the profile so future readings are instant and consistent. Use the `save_profile` tool to persist the exact birth data to `~/.astro_profiles.json`. If the tool is not available, ask the user to manually write down the Big Three / lagna / Day Master. Never save someone else's birth data without the user asking.
+After a real reading, offer to save the profile so future readings are instant and consistent. Use the `save_profile` tool to persist the exact birth data. If the tool is not available, ask the user to manually write down the Big Three / lagna / Day Master. Never save someone else's birth data without the user asking.
 
 ---
 
