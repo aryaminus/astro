@@ -59,11 +59,33 @@ For "when should I marry / launch / sign / move?":
    person's Day Master / useful god and that doesn't clash with their year animal.
 Give 2–3 ranked options with the reason for each — not one mystical decree.
 
-## D. Horary (answering a specific question)
+## D. Horary / Prasna (answering a specific question)
 Classical horary casts a chart for the *moment a question is asked*. Lightweight version:
 run `mode:"transit"` for now, read the Moon (the querent's flow) and the planet ruling
 the matter, and answer the specific yes/when/how — while being honest that horary is the
 most interpretive branch and you're giving guidance, not a guarantee.
+
+Classic uses: "Will my missing item be found?" (Moon + 2nd house), "Will I get this job?"
+(10th house lord's applying aspects to benefics), "Is my partner faithful?" (7th house lord
++ Venus aspects), "Should I buy this house?" (4th house lord's strength and Moon's phase).
+
+**Prasna (Vedic horary)**: the querent's rising sign at the moment of asking is read exactly
+like a natal chart. The Moon's nakshatra and the lagna lord's condition answer the question.
+
+## E. Mundane & Event Charts (Q115 — nations, companies, elections)
+
+Any moment of inception has a chart: a country's independence (e.g., India: Aug 15, 1947,
+00:00 IST, New Delhi), a company's incorporation, a marriage ceremony, a product launch.
+Cast it like a natal chart. The 1st = the entity's identity; 10th = its public standing;
+7th = partners/adversaries; 2nd/8th = finances; 6th = employees and operational challenges.
+
+**Elections**: compare both candidates' transits and dashas against the nation's natal chart.
+Jupiter or Venus transiting the candidate's 10th/1st = public favour; Saturn to 10th = obstacle.
+Frame as indicators, not predictions — mundane astrology has wide orbs of uncertainty.
+
+**Market / financial**: Eclipse seasons + outer-planet ingresses (Jupiter entering a sign, Saturn
+changing sign) mark economic turning points. Uranus in Gemini (2025–2033): communication/tech
+disruption cycle. Track slow-planet sign changes for sector themes.
 
 ## The honest forecasting frame
 Forecasts describe **weather and seasons**, giving the person time to prepare and agency

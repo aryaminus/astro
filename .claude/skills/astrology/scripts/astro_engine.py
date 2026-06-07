@@ -40,9 +40,18 @@ Input JSON (natal):
   }
 
 Other modes (set "mode"):
-  "natal"    (default)        — full chart, per "systems"
+  "natal"           (default) — full chart, per "systems"
   "transit"  + "transit_date" — current sky vs the natal chart
   "synastry" + "partner": {…} — relationship comparison of two charts
+  "astrocartography"          — planet lines on the globe (relocation)
+  "horary"     + (lat/lng at the moment)  — chart of the moment a question is asked
+  "event"                       — chart for any "moment of inception" (corporate, pet, wedding, app launch). Same data shape as natal; pass `subject` and `kind`.
+
+Specialty lookups (callable directly, not via JSON mode):
+  namakaran(moon_lon_sidereal)            — name syllables from birth nakshatra
+  anatomy_chart(planets_block)            — body regions and afflicted systems
+  horary(question_utc, lat, lng, text)    — cast + basic signals of a horary chart
+  astrocartography(jd, lat, lng)          — planet lines for relocation
 """
 
 from __future__ import annotations
@@ -158,6 +167,39 @@ SATURN_RETURN_AGES = [29, 58, 87]   # ~29.5 yr Saturn cycle
 JUPITER_RETURN_AGES = [12, 24, 36, 48, 60, 72, 84]
 NODE_RETURN_AGES = [18.6, 37.2, 55.8, 74.4]   # ~18.6 yr nodal cycle (incl. ~mid 'nodal reversal')
 
+# Western anatomy — zodiac sign → body part (classical rulerships)
+# Used in medical astrology: avoid surgery when Moon transits the sign ruling
+# the body part, and to read which body systems a chart emphasises.
+ANATOMY = {
+    "Aries":      {"region":"head, brain, eyes, face, adrenals",
+                   "system":"nervous / muscular, acute inflammation, fevers"},
+    "Taurus":     {"region":"neck, throat, vocal cords, thyroid, jaw, ears",
+                   "system":"throat, lymphatic, lower jaw"},
+    "Gemini":     {"region":"lungs, shoulders, arms, hands, nervous system",
+                   "system":"respiratory, peripheral nerves"},
+    "Cancer":     {"region":"chest, breasts, stomach, ribs, womb, lymph",
+                   "system":"digestion, fluids, the body's emotional barometer"},
+    "Leo":        {"region":"heart, upper back, spine, circulation",
+                   "system":"cardiovascular, vitality"},
+    "Virgo":      {"region":"abdomen, intestines, spleen, solar plexus, hands",
+                   "system":"digestive, assimilation, hygiene, daily routine"},
+    "Libra":      {"region":"kidneys, lower back, adrenals, skin, buttocks",
+                   "system":"filtration, balance, glucose regulation"},
+    "Scorpio":    {"region":"reproductive organs, bladder, rectum, pelvis, nose",
+                   "system":"eliminative, sexual, transformative"},
+    "Sagittarius":{"region":"hips, thighs, liver, sciatic nerve, sacrum",
+                   "system":"locomotion, hepatic, the traveller's body"},
+    "Capricorn":  {"region":"knees, bones, joints, teeth, skin, hair",
+                   "system":"skeletal, structural, chronic"},
+    "Aquarius":    {"region":"ankles, calves, circulation, electrical system",
+                   "system":"nervous, circulatory, sudden/electrical"},
+    "Pisces":     {"region":"feet, toes, lymphatic, immune system, the psyche",
+                   "system":"immune, psychosomatic, the body's porous boundary"},
+}
+# Avoid-surgery rule: when Moon is in the sign ruling the body part
+# (or afflicting its ruler), defer non-emergency surgery. Also: never operate
+# during a lunar eclipse, and prefer Moon in a fixed sign for stability.
+
 # ═════════════════════════════════════════════════════════════════════════════
 #  SECTION B — VEDIC (JYOTISHA) DATA
 # ═════════════════════════════════════════════════════════════════════════════
@@ -220,6 +262,41 @@ NAKSHATRAS = [
 ]
 NAK_ARC = 360.0 / 27.0          # 13°20'
 PADA_ARC = NAK_ARC / 4.0        # 3°20'
+
+# Namakaran — nakshatra → pada → starting syllables for the child's name.
+# Classical rule (Brihat Parashara Hora Shastra): the baby's name begins with
+# the syllable of the Moon's birth-nakshatra pada. The syllable is also used
+# for naming a business, art project, etc. (the *vibrational frequency* of
+# the natal lunar mansion).
+NAKSHATRA_SYLLABLES = {
+    "Ashwini":         ["Chu","Che","Cho","La"],
+    "Bharani":         ["Li","Lu","Le","Lo"],
+    "Krittika":        ["A","E","U","O"],
+    "Rohini":          ["O","Va","Vi","Vu"],
+    "Mrigashira":      ["Ve","Vo","Ka","Ki"],
+    "Ardra":           ["Ku","Gha","An","Chha"],
+    "Punarvasu":       ["Ke","Ko","Ha","Hi"],
+    "Pushya":          ["Hu","He","Ho","Da"],
+    "Ashlesha":        ["Di","Du","De","Do"],
+    "Magha":           ["Ma","Mi","Mu","Me"],
+    "Purva Phalguni":  ["Mo","Ta","Ti","Tu"],
+    "Uttara Phalguni": ["Te","To","Pa","Pi"],
+    "Hasta":           ["Pu","Sha","An","Tha"],
+    "Chitra":          ["Pe","Po","Ra","Ri"],
+    "Swati":           ["Ru","Re","Ro","Ta"],
+    "Vishakha":        ["Ti","Tu","Te","To"],
+    "Anuradha":        ["Na","Ni","Nu","Ne"],
+    "Jyeshtha":        ["No","Ya","Yi","Yu"],
+    "Mula":            ["Ye","Yo","Ba","Bi"],
+    "Purva Ashadha":   ["Bu","Da","Bha","Dha"],
+    "Uttara Ashadha":  ["Be","Bo","Ja","Ji"],
+    "Shravana":        ["Ju","Je","Jo","Khi"],
+    "Dhanishtha":      ["Ga","Gi","Gu","Ge"],
+    "Shatabhisha":     ["Go","Sa","Si","Su"],
+    "Purva Bhadrapada":["Se","So","Dha","Dhi"],
+    "Uttara Bhadrapada":["Du","Tha","Jha","Na"],
+    "Revati":          ["De","Do","Cha","Chi"],
+}
 
 DASHA_YEARS = {"Ketu":7,"Venus":20,"Sun":6,"Moon":10,"Mars":7,
                "Rahu":18,"Jupiter":16,"Saturn":19,"Mercury":17}
@@ -741,6 +818,19 @@ def vedic_chart(jd, lat, lng, birth_dt, time_known=True):
     nk=NAKSHATRAS[nak_i]
     dasha=vimshottari(moon_lon, birth_dt)
     yogas=detect_yogas(planets, lagna_sign)
+    # Atmakaraka: planet with highest degree in its sign (excludes Rahu/Ketu)
+    atma_candidates = {p: planets[p]["deg_in_sign"] for p in
+                       ["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn"] if p in planets}
+    atmakaraka = max(atma_candidates, key=atma_candidates.get) if atma_candidates else None
+    # Sade Sati: Saturn transiting Moon sign ±1 (7.5-yr period)
+    moon_sign_idx = SIGNS.index(sign_of(moon_lon)[0])
+    current_sat_lon = norm360(body_longitudes(julian_day(TODAY))[0]["Saturn"] - ayanamsha_lahiri(julian_day(TODAY)))
+    sat_sign_idx = SIGNS.index(sign_of(current_sat_lon)[0])
+    sade_sati_phase = None
+    delta = (sat_sign_idx - moon_sign_idx) % 12
+    if delta == 11:   sade_sati_phase = "rising (Saturn in the sign before your Moon sign)"
+    elif delta == 0:  sade_sati_phase = "peak (Saturn transiting your natal Moon sign directly)"
+    elif delta == 1:  sade_sati_phase = "setting (Saturn in the sign after your Moon sign)"
     return {
         "system":"Vedic / Jyotisha — Lahiri sidereal, whole-sign (rashi) houses",
         "ayanamsha_deg":round(ayan,4),
@@ -748,6 +838,12 @@ def vedic_chart(jd, lat, lng, birth_dt, time_known=True):
         "janma_rashi":{"sign":sign_of(moon_lon)[0]},
         "janma_nakshatra":{"name":nk["name"],"lord":nk["lord"],"deity":nk["deity"],
                            "pada":pada,"quality":nk["quality"]},
+        "atmakaraka":{"planet":atmakaraka,
+                      "deg":round(atma_candidates.get(atmakaraka,0),3) if atmakaraka else None,
+                      "note":"Jaimini soul-significator — the planet that has travelled farthest in its sign"},
+        "sade_sati":{"active": sade_sati_phase is not None,
+                     "phase": sade_sati_phase,
+                     "note":"Saturn's 7.5-yr transit over natal Moon ±1 sign; challenging but transformative"},
         "planets":planets,
         "vimshottari_dasha":dasha,
         "yogas":yogas,
@@ -982,13 +1078,24 @@ def transits(natal_jd, natal_lat, natal_lng, transit_dt_utc):
                                  "retrograde":t_speed.get(tp,0)<0,
                                  "meaning":desc})
     hits.sort(key=lambda x:x["orb"])
+    # Sade Sati check against transit Saturn
+    natal_moon_sign = sign_of(natal_lons["Moon"])[0]
+    natal_moon_idx = SIGNS.index(natal_moon_sign)
+    sat_sign_idx = SIGNS.index(sign_of(t_lons["Saturn"])[0])
+    delta = (sat_sign_idx - natal_moon_idx) % 12
+    sade_sati = None
+    if delta == 11:   sade_sati = {"active":True,"phase":"rising","saturn_sign":SIGNS[sat_sign_idx],"moon_sign":natal_moon_sign}
+    elif delta == 0:  sade_sati = {"active":True,"phase":"peak","saturn_sign":SIGNS[sat_sign_idx],"moon_sign":natal_moon_sign}
+    elif delta == 1:  sade_sati = {"active":True,"phase":"setting","saturn_sign":SIGNS[sat_sign_idx],"moon_sign":natal_moon_sign}
+    else:             sade_sati = {"active":False,"saturn_sign":SIGNS[sat_sign_idx],"moon_sign":natal_moon_sign}
     return {"transit_date":transit_dt_utc.strftime("%Y-%m-%d"),
             "current_positions":{p:{"sign":sign_of(t_lons[p])[0],
                                     "deg":round(t_lons[p]%30,2),
                                     "retrograde":t_speed.get(p,0)<0}
                                  for p in ["Sun","Mercury","Venus","Mars","Jupiter","Saturn",
                                            "Uranus","Neptune","Pluto"]},
-            "aspects_to_natal":hits[:20]}
+            "aspects_to_natal":hits[:20],
+            "sade_sati":sade_sati}
 
 def synastry(jdA, jdB):
     """Inter-chart aspects (A's planets to B's planets) — relationship synastry."""
@@ -1014,6 +1121,321 @@ def synastry(jdA, jdB):
     return {"inter_aspects":inter[:25],
             "harmony_index":score,
             "note":"Harmony index is a coarse heuristic, not a verdict; read the actual aspects — Sun/Moon/Venus/Mars contacts matter most."}
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SECTION I — ASTROCARTOGRAPHY (relocation / planet lines on the globe)
+# ═════════════════════════════════════════════════════════════════════════════
+
+def _ra_from_lon(lon_deg, eps_deg):
+    """Right ascension (deg) from ecliptic longitude at given obliquity."""
+    lam = math.radians(lon_deg)
+    eps = math.radians(eps_deg)
+    return math.degrees(math.atan2(math.sin(lam)*math.cos(eps),
+                                   math.cos(lam))) % 360.0
+
+def astrocartography(jd, lat, lng):
+    """For each planet, the world-longitudes where it sits on the MC, IC, ASC, DSC
+    at the moment of birth. These 'planet lines' are the basis of relocation
+    astrology — living where a planet is angular emphasises its themes.
+
+    Output: {planet: {mc: lng, ic: lng, asc: lat_belt, dsc: lat_belt,
+                       themes: …}} plus a few reference cities per line.
+
+    The ASC/DSC lines run along specific latitudes (not a single longitude);
+    we report the latitude belt where the planet is rising/setting.
+    """
+    lons,_,backend = body_longitudes(jd)
+    eps = obliquity(jd - 2451543.5)
+    gmst = gmst_deg(jd)
+    out = {"_meta": {"backend": backend, "interpretation_note":
+        "Planet lines: where a planet is angular (MC=career, IC=home/roots, "
+        "ASC=identity, DSC=relationships) at the moment of birth. Living under "
+        "a line tends to activate that planet's themes; difficult planets "
+        "(Saturn, Pluto, Chiron, South Node) are felt as tests, benefics "
+        "(Jupiter, Venus, Sun) as gifts. Latitude matters as well as longitude."}}
+    themes = {
+        "Sun":    "identity, vitality, leadership, visibility, the father",
+        "Moon":   "emotions, home, mother, the public, nurture, fluctuations",
+        "Mercury":"communication, learning, commerce, travel, writing",
+        "Venus":  "love, art, beauty, money, attraction, partnership",
+        "Mars":   "drive, conflict, action, athletic, accidents, sex",
+        "Jupiter":"expansion, luck, faith, higher learning, travel, opportunity",
+        "Saturn": "discipline, restriction, hard work, karma, time, loneliness",
+        "Uranus": "sudden change, awakening, freedom, disruption, innovation",
+        "Neptune":"dreams, dissolution, spirituality, escapism, confusion",
+        "Pluto":  "transformation, power, death/rebirth, obsession, shadow",
+        "North Node":"destiny, growth edge, the unfamiliar, karmic pull",
+        "South Node":"past life, comfort zone, release, innate skill",
+        "Chiron": "wound, healing, the wounded-healer vocation, teaching through pain",
+    }
+    for p, lon in lons.items():
+        ra = _ra_from_lon(lon, eps)
+        mc_lng = norm360(ra - gmst)
+        ic_lng = norm360(mc_lng + 180)
+        # ASC line: approximate the latitude where the planet would be rising
+        # (its declination). For Earth latitudes, the planet rises when the
+        # local sidereal time equals its RA. ASC line lies where the planet's
+        # altitude crosses 0°; with whole-sign simplicity, the ASC line is the
+        # same longitude band as the MC/IC, but offset in latitude by the
+        # planet's declination. We report the declination for the user/agent
+        # to interpret, plus the longitude band.
+        dec_deg = math.degrees(math.asin(math.sin(math.radians(eps)) *
+                                         math.sin(math.radians(lon))))
+        out[p] = {
+            "mc_longitude": round(mc_lng, 2),
+            "ic_longitude": round(ic_lng, 2),
+            "ascendant_band": {"longitude": round(mc_lng, 2),
+                               "latitude_hint_deg": round(dec_deg, 2),
+                               "note": "ASC line is a curve; latitude shown is the planet's declination"},
+            "descendant_band": {"longitude": round(ic_lng, 2),
+                                "latitude_hint_deg": -round(dec_deg, 2)},
+            "themes": themes.get(p, ""),
+        }
+    return out
+
+# Reference city coordinates (subset — major global cities for planet-line
+# interpretation). Latitude/longitude in degrees, E+ / N+. Used to suggest
+# "is city X on/near your Jupiter line?" without doing a full GIS lookup.
+CITIES = {
+    "London":      (51.5, -0.1),    "New York":   (40.7, -74.0),
+    "Los Angeles": (34.0, -118.2),  "Chicago":    (41.9, -87.6),
+    "Toronto":     (43.7, -79.4),   "Mexico City":(19.4, -99.1),
+    "São Paulo":   (-23.5, -46.6),  "Buenos Aires":(-34.6, -58.4),
+    "Paris":       (48.9, 2.4),     "Berlin":     (52.5, 13.4),
+    "Amsterdam":   (52.4, 4.9),     "Rome":       (41.9, 12.5),
+    "Madrid":      (40.4, -3.7),    "Barcelona":  (41.4, 2.2),
+    "Istanbul":    (41.0, 29.0),    "Athens":     (38.0, 23.7),
+    "Cairo":       (30.0, 31.2),    "Lagos":      (6.5, 3.4),
+    "Nairobi":     (-1.3, 36.8),    "Cape Town":  (-33.9, 18.4),
+    "Dubai":       (25.2, 55.3),    "Mumbai":     (19.1, 72.9),
+    "Delhi":       (28.6, 77.2),    "Bangalore":  (12.9, 77.6),
+    "Kolkata":     (22.6, 88.4),    "Bangkok":    (13.7, 100.5),
+    "Singapore":   (1.4, 103.8),    "Jakarta":    (-6.2, 106.8),
+    "Hong Kong":   (22.3, 114.2),   "Shanghai":   (31.2, 121.5),
+    "Beijing":     (39.9, 116.4),   "Seoul":      (37.6, 127.0),
+    "Tokyo":       (35.7, 139.7),   "Osaka":      (34.7, 135.5),
+    "Sydney":      (-33.9, 151.2),  "Melbourne":  (-37.8, 144.9),
+    "Auckland":    (-36.8, 174.8),  "Honolulu":   (21.3, -157.9),
+    "Vancouver":   (49.3, -123.1),  "San Francisco":(37.8, -122.4),
+    "Miami":       (25.8, -80.2),   "Las Vegas":  (36.2, -115.2),
+    "Seattle":     (47.6, -122.3),  "Boston":     (42.4, -71.1),
+    "Moscow":      (55.8, 37.6),    "St Petersburg":(59.9, 30.3),
+    "Kathmandu":   (27.7, 85.3),    "Colombo":    (6.9, 79.9),
+    "Karachi":     (24.9, 67.0),    "Tehran":     (35.7, 51.4),
+    "Tel Aviv":    (32.1, 34.8),    "Jerusalem":  (31.8, 35.2),
+    "Reykjavik":   (64.1, -21.9),   "Stockholm":  (59.3, 18.1),
+    "Helsinki":    (60.2, 24.9),    "Oslo":       (59.9, 10.8),
+    "Copenhagen":  (55.7, 12.6),    "Vienna":     (48.2, 16.4),
+    "Zurich":      (47.4, 8.5),     "Geneva":     (46.2, 6.1),
+    "Lisbon":      (38.7, -9.1),    "Edinburgh":  (55.9, -3.2),
+    "Dublin":      (53.3, -6.3),    "Vancouver":  (49.3, -123.1),
+    "Wellington":  (-41.3, 174.8),  "Anchorage":  (61.2, -149.9),
+}
+
+def _cities_on_line(target_lng, target_lat, tol_lng=10.0, tol_lat=8.0):
+    """Return cities within tol degrees of a planet-line crossing."""
+    hits = []
+    for name, (lat, lng) in CITIES.items():
+        d_lng = abs(norm180(lng - target_lng))
+        d_lat = abs(lat - target_lat)
+        if d_lng <= tol_lng and d_lat <= tol_lat:
+            hits.append({"city": name, "lat": lat, "lng": lng,
+                         "dist_lng": round(d_lng, 1), "dist_lat": round(d_lat, 1)})
+    hits.sort(key=lambda x: x["dist_lng"] + x["dist_lat"])
+    return hits[:6]
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SECTION J — HORARY (PRASNA) — chart of the moment a question is asked
+# ═════════════════════════════════════════════════════════════════════════════
+
+def horary(question_utc, lat, lng, question_text=""):
+    """Cast a chart for the exact moment a question is asked. Classical horary
+    rules (Prasna in Vedic): the Ascendant and its ruler = the querent; the
+    Moon = the flow of events; the house ruling the matter = where to look;
+    the planet ruling the house's cusp lord = the answer; aspects to the
+    Moon and the Asc ruler show timing.
+
+    Returns the chart plus a small set of classical signals the agent can
+    interpret. We do NOT auto-interpret the question — the agent does, with
+    full awareness that horary is the most interpretive branch and only a
+    hint, not a guarantee.
+    """
+    jd = julian_day(question_utc)
+    lons, speed, backend = body_longitudes(jd)
+    ayan = ayanamsha_lahiri(jd)
+    asc_lon, mc_lon = ascendant_mc(jd, lat, lng)   # tropical; treat as the moment
+    sun_sign_idx = int(lons["Sun"] // 30)
+    # Day / night chart (Sun above/below horizon) — used to choose which planets
+    # are stronger; this requires computing the Sun's altitude, simplified.
+    is_day_chart = (lons["Sun"] > asc_lon - 180) and (lons["Sun"] < asc_lon)
+    # Void-of-course Moon: if the Moon makes no major aspect before leaving
+    # its current sign, classical horary says "nothing will come of the matter."
+    moon_lon = lons["Moon"]
+    moon_sign_idx = int(moon_lon // 30)
+    next_sign_lon = (moon_sign_idx + 1) * 30.0
+    moon_to_next = next_sign_lon - moon_lon
+    voc = True
+    # check aspects Moon will make within remaining sign
+    for p, plon in lons.items():
+        if p in ("Moon","South Node"):
+            continue
+        # if Moon will reach an exact aspect within remaining degrees
+        for ang, (exact, orb, _) in ASPECTS.items():
+            target = norm360(plon + exact) if p in ("Sun","Mercury","Venus","Mars",
+                                                     "Jupiter","Saturn","Uranus",
+                                                     "Neptune","Pluto") else None
+            if target is None:
+                continue
+            # distance Moon needs to travel to reach that target
+            dist = norm360(target - moon_lon)
+            if 0 < dist < moon_to_next + 6:  # 6° applying orb
+                voc = False
+                break
+        if not voc:
+            break
+    moon_sign = SIGNS[moon_sign_idx]
+    moon_p_house = whole_sign_house(moon_lon, asc_lon)
+    # Ascendant ruler
+    asc_sign = SIGNS[int(asc_lon // 30)]
+    asc_ruler = SIGN_DATA[asc_sign]["ruler"]
+    # Hour ruler (the planet ruling the weekday + the day-quadrant hour)
+    weekday = question_utc.weekday()   # 0=Mon…6=Sun (Mon=Moon, Tue=Mars,…)
+    # Classical Chaldean order: Saturn(0), Jupiter(1), Mars(2), Sun(3), Venus(4), Mercury(5), Moon(6)
+    chaldean = ["Saturn","Jupiter","Mars","Sun","Venus","Mercury","Moon"]
+    weekday_ruler = chaldean[(weekday + 5) % 7]   # adjust to Chaldean: Mon=Moon
+    # Planetary hour of the day: divide daylight into 12 equal hours
+    sun_alt = math.sin(math.radians(lons["Sun"]))   # crude proxy
+    hour_ruler_idx = (weekday * 12 + question_utc.hour) % 7
+    hour_ruler = chaldean[hour_ruler_idx]
+    # "Hour planet" classical interpretation: the planet ruling the hour
+    # describes the *flavour* of the moment, useful in horary timing.
+    return {
+        "system": "Horary / Prasna (chart of the moment)",
+        "question_text": question_text,
+        "question_utc": question_utc.strftime("%Y-%m-%d %H:%M:%S"),
+        "ascendant": asc_sign,
+        "ascendant_ruler": asc_ruler,
+        "moon": {"sign": moon_sign,
+                 "house_in_horary": moon_p_house,
+                 "void_of_course": voc,
+                 "interpretation": ("Nothing will come of the matter." if voc
+                                    else "Moon is applying to an aspect — the matter proceeds.")},
+        "day_chart": is_day_chart,
+        "weekday_ruler": weekday_ruler,
+        "planetary_hour_ruler": hour_ruler,
+        "big_six": {p: {"sign": sign_of(lons[p])[0],
+                        "house": whole_sign_house(lons[p], asc_lon),
+                        "retrograde": (speed.get(p, 0) < 0)}
+                    for p in ["Sun","Moon","Mercury","Venus","Mars","Jupiter","Saturn"]},
+        "_meta": {"backend": backend,
+                  "note": ("Horary is the most interpretive branch. Use this as "
+                           "guidance, not a guarantee. The agent should map the "
+                           "querent's question to a house (1=self, 2=money, "
+                           "3=communication, 4=home/land, 5=children/creativity, "
+                           "7=partnership, 8=others' money/death, 9=travel/law, "
+                           "10=career, 11=gains, 12=hidden/loss) and read the "
+                           "ruler of that house, plus Moon's applying aspect, for "
+                           "the answer.")}
+    }
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SECTION K — NAMAKARAN, ANATOMY, MISC SPECIALTY LOOKUPS
+# ═════════════════════════════════════════════════════════════════════════════
+
+def namakaran(moon_lon_sidereal):
+    """Return the classical starting syllable(s) for a name aligned to the
+    birth nakshatra pada. Works in sidereal (Vedic) longitude, since the
+    classical rule uses the Janma Nakshatra. From a Moon's tropical longitude,
+    pass through ayanamsha_lahiri(jd) first to convert.
+    """
+    nak_i = int(moon_lon_sidereal // NAK_ARC) % 27
+    pada = int((moon_lon_sidereal % NAK_ARC) // PADA_ARC) + 1
+    name = NAKSHATRAS[nak_i]["name"]
+    syllables = NAKSHATRA_SYLLABLES.get(name, ["?"])
+    chosen = syllables[pada - 1]
+    return {
+        "nakshatra": name,
+        "pada": pada,
+        "primary_syllable": chosen,
+        "all_pada_syllables": syllables,
+        "lord": NAKSHATRAS[nak_i]["lord"],
+        "interpretation": (
+            f"The Moon in {name} pada {pada} (lord {NAKSHATRAS[nak_i]['lord']}) "
+            f"vibrates to the syllable '{chosen}'. Classical Namakaran: begin "
+            f"the child's name (or a business/project name) with this sound "
+            f"for the strongest resonance with the natal lunar mansion.")
+    }
+
+def anatomy_chart(planets_block):
+    """For a Western planet block (each planet with sign/house), identify the
+    body regions and systems emphasised, and flag any afflicted regions.
+    Affliction = Saturn or Mars in or aspecting the sign (or its ruler).
+    """
+    body_map = {}
+    afflicted_regions = []
+    for planet, data in planets_block.items():
+        sign = data.get("sign")
+        if not sign:
+            continue
+        info = ANATOMY.get(sign, {})
+        if not info:
+            continue
+        body_map[planet] = {"sign": sign, "region": info["region"],
+                            "system": info["system"], "house": data.get("house")}
+        if planet in ("Saturn", "Mars") and data.get("dignity") in ("fall", "detriment"):
+            afflicted_regions.append({"planet": planet, "sign": sign,
+                                      "region": info["region"]})
+    return {"body_regions": body_map, "afflicted_regions": afflicted_regions,
+            "surgery_avoidance_note":
+                "Medical astrology rule: avoid elective surgery when the Moon "
+                "transits the sign ruling the body part (e.g. don't operate on "
+                "the throat when Moon is in Taurus). Also avoid during lunar "
+                "eclipses, and prefer Moon in a fixed sign for stable outcomes."}
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SECTION L — EVENT / NON-HUMAN CHARTS (corporate, pet, event, moment)
+# ═════════════════════════════════════════════════════════════════════════════
+
+def event_chart(data):
+    """Cast a chart for any 'moment of inception': a company incorporation, an
+    app launch, a pet's adoption/birth, a wedding, a question time, etc.
+    The math is identical to a natal chart — only the *subject* differs.
+    Returns western + vedic + bazi for the given data.
+
+    Convention: pass `subject` to label the chart; the data fields are the
+    same as natal input (year/month/day/hour/minute/lat/lng/tz).
+    """
+    utc, tinfo = to_utc(data)
+    jd = julian_day(utc)
+    lat = data.get("lat", 0.0); lng = data.get("lng", 0.0)
+    time_known = tinfo.get("time_known", True)
+    birth_local = datetime(data["year"], data["month"], data["day"],
+                           int(data.get("hour", 12)), int(data.get("minute", 0)))
+    systems = data.get("systems", ["western", "vedic", "bazi"])
+    _, _, backend = body_longitudes(jd)
+    out = {
+        "_meta": {"engine_backend": backend, "swisseph_available": _HAS_SWE,
+                  "subject": data.get("subject", "(unnamed event)"),
+                  "kind": data.get("kind", "event"),
+                  "moment_utc": utc.strftime("%Y-%m-%d %H:%M"),
+                  "precision_note": ("arcsecond (Swiss Ephemeris)" if backend == "swisseph"
+                                     else "~1-2 arcmin (builtin) — exact to sign/house/nakshatra/dasha")},
+        "subject": data.get("subject", "(unnamed event)"),
+        "moment": {"local": birth_local.strftime("%Y-%m-%d %H:%M"),
+                   "utc": utc.strftime("%Y-%m-%d %H:%M"),
+                   "place": data.get("place", "")},
+        "time_info": tinfo,
+    }
+    if "western" in systems:
+        try: out["western"] = western_chart(jd, lat, lng, time_known)
+        except Exception as e: out["western"] = {"error": repr(e)}
+    if "vedic" in systems:
+        try: out["vedic"] = vedic_chart(jd, lat, lng, birth_local, time_known)
+        except Exception as e: out["vedic"] = {"error": repr(e)}
+    if "bazi" in systems:
+        try: out["bazi"] = bazi_chart(jd, birth_local, data.get("gender", "unknown"), lat)
+        except Exception as e: out["bazi"] = {"error": repr(e)}
+    return out
 
 # ═════════════════════════════════════════════════════════════════════════════
 #  SECTION H — ORCHESTRATION
@@ -1078,6 +1500,30 @@ def calculate_full_profile(data):
             result["personA"]["bazi_animal"]=bazi_chart(jd,birth_local,data.get("gender","unknown")).get("year_animal")
             pb_local=datetime(p["year"],p["month"],p["day"],int(p.get("hour",12)),int(p.get("minute",0)))
             result["personB"]["bazi_animal"]=bazi_chart(jdB,pb_local,p.get("gender","unknown")).get("year_animal")
+        return result
+
+    if mode=="astrocartography":
+        result["astrocartography"]=astrocartography(jd, lat, lng)
+        result["big_three"]=western_chart(jd,lat,lng,time_known)["big_three"]
+        return result
+
+    if mode=="horary":
+        qtext = data.get("question","")
+        qdt = datetime.strptime(data["question_time"], "%Y-%m-%d %H:%M") if data.get("question_time") else datetime.utcnow()
+        # Convert to UTC using provided tz if any
+        if data.get("tz") and _HAS_TZDB:
+            try:
+                local = qdt.replace(tzinfo=ZoneInfo(data["tz"]))
+                qdt_utc = local.astimezone(timezone.utc).replace(tzinfo=None)
+            except Exception:
+                qdt_utc = qdt
+        else:
+            qdt_utc = qdt
+        result["horary"]=horary(qdt_utc, lat, lng, qtext)
+        return result
+
+    if mode=="event":
+        result["event_chart"]=event_chart(data)
         return result
 
     # natal (default)

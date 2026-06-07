@@ -86,11 +86,163 @@ Jyotish gives a detailed health map. The primary indicators:
 
 **Remedies for health**: Strengthening the Lagna lord (mantra, right lifestyle for that planet); Saturn afflictions → discipline, service, cold water routines; Mars → non-violence, cooling diet.
 
+## 8. Sade Sati — Saturn's 7.5-year Moon transit (most-asked Vedic question)
+
+**Sade Sati** = Saturn transiting the sign before the natal Moon, the Moon sign itself, and
+the sign after — three signs × 2.5 years = 7.5 years. The engine detects this in `sade_sati`.
+
+- **Rising phase** (sign before Moon): external pressures begin, responsibilities mount.
+- **Peak phase** (Saturn over Moon sign): the most demanding — emotional weight, health care
+  needed, relationships tested, career restructuring. *Not a curse — Saturn's audit.*
+- **Setting phase** (sign after Moon): pressure lifts; rebuilding; harvest of what was genuine.
+
+Always name the **end date** of the current phase. *"Your Sade Sati peak runs through [date].
+After that, this weight lifts."* That certainty is the relief people need. Frame it as a
+seven-year renovation — people emerge with their most durable life structure.
+
+**Remedies**: Shani mantra on Saturdays, black sesame charity, service to the elderly,
+consistent discipline and routine (Saturn rewards what Sade Sati tests).
+
+## 9. Atmakaraka — the soul significator (Jaimini)
+
+The engine returns `atmakaraka`: the planet with the highest degree in its sign, excluding
+Rahu/Ketu. It represents the soul's primary lesson and deepest essential quality.
+
+| Atmakaraka | Soul theme |
+| --- | --- |
+| Sun | Leadership, self-authorship, authority — father/self are the karmic arena |
+| Moon | Nourishment, belonging, emotional wholeness — mother and inner life |
+| Mars | Courage, right action, standing firm — conflict is the soul's classroom |
+| Mercury | Communication, discernment — the mind and speech are the soul's instrument |
+| Jupiter | Wisdom, dharma, the guru — student relationships and expansion |
+| Venus | Love, beauty, relationship — partnership and desire are the curriculum |
+| Saturn | Discipline, humility, service — the soul agreed to learn through limitation |
+
+The Atmakaraka's natal house shows *where* the soul's deepest work plays out this life.
+
+## 10. Love marriage vs. arranged marriage (Q8 — common in South Asian contexts)
+
+- **5th house/lord** = romantic desire, love affairs, the heart's choice.
+- **7th house/lord** = formal partnership, the socially/family-sanctioned spouse.
+- **Rahu in 5th or 7th** = unconventional relationships, cross-boundary love marriages.
+- Venus aspecting the 5th = romantic path more natural; Venus in 7th = partnership through formal channels.
+- Timing: 5th-lord or Venus dasha + Jupiter transiting 5th or 7th → marriage (love or arranged) is classically indicated.
+
+## 11. Putra Bhava — children and fertility (Q45)
+
+- **5th house** = children, creativity, past-life merit (purva punya).
+- **Jupiter** = natural significator for children; his dignity is crucial.
+- Delays (not denial): Saturn in 5th, 5th lord in 6/8/12, Jupiter debilitated.
+  Neecha-Bhanga can reverse this; always check before saying "no children."
+- **Timing**: Jupiter mahadasha/antardasha, or Jupiter transiting 1st/5th/9th = classic windows.
+- Child's nature from 5th sign: Fire = energetic/assertive; Earth = steady/practical; Air = communicative; Water = sensitive.
+
+## 12. Namakaran — naming a child or business (Q in §3 of ref/6.txt)
+
+The classical rule: the **starting syllable of the name** is taken from the
+**Janma Nakshatra pada** of the Moon (for a child) or the inception chart's
+Moon (for a business). The engine's `namakaran(moon_lon_sidereal)` returns
+the four pada-syllables for the relevant nakshatra. Common application rules:
+
+- **Boys**: odd padas (1, 3) traditionally preferred; **girls**: even padas (2, 4).
+- **Combine** with the family's traditional naming letter (varies by region).
+- **Avoid** syllables of grahas to be pacified (e.g. don't start a name with "Sa" if Saturn is the worst planet in the chart).
+- For **businesses**: cast the inception chart (`mode:"event"`), then `namakaran` on its Moon.
+
+## 13. Mangal Dosha (Kuja Dosha) — the marriage flag
+
+**Mars in the 1st, 2nd, 4th, 7th, 8th, or 12th house from the Lagna** is
+traditionally flagged as Mangal Dosha (also called "Manglik") — said to bring
+friction to marriage. **Important**:
+- Mars in its **own sign** (Aries, Scorpio) or **exalted** (Capricorn) in these houses often **cancels** the dosha.
+- The dosha is also **cancelled** if both partners are Manglik, or if Mars is in a kendra/trikona of the Navamsha.
+- Modern practitioners are split on the strength of the flag; the agent should mention it when present and contextualise, not as a verdict.
+
+## 14. Ashtakoota / Guna Milan — the 36-point marriage match (Q2)
+
+The classical 8-Koota score (out of 36) for marriage compatibility. The engine
+returns the two Janma Nakshatras; the agent can describe each Koota
+qualitatively; for the full point scoring, the user can use a dedicated tool
+or see a Jyotish practitioner.
+
+| Koota | Max | What it measures |
+| --- | --- | --- |
+| **Varna** | 1 | spiritual / dharmic compatibility |
+| **Vashya** | 2 | control / attraction |
+| **Tara** | 3 | luck / birth-star harmony (9-count from each nakshatra) |
+| **Yoni** | 4 | physical / sexual compatibility (animal-symbol) |
+| **Graha Maitri** | 5 | mental compatibility (lordship friendship) |
+| **Gana** | 6 | temperament (Deva / Manushya / Rakshasa) |
+| **Bhakoot** | 7 | Moon-sign relationship (some combos = dosha) |
+| **Nadi** | 8 | physiological / karmic (highest weight; **same Nadi = Nadi Dosha**) |
+
+- Score **≥ 18**: workable. **≥ 25**: strong. **< 18**: friction; traditional.
+- **Nadi Dosha** (same nadi) is the classical deal-breaker; many modern astrologers consider it overstated. Mention it; let the user decide.
+
+## 15. Deeper remedies (upayas) — the classical toolkit
+
+For a troubled graha, the classical remedies form a hierarchy. **Always offer as supportive practices, never as "pay to avoid doom."**
+
+- **Mantra (beej) — repeat on the graha's day:**
+  - Surya (Sun): "Om Hraam Hreem Hraum Sah Suryaya Namah" (Sunday)
+  - Chandra (Moon): "Om Shraam Shreem Shraum Sah Chandraya Namah" (Monday)
+  - Mangal (Mars): "Om Kraam Kreem Kraum Sah Bhaumaya Namah" (Tuesday)
+  - Budha (Mercury): "Om Braam Breem Braum Sah Budhaya Namah" (Wednesday)
+  - Guru (Jupiter): "Om Graam Greem Graum Sah Gurave Namah" (Thursday)
+  - Shukra (Venus): "Om Draam Dreem Draum Sah Shukraya Namah" (Friday)
+  - Shani (Saturn): "Om Praam Preem Praum Sah Shanaischaraya Namah" (Saturday)
+  - Rahu: "Om Bhram Bhrim Bhraum Sah Rahave Namah" (Saturday)
+  - Ketu: "Om Stram Strim Straum Sah Ketave Namah" (Tuesday/Thursday)
+- **Charity (daan)** — to the graha's signifier: Saturn → the poor, elderly, disabled, dark sesame, iron; Mars → soldiers, blood donation, red lentils; etc.
+- **Fasting (vrat)** — the graha's day, or the 11th tithi from birth.
+- **Gemstones (ratna)** — the strongest remedy; **only on the recommendation of a competent Jyotish practitioner**, and only when the graha is functional and well-placed (wearing the gem of a weak/malefic graha can amplify problems).
+- **Right action** — strengthen the dasha lord's significations through aligned conduct (Saturn mahadasha = disciplined service; Jupiter = teaching/learning; Venus = art/relationship care).
+
+**Remedies never to give**: terminal-illness predictions, expensive rituals to "lift a curse," or a gem to "fix" a relationship.
+
+## 16. Litigation, business & money outcomes (Q22)
+
+For "will I win this lawsuit?" / "will the business turn a profit?" / "will I recover what was stolen?":
+- **6th house (Shatru)** = the contest, the opponent; a strong 6th lord = strong position
+- **10th house (Karma)** = the public outcome
+- **11th house (Labha)** = gains from the verdict
+- **2nd (Dhana) / 8th (others' money)** = the contested resource
+- **Jupiter** (judge, dharma) well-placed in kendra/trikona = favourable judgment
+- **Mercury** (the brief) well-placed = case well-presented
+- **Active mahadasha of 6th or 10th lord** = resolution window
+
+Frame honestly: charts show *tendency*, not verdicts. A good lawyer, evidence, and timing all matter; the chart is one input.
+
+## 17. Inheritance & others' money (Q in §6 of ref/6.txt)
+
+For "which parent will leave the larger inheritance?" / "will I receive the expected sum?" / "will the siblings fight me for it?":
+- **8th house** = others' money (including inheritance), the partner's assets, sudden transformation
+- **4th house** = one parent (often the mother), the home you inherit
+- **10th house** = the other parent (often the father), status inheritance
+- **2nd from 8th (= 9th)** = the luck of the inheritance reaching you
+- **Benefics on 8th / 8th lord in a good house** = the inheritance is likely
+- **Malefics on 8th / 8th lord in 6/8/12** = delay, dispute, or litigation over it
+- **3rd house** = siblings; a hard aspect between 3rd and 8th lords = sibling friction over the estate
+
+Frame as a *family-pattern* issue (often karmic, often with a hard emotional truth); don't fuel family conflict. For sensitive family-wealth questions, suggest the querent discuss the patterns calmly with a mediator or estate planner, not at the dinner table.
+
+## 18. Foreign travel & relocation (Q19)
+
+For "should I move abroad?" / "will I be more successful overseas?":
+- **12th house** = foreign lands, life away from birth, the bed
+- **9th house** = long travel, fortune, the foreign
+- **Lagna lord in 7th, 9th, or 12th** = life-direction is *away* from birth
+- **Moon in a movable (cardinal) sign** or strong cardinal emphasis = a life of movement
+- **Rahu in 9th** = the soul's pull toward the uncharted
+- **Saturn in 12th** = the cost of foreign life (loneliness, slow start, but eventual depth)
+- For the *where*, use the **astrocartography** mode of the engine — see `specialty-systems.md §1`
+
 ## Reading recipe
 1. Lagna + its lord's placement → the life's frame and direction.
 2. Moon sign + nakshatra → mind, emotion, character seed.
 3. Scan dignities & the engine's yogas → the chart's strengths and strains.
-4. **Current mahadasha + antardasha with dates** → the chapter they're living now and what it asks.
+4. **Current mahadasha + antardasha with dates** + Sade Sati status → the chapter they're living now.
 5. Tie the question's house(s) to the active dasha lord → the specific, timed answer.
-6. Frame as karma-with-agency; offer a constructive remedy if apt.
-7. **Health reading**: check 1st/6th/8th/12th + Saturn/Mars/Rahu; give the dasha timing and a practical remedy — never a diagnosis.
+6. Check Atmakaraka for soul-purpose questions.
+7. Frame as karma-with-agency; offer a constructive remedy if apt.
+8. **Health reading**: check 1st/6th/8th/12th + Saturn/Mars/Rahu; give the dasha timing and a practical remedy — never a diagnosis.

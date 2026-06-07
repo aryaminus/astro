@@ -12,10 +12,17 @@ description: >-
 when_to_use: >-
   Activate whenever the user asks about astrology, their horoscope, sun/moon/rising
   sign, birth or natal chart, kundli/janma, zodiac, BaZi/Chinese astrology, feng-shui
-  elements, nakshatra, dasha, planetary transits, Saturn return, "Mercury retrograde",
-  relationship compatibility, an auspicious date, "what's my luck this year", Tibetan
-  or Buddhist astrology, Losar animal, Kalachakra, Mewa, Chiron/wounded healer, or
-  brings a love/career/money/crisis/health/purpose question through the stars.
+  elements, nakshatra, dasha, planetary transits, Saturn return, Sade Sati,
+  "Mercury retrograde", relationship compatibility, an auspicious date/muhurta,
+  "what's my luck this year", Tibetan or Buddhist astrology, Losar animal, Kalachakra,
+  Mewa, Chiron/wounded healer, or brings a love/career/money/crisis/health/purpose
+  question through the stars. Also activate for: "where should I move/live", relocation
+  or astrocartography, fertility/children questions, baby naming/Namakaran, family
+  conflict, past lives or South Node/Ketu karma, "will I have kids", "is my partner
+  cheating", corporate/startup/event charts, "is my business chart good", pet charts,
+  election or political astrology, medical astrology/surgical timing, Nadi astrology,
+  birth time rectification, evil eye or curse questions framed astrologically, and any
+  question beginning "what do the stars say about…"
 allowed-tools: Bash(python3 *)
 argument-hint: "[birth details, or a question like 'am I compatible with…']"
 metadata:
@@ -111,14 +118,29 @@ change needed.
 ### 3 — Ground the interpretation
 
 Read the chart through the **reference rulesets**, not from vibes. Load the file(s)
-matching the systems you ran:
+matching the question type:
 
-- **[references/western.md](references/western.md)** — signs, planets, houses, aspects, dignities, the Big Three, Chiron, health indicators, transits, Saturn return.
-- **[references/vedic.md](references/vedic.md)** — lagna, rashi, nakshatra, the grahas, dashas, yogas, karma, health (6th/8th/12th), remedies.
-- **[references/bazi.md](references/bazi.md)** — four pillars, Day Master & strength, the five elements, useful/unfavourable element, luck pillars, Ten Gods, Tai Sui.
-- **[references/synastry-and-timing.md](references/synastry-and-timing.md)** — compatibility, transits/forecasting, electional (auspicious dates) and horary (specific questions).
-- **[references/tibetan.md](references/tibetan.md)** — Tibetan/Buddhist astrology: Losar animal cycle, Mewa nine-number fate system, Kalachakra Lung-ta, Parkha trigrams, Buddhist karmic frame, remedial practices.
-- **[references/consultation.md](references/consultation.md)** — the human craft: the five anxieties (love, vocation, timing, purpose, **health**), anti-Barnum discipline, ethics, and hard-news delivery. **Read this one for any real reading.**
+| Question type | Load |
+| --- | --- |
+| Natal / personality / Big Three | `western.md` |
+| Karma, dasha, "when will X happen", Kundli | `vedic.md` |
+| BaZi, Chinese astrology, luck pillars | `bazi.md` |
+| Compatibility / synastry | `synastry-and-timing.md` |
+| Transits, forecasting, "why is life like this now" | `synastry-and-timing.md` + `vedic.md` (Sade Sati) |
+| Auspicious date / Muhurta / electional | `synastry-and-timing.md` |
+| Health, body, chronic illness, Ayurvedic dosha | **`health.md`** |
+| Children, fertility, naming, family, home | **`specialized.md`** section B |
+| Relocation, "where should I move" | **`specialized.md`** section A |
+| Past lives, South Node, evolutionary astrology | **`specialized.md`** section C |
+| Unknown birth time / rectification | **`specialized.md`** section D |
+| Corporate / startup / event chart | **`specialized.md`** section E |
+| Mundane / political / market astrology | **`specialized.md`** section E |
+| Pets | **`specialized.md`** section F |
+| Taboo / intimate questions | **`specialized.md`** section G |
+| Curse / evil eye / blocked energy | **`specialized.md`** section H |
+| Twin problem | **`specialized.md`** section I |
+| Nadi astrology | **`specialized.md`** section J |
+| Human counseling craft, ethics | `consultation.md` — **always read for a real reading** |
 
 ### 4 — Synthesise (this is the skill)
 
@@ -133,15 +155,44 @@ and the held-back force turns inward as pressure on your own body."* Always look
 
 ### 5 — Counsel
 
-Answer the **real question** underneath the astrology one. Map every request to one
-of the four human anxieties and respond to the person, not just the planets:
+Answer the **real question** underneath the astrology one. Every question in ref/6.txt
+maps here. Respond to the *person*, not just the planets.
 
-- **Love / relationships** → synastry + 7th house / Venus / Moon; honest about friction, never "doomed".
-- **Career / money / power** → 10th & 2nd house, Midheaven, current dasha, Day Master's wealth element.
-- **Timing / crisis** → transits + dasha/luck-pillar timeline; *name when it eases* — certainty is the relief people seek.
-- **Purpose / self** → North Node / dharma (9th) / the chart's spine; validate without flattering.
-- **Health / body** → 1st/6th/8th/12th houses + Saturn/Mars/Rahu indicators + Chiron's house; give the timing window and 1–2 constructive practices; never a diagnosis; real medical concern → real doctor first.
-- **Tibetan/Buddhist angle** → use the birth year animal (from BaZi engine year pillar) + current year Lung-ta relationship + Mewa if known; frame as karma with Buddhist remedial practices.
+**The five core anxieties:**
+- **Love / relationships (Q1–12)** → synastry + 7th house / Venus / Moon / Rahu axis;
+  honest about friction, never "doomed". For repeating patterns: South Node + Venus/Moon placement.
+  For love vs arranged: 5th/7th lords (see `vedic.md §10`). For "will they come back": 7th lord
+  transits + Venus dasha timing.
+- **Career / money / power (Q13–24)** → 10th & 2nd house, Midheaven, current dasha, Day Master
+  wealth element; for relocation success (Q19): see `specialized.md §A`; for property (Q20, Q49):
+  4th house + Jupiter transit timing; for hidden talents (Q23): 5th house + Mercury/Venus dignities.
+- **Timing / crisis (Q25–34)** → transits + dasha/luck-pillar timeline; check Sade Sati
+  (`vedic.md §8`, engine `sade_sati` field); *always name when it eases* — that certainty is
+  the relief. For "stuck in life" (Q34): Saturn return + 12th house emphasis + North Node timing.
+- **Soul / purpose / karma (Q35–44)** → North Node / Atmakaraka (engine field) / 9th house /
+  Ketu's past-life story; for ancestral karma (Q44): 4th house + Saturn + Ketu; for spiritual
+  awakening (Q41): Neptune/Uranus transits + 12th house activation.
+- **Family / children / home (Q45–50)** → 5th house for fertility/children; 4th house for home
+  and family conflict; see `specialized.md §B` for naming, children's charts, Putra Bhava.
+
+**The specialist questions:**
+- **Health / body (Q27–30)** → load `health.md`; 1st/6th/8th/12th + Saturn/Mars/Rahu/Chiron;
+  give the timing window; never a diagnosis; real medical concern → real doctor *first*.
+- **Relocation / "where to move" (Q19, Q31)** → `specialized.md §A`; identify the planetary line
+  for the goal (Venus line for love, Jupiter MC for career); 9th house and its ruler for travel.
+- **Past lives / repeating patterns (Q36, Q37)** → `specialized.md §C`; South Node + Ketu story.
+- **Children, fertility, naming (Q45–47, Q50)** → `specialized.md §B`; 5th house + Jupiter timing.
+- **"I don't know my birth time" (Q rectification)** → `specialized.md §D`; run with `time_known:false`
+  and state explicitly what cannot be computed without a time (Ascendant, houses, hour pillar).
+- **Corporate / event / startup charts** → `specialized.md §E`; cast chart for the incorporation date.
+- **Mundane / political / market (Q specialized)** → `specialized.md §E`; outer-planet ingresses.
+- **Pets (Q specialized)** → `specialized.md §F`; cast chart for adoption/birth date.
+- **Taboo & intimate (Q6, Q specialized)** → `specialized.md §G`; hold non-judgmentally; read the chart.
+- **Curse / evil eye / blocked energy (Q29)** → `specialized.md §H`; reframe as Rahu/Saturn
+  transit pattern; give the end date and grounded remedies; never exploit fear.
+- **Surgical timing / medical electional (Q hyper-specific)** → `health.md §A` surgical timing;
+  avoid operating on the body part ruled by the Moon's current sign.
+- **Namakaran / business naming (Q specialized)** → `specialized.md §B` naming table by nakshatra.
 
 ### 6 — Remember
 
