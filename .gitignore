@@ -1,5 +1,6 @@
 __pycache__/
 *.pyc
+dist/
 
 # ControlKeel managed (do not edit) - artifacts that must not be committed
 /controlkeel/

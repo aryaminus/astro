@@ -1,12 +1,12 @@
 {
   "name": "astrology",
-  "version": "1.0.0",
-  "description": "Trustworthy multi-tradition astrology. Casts mathematically real charts (Western tropical, Vedic/Jyotish sidereal, Chinese BaZi) from birth data via a deterministic ephemeris engine.",
+  "version": "2.1.0",
+  "description": "Trustworthy multi-tradition astrology. 19 modes, 3 traditions, zero deps. Computes mathematically real charts from birth data via a deterministic ephemeris engine.",
   "author": {
     "name": "aryaminus"
   },
   "homepage": "https://github.com/aryaminus/astro",
   "repository": "https://github.com/aryaminus/astro",
   "license": "MIT",
-  "keywords": ["astrology", "horoscope", "natal chart", "bazi", "vedic", "jyotish", "zodiac", "tarot", "prediction"]
+  "keywords": ["astrology", "horoscope", "natal chart", "bazi", "vedic", "jyotish", "zodiac", "ephemeris", "mcp"]
 }

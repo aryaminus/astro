@@ -1,29 +1,31 @@
-# Astro Engine
+# Astro
 
-> A deterministic, multi-tradition astrology ephemeris engine designed for AI Agents and LLMs.
+> Deterministic, multi-tradition astrology ephemeris engine for AI agents.
 
-## Overview
-Astro is a zero-dependency Python library that calculates mathematically real astrological charts (Western tropical, Vedic/Jyotish sidereal, and Chinese BaZi) based on NASA JPL approximations. It decouples calculation from interpretation, providing LLMs with trustworthy celestial data to prevent hallucinations.
+## What it does
 
-## Usage for AI Agents
+Decouples calculation from interpretation. A pure-Python engine computes
+real sky positions; the host LLM interprets the structured output using
+classical rulesets. The model never has to hallucinate a planetary position.
 
-Astro is universally deployable across the AI ecosystem:
+## Quick start
 
-1. **MCP (Model Context Protocol):**
-   - Use `skills/astrology/scripts/mcp_server.py` to expose Astro as an MCP tool.
-   - Run via FastMCP: `fastmcp run skills/astrology/scripts/mcp_server.py:mcp`
+```bash
+npx skills add aryaminus/astro -g       # 50+ agent hosts
+/plugin marketplace add aryaminus/astro  # Claude Code
+pip install -r requirements.txt && uvicorn skills.astrology.scripts.api:app  # REST API
+```
 
-2. **OpenAPI / Custom GPTs / Coze:**
-   - See `openapi.yaml` for the standard REST schema.
-   - A monetization-ready FastAPI server is available at `skills/astrology/scripts/api.py`.
+## Key files
 
-3. **Agent Skills (OpenClaw, Cursor, Codex):**
-   - Install via CLI: `npx skills add aryaminus/astro -g`
-   - See `.agents/plugins/marketplace.json` and `skills/astrology/SKILL.md`.
+- `skills/astrology/scripts/astro_engine.py` — zero-dep math engine. Do NOT add external deps.
+- `skills/astrology/scripts/mcp_server.py` — MCP wrapper (18 tools, stdio + SSE)
+- `skills/astrology/scripts/api.py` — FastAPI (27 endpoints, free by default)
+- `skills/astrology/SKILL.md` — runtime spec the model reads
+- `skills/astrology/references/` — 8 grounded classical rulesets
+- `openapi.yaml` — REST schema for ChatGPT, Agentforce, Coze
 
-## Core Logic
-- `astro_engine.py`: Contains the pure math engine. Do not add external dependencies like pandas or numpy here.
-- Outputs are strictly JSON formatting the celestial bodies, houses, aspects, dignities, and dashas.
+## Full docs
 
-## Documentation
-For complete installation and marketplace distribution guidelines, refer to `AGENTS.md` and `README.md`.
+See `AGENTS.md` for install methods, env vars, and cloud config.
+See `README.md` for the project overview.
