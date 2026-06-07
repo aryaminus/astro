@@ -2,16 +2,16 @@
 
 Beyond the core reading of a natal chart, every tradition has a long tail of
 specialised branches — the questions a long-time client brings once the basics
-have been covered. This file is the playbook for those questions. It pairs
-with the engine's extra modes (`astrocartography`, `horary`, `event`) and
-its specialty lookups (`namakaran`, `anatomy_chart`).
+have been covered. This file is the playbook for those questions, organised
+by branch. It pairs with the engine's extra modes (`astrocartography`,
+`horary`, `event`) and its specialty lookups (`namakaran`, `anatomy_chart`).
 
 Rule that governs every section here: **always cite the computed placement**.
 The specialty branches are the most tempting to free-associate on. Resist.
 
 ---
 
-## 1. Astrocartography & relocation (engine `mode:"astrocartography"`)
+## §1 — Astrocartography & relocation (engine `mode:"astrocartography"`)
 
 **The question it answers:** *"Where in the world should I live for love / career
 / health / to find my 'Venus line' / to escape a hard Saturn placement?"*
@@ -45,15 +45,33 @@ the agent interprets. The classic mistake: "Saturn line bad → avoid" — many
 people thrive on Saturn lines (they need structure to do their best work).
 Frame each line as **what it asks of you**, not a binary good/bad.
 
-### The Twin Problem (a note)
+### The Twin Cities note
 Astrologers note that many people flourish in cities *opposite* their birth
 longitude. The DS line of the Sun, the IC line of the Moon, the ASC line of
 Jupiter — these are often "where I become who I was always meant to be." Use
 the engine's output to surface non-obvious lines for the client.
 
+### Property buying & home timing
+
+4th house lord's strength + current 4th-house transits time home purchases.
+Jupiter or Venus transiting the 4th = auspicious time to buy home/land.
+In BaZi: choose a year whose element supports the Day Master, and a house
+facing a direction aligned with the Useful God element. Avoid purchasing
+when malefics (Saturn, Rahu, Mars) heavily afflict the 4th house lord.
+
+### Travel safety
+
+Check the Moon and 9th-house ruler for the travel period. Avoid major malefic
+transits to the Ascendant or Moon during the travel window. In BaZi, avoid
+travelling in years that clash with your year-branch animal (e.g. Dragon year
+person avoids Dog year travel). See also the **local space chart**: the natal
+chart's angular planets (1st/4th/7th/10th) point in specific compass directions
+from the birthplace — living or travelling in those directions activates the
+planet's themes.
+
 ---
 
-## 2. Horary / Prasna — chart of the moment (engine `mode:"horary"`)
+## §2 — Horary / Prasna — chart of the moment (engine `mode:"horary"`)
 
 **The questions it answers:** *"Will my ex come back? Where did I lose my ring?
 Is the rumor about my boss true? Should I sign this contract today?"*
@@ -98,47 +116,38 @@ Moon first (it overrides everything), (c) read the planetary hour ruler for
 flavour, (d) read the Ascendant ruler and the relevant house ruler for the
 answer. Never assert certainty — frame as "the chart suggests…"
 
-### Lost objects (a horary speciality)
-"Where did I lose it?" → 4th house rules the matter's end (where the object
-rests). The **sign on the 4th** gives the **element** of the location:
-
-- **Fire (Aries/Leo/Sagittarius)** → near heat (kitchen, fireplace), high places, east-facing rooms
-- **Earth (Taurus/Virgo/Capricorn)** → on the ground, in storage, in soil or wood; low shelves
-- **Air (Gemini/Libra/Aquarius)** → where air moves (windows, vents), on paper, in books
-- **Water (Cancer/Scorpio/Pisces)** → near water (sink, bathroom), in containers, dark damp places
-
-The **Moon's last aspect** before changing sign → which direction relative
-to where you are now. This is the level of specificity the engine + agent
-can offer; for the actual "it's in the upstairs bedroom closet" the querent
-needs to walk through the space.
+For lost-object guidance, see **§6** below.
 
 ---
 
-## 3. Electional astrology — picking the right day (also `synastry-and-timing.md`)
+## §3 — Electional astrology — picking the right day (also `synastry-and-timing.md`)
 
 **The questions it answers:** *"When should I get married? Launch the business?
 Sign the contract? Have the surgery? Send the email? Move house?"*
 
 ### Core rules (cross-tradition)
 1. **Identify the house that rules the matter** (7=marriage, 10=career, 2/8=finance, 5=children/creativity).
-2. **Find a day when the relevant planet is strong and unafflicted:**
-   - Marriage → Venus, Jupiter, 7th house lord well-aspected
-   - Business launch → Jupiter (expansion), Mercury (commerce), 10th house lord
-   - Surgery → Moon NOT in the sign ruling the body part (see Medical below); avoid lunar eclipse
-   - Contract signing → Mercury direct (not retrograde), no major malefic aspecting Mercury
-   - Moving house → Moon in a fixed sign (Taurus, Leo, Scorpio, Aquarius) for stability
+2. **Find a day when the relevant planet is strong and unafflicted.**
 3. **Avoid Mercury retrograde** for any signing, launching, or starting-from-scratch.
 4. **Avoid lunar eclipses** for almost all beginnings.
 5. **Favour benefics on the relevant point:** Moon in a friendly sign, Jupiter trine or sextile the Ascendant, Venus well-placed.
+6. **Check Void-of-course Moon** → if VoC on the candidate day, do not initiate.
 
 ### Vedic muhurta (the deepest electional system)
-- **Pushya nakshatra** is the most auspicious for nearly all beginnings (nourishment, growth, support from Saturn's disciplined quality).
+- **Pushya nakshatra** is the most auspicious for nearly all beginnings.
 - **Rohini** (Moon) — beauty, abundance, creativity, marriage.
 - **Hasta** (Moon) — skill, craftsmanship, healing.
 - **Mrigashira** (Mars) — searching, gentle beginnings, journeys.
 - **Avoid:** Ashlesha (serpent, deceit), Jyeshtha (seniority, isolation), Mula (uprooting).
 - **Avoid 8th-house or 6th-house days** (Rahu Kalam, Yama Ghantaka, Gulika Kalam in South-Indian panchang).
 - **Best weekday + hora combination** for the matter: e.g. Thursday + Jupiter's hora for financial beginnings, Friday + Venus's hora for romance/arts.
+
+### Specific event rules (also see `synastry-and-timing.md §C.1–C.5`)
+- **Wedding muhurtham**: fixed (Sthira) Lagna; Moon in Rohini / Mrigashira / Magha / Uttara Phalguni / Hasta / Swati / Anuradha / Uttara Ashadha / Uttara Bhadrapada / Revati; Venus and Jupiter unafflicted; Tarabala favourable for both bride and groom.
+- **Business launch**: movable (Chara) Lagna; 10th house strong; Mercury and Jupiter unafflicted; Pushya / Hasta / Rohini nakshatra.
+- **Surgery**: avoid Moon in the sign ruling the body part; avoid lunar eclipse; prefer fixed-sign Moon; waning Moon; Mars not afflicting the Lagna.
+- **Contract signing**: Mercury direct; Moon not in 6/8/12 from Lagna; Mercury unafflicted.
+- **House purchase / renovation**: 4th house strong, unafflicted; fixed-sign Moon; Venus well-aspected; Mars not in the 4th.
 
 ### Chinese day selection
 - **Day branch** favourable to the querent's year animal (not clashing).
@@ -153,7 +162,7 @@ agent should explain *why*, not just *when*.
 
 ---
 
-## 4. Rectification — when the birth time is unknown
+## §4 — Rectification — when the birth time is unknown
 
 **The question it answers:** *"Can you tell me exactly when I was born, given
 that I know when my major life events happened?"*
@@ -188,7 +197,7 @@ substantive reading; just say what's missing.
 
 ---
 
-## 5. Namakaran — naming a child (or a business, or a project)
+## §5 — Namakaran — naming a child or business
 
 **The question it answers:** *"What should my baby be named? What syllable
 vibrates with my chart / my business's inception chart?"*
@@ -196,15 +205,56 @@ vibrates with my chart / my business's inception chart?"*
 ### The classical rule (Vedic)
 The **starting syllable of the name** is taken from the **Janma Nakshatra
 pada** of the Moon (or for a business, of the inception chart's Moon).
-The engine's `namakaran(moon_lon_sidereal)` returns the four syllables of
-the relevant nakshatra, one per pada. Traditional rules:
+The engine returns `janma_nakshatra`. Traditional rules:
 
 - **Boy**: odd padas (1, 3) favoured; even padas (2, 4) sometimes preferred by region
 - **Girl**: even padas (2, 4) favoured; odd padas (1, 3) sometimes preferred by region
-- **Avoid** syllables that rhyme with the family surname (sound clash) and syllables of grahas to be pacified (e.g. Shani's syllable "Sa" not used if Saturn is the worst planet in the chart)
+- **Avoid** syllables that rhyme with the family surname (sound clash) and syllables of grahas to be pacified (e.g. Shani's "Sa" if Saturn is the chart's worst graha)
 - **Combine** with the family letter tradition (e.g. South Indian: family letter from the father's name)
 
-### The Western equivalent
+### Nakshatra syllable table (all 27)
+
+| Nakshatra | Starting syllables | | Nakshatra | Starting syllables |
+| --- | --- | --- | --- | --- |
+| Ashwini | Chu, Che, Cho, La | | Vishakha | Ti, Tu, Te, To |
+| Bharani | Li, Lu, Le, Lo | | Anuradha | Na, Ni, Nu, Ne |
+| Krittika | A, I, U, E | | Jyeshtha | No, Ya, Yi, Yu |
+| Rohini | O, Va, Vi, Vu | | Mula | Ye, Yo, Ba, Bi |
+| Mrigashira | Ve, Vo, Ka, Ki | | Purva Ashadha | Bu, Dha, Bha, Da |
+| Ardra | Ku, Kha, Ng, J | | Uttara Ashadha | Be, Bo, Ja, Ji |
+| Punarvasu | Ke, Ko, Ha, Hi | | Shravana | Ju, Je, Jo, Sha |
+| Pushya | Hu, He, Ho, Da | | Dhanishtha | Ga, Gi, Gu, Ge |
+| Ashlesha | Di, Du, De, Do | | Shatabhisha | Go, Sa, Si, Su |
+| Magha | Ma, Mi, Mu, Me | | Purva Bhadrapada | Se, So, Da, Di |
+| Purva Phalguni | Mo, Ta, Ti, Tu | | Uttara Bhadrapada | Du, Th, Jha, Na |
+| Uttara Phalguni | Te, To, Pa, Pi | | Revati | De, Do, Cha, Chi |
+| Hasta | Pu, Sh, Na, Th | | | |
+| Chitra | Pe, Po, Ra, Ri | | | |
+| Swati | Ru, Re, Ro, Ta | | | |
+
+### Children's charts
+
+Read a child's chart **for the parent's understanding**, not as the child's fate.
+Never label a child as "difficult" or use their chart to compare them with siblings.
+
+- **Moon sign** = the child's emotional needs and how they receive love
+- **Mercury sign/house** = how they learn best (earth = hands-on; air = verbal/conceptual; fire = enthusiastic; water = intuitive)
+- **Sun sign** = the identity they're growing *into* — not there yet, so give patience not projection
+- **Saturn's placement** = where they'll face the most structured challenge; give support, not pressure
+
+### Fertility timing
+
+In Vedic: **5th house (Putra bhava)** + Jupiter's condition. Check the 5th lord's dignity and placement — strong = good fertility potential. Delays (not denial) from Saturn/Rahu in the 5th or afflicting the 5th lord. Timing: children classically arrive in **Jupiter dasha/antardasha**, or when Jupiter transits the 5th or 9th, or when the 5th-lord dasha activates. Check for Neecha-Bhanga before calling any delay permanent.
+
+In Western: 5th house planets + Venus/Moon condition. Jupiter transiting the 5th or making a good aspect to natal Moon = fertility window. New Moons near the 5th house cusp align symbolically.
+
+In BaZi: the **Output element** (what the Day Master produces) = children. Strong Output element in the chart or luck pillar = natural window for children.
+
+**Fertility window** = parent in a Jupiter-active period (Jupiter dasha or
+antardasha; Jupiter transiting 1/5/9); see `vedic.md §11` for the full Putra
+Bhava ruleset.
+
+### Western baby-naming
 Western baby-naming fads come and go; the most astro-aligned modern trend is
 matching the child's chart to the **name's numerology** (Pythagorean, Chaldean,
 or Vedic) and the **initial letter's zodiacal sign ruler** (Aries = "A" names
@@ -218,75 +268,51 @@ business's birth Moon becomes the suggested starting sound for the brand.
 Pair with the **founder's own Janma Nakshatra** if compatibility with the
 founder is the priority.
 
+Element vibration for the brand name style: Fire-sign Moon = bold, leading names; Earth = solid, trustworthy names; Air = communicative, clever names; Water = intuitive, caring names.
+
+### Changing one's own name
+A common modern question: "If I legally change my first name, will it change
+my destiny / fix my bad luck?" Classical Jyotish says: a name *can* shift the
+vibrational pattern, but only if (a) the new name's syllable matches the
+natal nakshatra pada, (b) the change is done on a favourable muhurta
+(see §3), and (c) the person lives into the new name (the chart doesn't
+change retroactively, but the *vibration* of the lived name can support a
+new chapter). The agent should be honest this is less codified than
+parent-to-child naming.
+
 ---
 
-## 6. Medical astrology (deeper than the core reading)
+## §6 — Lost objects & quick decisions (using the horary engine)
 
-**The questions it answers:** *"What body systems does my chart say to watch?
-Why do I always get sick at the same time of year? When is the best time for
-surgery? What herbs/medicines suit me?"*
+For simple lost-object questions and immediate "should I" decisions, the
+agent runs a quick horary chart and reads the **4th house** (where the
+object rests / where the matter ends) and the **Moon's last separating
+aspect** (direction relative to the querent).
 
-### The zodiac-anatomy map
-Each sign rules a body region (engine `ANATOMY`):
-- **Aries** — head, brain, eyes, face, adrenals
-- **Taurus** — neck, throat, vocal cords, thyroid, jaw
-- **Gemini** — lungs, shoulders, arms, hands, peripheral nerves
-- **Cancer** — chest, breasts, stomach, womb, lymph
-- **Leo** — heart, upper back, spine, circulation
-- **Virgo** — abdomen, intestines, spleen, assimilation
-- **Libra** — kidneys, lower back, adrenals, skin
-- **Scorpio** — reproductive organs, bladder, rectum, pelvis
-- **Sagittarius** — hips, thighs, liver, sciatic nerve
-- **Capricorn** — knees, bones, joints, teeth, skin
-- **Aquarius** — ankles, calves, circulation, the electrical system
-- **Pisces** — feet, immune system, the psyche
+### "Where did I lose my ___?"
+- **2nd house** = the lost item (your possessions); **4th house** = where it rests
+- The **sign on the 4th house cusp** = the **element** of the location:
+  - **Fire (Aries/Leo/Sagittarius)** → near heat (kitchen, fireplace), high places, east-facing rooms
+  - **Earth (Taurus/Virgo/Capricorn)** → on the ground, in storage, in soil or wood; low shelves
+  - **Air (Gemini/Libra/Aquarius)** → where air moves (windows, vents), on paper, in books
+  - **Water (Cancer/Scorpio/Pisces)** → near water (sink, bathroom), in containers, dark damp places
+- The **Moon's last separating aspect** = the direction relative to where you are now
 
-### The chart tells you which body systems to watch
-- The **6th house** (Western) and **Shatru bhava** (Vedic) = chronic, daily-body patterns; its sign tells the system.
-- **Saturn in or afflicting the 6th** = chronic, structural, long-lasting issues
-- **Mars in the 6th or 8th** = inflammation, accidents, surgery themes
-- **Chiron's house** = the arena of psychosomatic wounding and the gift of healing others through that wound
-- **The Ascendant and its ruler** = the constitutional baseline
-
-### Surgery timing — the most actionable rule
-**Avoid elective surgery when the Moon transits the sign ruling the body part.**
-- Throat surgery → avoid Moon in Taurus
-- Heart surgery → avoid Moon in Leo
-- Abdominal surgery → avoid Moon in Virgo
-- Hips/thighs surgery → avoid Moon in Sagittarius
-- Knee surgery → avoid Moon in Capricorn
-- Etc.
-
-**Additional rules** (classical):
-- Avoid the **lunar eclipse** windows (2 weeks before/after) for elective procedures
-- Prefer **Moon in a fixed sign** (Taurus, Leo, Scorpio, Aquarius) for stable outcomes
-- **Mars afflicting the Moon** or the Ascendant ruler → higher risk of complications; defer
-- The **waning Moon** is traditionally preferred for surgery (less vital force bleeding out)
-- The **waxing Moon** is preferred for treatments that need to "build" (long-term therapies, organ-supportive procedures)
+### "Should I do X right now?"
+- Run a horary chart for the moment of deliberation
+- **VoC Moon** → "nothing will come of it" — wait
+- **Mercury retrograde** in the chart → "you'll be redoing this — wait"
+- **The 1st house ruler applying to a benefic** → "yes, go"
+- **The 1st house ruler in 6/8/12 or with a malefic** → "the matter has a cost — proceed with eyes open"
 
 ### The honest frame
-**Astrology complements but never replaces medicine.** Use the engine to read
-the *timing* and the *vulnerability map*. A real diagnosis comes from a real
-doctor. The agent must be unequivocal about this: "your chart suggests
-watching X; please see a qualified practitioner for any actual symptoms."
-
-### Diet & lifestyle by chart
-- **Aries-rising / Mars-prominent** → favours a cooling diet (less red meat, more greens); rhythmic exercise
-- **Taurus / Venus-prominent** → favours slow, sensual eating; watch the throat (salt, sugar, voice use)
-- **Gemini / Mercury-prominent** → favours light, varied meals; the breath and the lungs are the barometer
-- **Cancer / Moon-prominent** → favours warm, cooked food; the gut is the emotional barometer
-- **Leo / Sun-prominent** → favours the heart; aerobic exercise and warming spices
-- **Virgo / Mercury-prominent** → favours simple, whole foods; routine is the medicine
-- **Libra / Venus-prominent** → favours balance; the kidneys and skin
-- **Scorpio / Mars-Pluto-prominent** → favours cleansing; the reproductive and eliminative systems
-- **Sagittarius / Jupiter-prominent** → favours variety and the outdoors; the liver thrives on movement
-- **Capricorn / Saturn-prominent** → favours discipline; bones and joints need weight-bearing and minerals
-- **Aquarius / Uranus-Saturn-prominent** → favours the circulatory and nervous systems; rhythm and rest
-- **Pisces / Neptune-Jupiter-prominent** → favours the immune and the psyche; the body is porous to environment
+The chart gives the *element and direction*, not the exact GPS. Be honest
+about this limit; the level of specificity a real "where is it?" question
+needs is beyond any chart. The querent still has to walk through the space.
 
 ---
 
-## 7. Mundane astrology — collective events, markets, politics
+## §7 — Mundane astrology — collective events, markets, politics
 
 **The questions it answers:** *"Who will win the election? Is a recession
 coming? When will the market crash?"*
@@ -329,16 +355,12 @@ chart suggests financial restructuring, which lines up with the actual
 
 ---
 
-## 8. Forensic & lost-object astrology
+## §8 — Forensic & criminal astrology
 
 **The questions it answers:** *"Where is the missing body? Is the rumor
 true? Who committed the crime? Where is my lost ring?"*
 
-### Lost objects (horary)
-- **2nd house** = the lost item (your possessions); **4th house** = where it rests
-- The **sign on the 4th house cusp** = the **element** of the location
-  (see Horary above for Fire/Earth/Air/Water correspondences)
-- The **Moon's last separating aspect** = the direction relative to the querent
+### Lost objects (use §6 above; the same rules apply)
 
 ### Forensic event charts
 - Cast a chart for the **exact moment of the crime** (or "moment last seen")
@@ -356,15 +378,18 @@ moment, not an investigation tool. Real forensic work is for the police and
 qualified investigators." Even so, the symbolic reading can sometimes
 **suggest a direction or characteristic** that the querent already half-knows.
 
+For sensitive forensic questions (missing persons, crime), always
+recommend the user also contact law enforcement and licensed investigators.
+
 ---
 
-## 9. Corporate, pet, and event charts (engine `mode:"event"`)
+## §9 — Corporate, pet, event, and family-conflict charts (engine `mode:"event"`)
 
 **The questions it answers:** *"What is the destiny of my startup? Will the
 new kitten get along with my cat? Should I move in on this date? Is this
-moment right to launch?"*
+moment right to launch? How can I mend my relationship with my parent?"*
 
-### The method
+### The "moment of inception" method
 Any "moment of inception" can be charted — the math is identical to a natal
 chart. The agent and querent choose the moment together:
 
@@ -377,6 +402,8 @@ chart. The agent and querent choose the moment together:
 - **Project / creative work** → moment of public launch or first public showing
 - **App / product** → moment of public release (this is the literal "ChatGPT
   moment" — the day OpenAI pushed the public release)
+- **Divorce finalisation** → moment the decree is signed
+- **Recovery milestone** → first day of sobriety, day out of hospital, etc.
 
 ### The interpretation
 Once you have the chart, **read it as a person**: Big Three = the
@@ -391,9 +418,170 @@ Two pet charts → `mode:"synastry"` with the two birth data sets. Read Sun-Moon
 (bond), Venus-Mars (play), Mars-Mars (the fights). The fact that the
 compatibility is computed the same way as a couple is itself the answer.
 
+### Family conflict & home
+For "why is there so much arguing at home?" / "how do I mend things with my parent?":
+- **4th house** (Western) / **Sukha bhava** (Vedic) = the home, the parents, the heart of the family
+- The 4th house's current **transits** describe the *current* family atmosphere
+- The 4th **lord's** placement and condition describe the *texture* of the family
+- Saturn in / afflicting the 4th = long-running family weight, often from ancestral patterns
+- For parent-specific: 4th = one parent (often mother), 10th = the other (often father); compare to the **natal Moon** and **natal Sun** for the parents as people
+- For active mend: a Jupiter transit through the 4th (or the parent's 4th) often opens a window of forgiveness; an eclipsed Moon transit can also crack the family open
+- **Read the parent's chart too** if you have it — most family conflict is bidirectional
+
 ---
 
-## 10. Out of scope (acknowledge honestly)
+## §10 — Past lives, karma, evolutionary astrology
+
+**The questions it answers:** *"How did I die in a past life? What phobias
+am I carrying from before? What is my karmic debt? Why do I keep repeating
+the same painful lesson?"*
+
+### Vedic (Jyotish) — Rahu and Ketu
+- **Ketu** (south node) = past-life mastery, what the soul has already
+  learned, the gift to *use* not *pursue*; in the chart, the Ketu sign/house
+  describes an area of innate skill and equally a danger of over-identifying
+  with the past
+- **Rahu** (north node) = the soul's hunger this lifetime, the unfamiliar
+  direction, the area of growth-by-stretching; the Rahu sign/house is where
+  obsession, ambition, and unconventional success come
+- The **Rahu-Ketu axis** is the karmic spine of the chart; the houses they
+  occupy describe the axis of past-life comfort (Ketu) vs. this-life
+  stretching (Rahu)
+
+### Western — Pluto and the South Node
+- **Pluto** at birth = the soul's evolutionary starting point; the sign and
+  house describe the depth of transformation the soul agreed to
+- **South Node** = past-life comfort and gifts to release
+- **North Node** = this-life growth edge (Rahu's equivalent)
+- **Chiron's house** = the area of psychosomatic wounding carried over from
+  earlier, which becomes the gift of healing others
+- The **12th house** = the unconscious, the past, what's behind the curtain;
+  its transits and progressions describe the karmic re-patterning
+
+### Pluto transits
+The transits that *most reliably* mark the moments when past-life material
+surfaces:
+- **Pluto conjunct the Ascendant** → a death-and-rebirth of identity
+- **Pluto conjunct the Sun or Moon** → the soul's core question comes up
+- **Pluto conjunct the South Node** → the past-life pattern demands resolution
+- **Pluto square the Nodal axis** → the karmic balance shifts, often through crisis
+
+### Evolutionary astrology (Jeffrey Wolf Green school)
+- Focus is on the *evolutionary intention*: what the soul wanted to do this
+  time that it didn't manage last time
+- The **South Node** is not just past comfort; it's the *strategy the soul
+  developed* to survive, and Pluto shows how the soul will be asked to
+  transform it
+- The **North Node** is the *evolutionary intention*: the direction the soul
+  wants to grow
+
+### Reading recipe
+1. Identify the Rahu-Ketu axis (Vedic) and the Pluto placement (Western)
+2. Describe the past-life pattern (the gift, the comfort, the over-use)
+3. Describe the this-life hunger / evolutionary intention
+4. Note the current Pluto transit if active → "the soul is being asked to transform ___ right now"
+5. Frame as work the soul *can* do, not a fixed sentence
+
+---
+
+## §11 — Taboo & highly intimate questions
+
+People bring the questions they would never ask a therapist or priest. Because
+astrologers are read as neutral observers of a mathematical chart, the
+confessional posture is common. The questions span:
+
+- **"I'm having an affair — will my spouse find out?"** — Read the 7th house (the spouse's proxy) and the 12th (the hidden). A 7th-12th hard aspect or 12th-house malefics → concealment has a cost. A 7th-house transit opening → the truth surfaces. **Don't** moralise; reflect the geometry of secrecy and offer the choice.
+- **"I hate my career but I make too much money to leave — will the universe force me out?"** — Read the 2nd (security), 10th (career), 6th (daily work), and the transits to the Midheaven. A Saturn return or 10th-house Pluto transit often does exactly this — *forces the exit the person won't choose*.
+- **"Which parent will leave the larger inheritance?"** — See `vedic.md §17`. Read 4th and 10th houses, 8th for the inheritance itself. Frame as a family-pattern issue; suggest estate mediation rather than a family fight.
+- **"Will I have an affair, ever?"** — Read 5th (romance, pleasure), 8th (intimacy, the hidden), 12th (the unconscious, what's concealed), and Venus/Mars. The honest read: a high-libido signature (Mars-Venus in passionate signs, Pluto aspecting the 5th, Rahu in 7th) describes the *capacity*, not a *fate*. Agency is the agent's gift back to the client.
+- **"Will my ex come back?"** — Read the 7th house and its current transits, plus the relationship's dasha timing (Vedic) and the 7th-house activation in the partner's chart if you have it. The honest answer is almost never a binary; it's "the relationship has a future *if both of you do this work*."
+
+**The frame**: these are normal human questions. The agent's job is to hold
+them with compassion, never judgement, and to translate the geometry into
+honest language. The chart shows the shape of the energy; the person still
+chooses the action.
+
+For fertility, conception, and "will I be a parent?" see **§5** above (with
+the Putra Bhava rules in `vedic.md §11`).
+
+For inheritance and family-money disputes see `vedic.md §17`.
+
+---
+
+## §12 — Curse / evil eye / blocked energy
+
+**The question it answers:** *"Is there a curse on me? Is someone sending
+me negative energy? Why is everything blocked?"*
+
+This question is common in Mediterranean, Middle Eastern, Latin American, and
+some South Asian contexts. The agent should:
+
+- **Listen first** — for the person, "curse" is a real felt experience. The
+  chart's job is to translate it, not to dismiss it.
+- **Reframe through the chart**: classical Jyotish and Hellenistic astrology
+  *do* have vocabulary for what the modern mind calls a "curse":
+  - **Saturn in the 8th / 12th** with no benefic aspect = chronic, long, hidden suffering
+  - **Rahu in the 12th** + 1st-lord in 6/8/12 = the body's energy is "stuck"
+  - **Affliction of the 5th house (purva punya)** = the soul came in with unfinished business; the patterns repeat
+  - **A "functional malefic" without cancellation** = a planet that can't deliver its gifts; an area of life that feels blocked
+- **Offer the classical remedies** (see `vedic.md §15`): the Saturn
+  mantra + Saturday service, charity to the graha's signifier, the right
+  action. The "lift the curse" framing is a fear-based upsell the agent
+  must avoid. The "work the pattern" framing is honest and empowering.
+- **Validate the felt experience without endorsing magical thinking**:
+  *"What you're describing has a real felt weight. The chart shows it as
+  [Saturn in the 8th]. The classical remedy is [Saturn mantra + service
+  to the elderly + disciplined daily structure]. That's the work. The
+  chart is a map; you're the one walking the path."*
+- **If a paid "curse removal" ritual is being suggested** by another
+  practitioner, gently flag: classical Jyotish does not support
+  paid-ritual "curse lifts" by competent astrologers. This is a known
+  exploitation pattern; protect the client.
+
+---
+
+## §13 — The Twin Problem (why a 3-minute difference can change everything)
+
+**The question it answers:** *"My twin and I were born 3 minutes apart. We
+have the same chart. Why do we live such different lives?"*
+
+The answer in practice: **they don't have the same chart**. The Ascendant
+moves roughly 1° every 4 minutes, so a 3-minute difference can shift the
+Ascendant by up to 1° (sometimes the whole Rising sign), and a 2-hour
+difference (the longest plausible "twin" interval) can shift the Moon by
+1°. The natal chart at finer resolution tells the story:
+
+- **D-9 (Navamsha)** — the marriage and dharma chart; changes every 3°20'
+  (≈ 8 minutes of birth time); the most classical resolution to the twin
+  problem
+- **D-60 (Shashtiamsha)** — the karma chart; changes every 1° (≈ 2 minutes
+  of birth time); the most granular
+- **D-1, D-2, D-3, D-4…** (the varga charts of Vedic astrology) — each
+  layers a different life-domain onto the same planetary positions at
+  increasing resolution
+- **Progressed chart** (Western) — moves ~1° per year; after the birth,
+  the progressed Ascendant can be in a *completely different sign* from
+  the natal Ascendant
+- **Solar arc directions** — move ~1° per year; trigger life events with
+  extraordinary accuracy when calculated correctly
+
+### What the agent should do
+- Validate the question (it's a real puzzle and a great one)
+- Run the engine and show the difference in the *2nd-3rd minute* of the
+  birth time — even a small time shift changes the Moon's exact degree,
+  the dasha balance, the planetary aspects
+- Note that **the varga charts and progressions are where the real
+  difference shows up**; the current engine computes the Rasi (D-1) chart;
+  for full twin-differentiation work, see a Jyotish practitioner who
+  computes the D-9 and D-60
+- The deeper truth: the chart is the *map of possibility*, not the
+  *blueprint of fate*; even identical twins make different choices, and
+  the chart describes the energy available to those choices, not the
+  choices themselves
+
+---
+
+## §14 — Out of scope (acknowledge honestly)
 
 Some branches the skill does **not** support, and the agent should say so:
 
@@ -405,7 +593,7 @@ Some branches the skill does **not** support, and the agent should say so:
   not model it.
 - **True automatic rectification** (no candidate-time scan against life
   events) — the engine does not run progressions or solar arcs; the agent
-  can guide a manual rectification but does not automate it.
+  can guide a manual rectification but does not automate it (see §4).
 
 For these, the agent's job is to **acknowledge the tradition, explain the
 method, and refer** to a qualified practitioner.

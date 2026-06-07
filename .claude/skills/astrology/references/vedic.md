@@ -137,7 +137,7 @@ The Atmakaraka's natal house shows *where* the soul's deepest work plays out thi
 - **Timing**: Jupiter mahadasha/antardasha, or Jupiter transiting 1st/5th/9th = classic windows.
 - Child's nature from 5th sign: Fire = energetic/assertive; Earth = steady/practical; Air = communicative; Water = sensitive.
 
-## 12. Namakaran — naming a child or business (Q in §3 of ref/6.txt)
+## 12. Namakaran — naming a child or business
 
 The classical rule: the **starting syllable of the name** is taken from the
 **Janma Nakshatra pada** of the Moon (for a child) or the inception chart's
@@ -213,7 +213,7 @@ For "will I win this lawsuit?" / "will the business turn a profit?" / "will I re
 
 Frame honestly: charts show *tendency*, not verdicts. A good lawyer, evidence, and timing all matter; the chart is one input.
 
-## 17. Inheritance & others' money (Q in §6 of ref/6.txt)
+## 17. Inheritance & others' money
 
 For "which parent will leave the larger inheritance?" / "will I receive the expected sum?" / "will the siblings fight me for it?":
 - **8th house** = others' money (including inheritance), the partner's assets, sudden transformation
@@ -246,3 +246,9 @@ For "should I move abroad?" / "will I be more successful overseas?":
 6. Check Atmakaraka for soul-purpose questions.
 7. Frame as karma-with-agency; offer a constructive remedy if apt.
 8. **Health reading**: check 1st/6th/8th/12th + Saturn/Mars/Rahu; give the dasha timing and a practical remedy — never a diagnosis.
+9. **Children question**: 5th house + Jupiter + active dasha of 5th lord or Jupiter → fertility window; mention Putra Bhava.
+10. **Marriage question**: 7th house + Venus/Mars + Darakaraka → partner texture; Mangal Dosha if Mars in 1/2/4/7/8/12; Navamsha for relationship depth; Guna Milan for the classical 36-point match.
+11. **Naming question (Namakaran)**: use `namakaran(moon_lon_sidereal)` to get the syllable; see §12.
+12. **Money / business question**: 2/6/10/11 + active dasha → financial chapter.
+13. **Litigation / inheritance**: 6/8/10 + dasha of the relevant lord → likely timing and texture; avoid fuelling family conflict.
+14. **Foreign / relocation**: 9/12 + astrocartography planet lines → direction and timing.

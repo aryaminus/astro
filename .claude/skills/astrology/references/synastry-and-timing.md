@@ -59,11 +59,76 @@ For "when should I marry / launch / sign / move?":
    person's Day Master / useful god and that doesn't clash with their year animal.
 Give 2–3 ranked options with the reason for each — not one mystical decree.
 
-## D. Horary / Prasna (answering a specific question)
-Classical horary casts a chart for the *moment a question is asked*. Lightweight version:
-run `mode:"transit"` for now, read the Moon (the querent's flow) and the planet ruling
-the matter, and answer the specific yes/when/how — while being honest that horary is the
-most interpretive branch and you're giving guidance, not a guarantee.
+### C.1 — Wedding muhurtham (Vedic, the most-asked electional)
+
+The classical rules for an Indian wedding muhurtha. A wedding chart is read
+as the *karmic joining* of two charts; a strong muhurtha is said to bless
+the marriage for lifetimes.
+
+- **Lagna** must be a fixed (Sthira) sign — Taurus, Leo, Scorpio, Aquarius — for marital stability
+- **Moon** bright, well-aspected, not in the 6/8/12 from the Lagna
+- **Moon's nakshatra**: avoid Ashlesha, Jyeshtha, Mula (separative); prefer Rohini, Mrigashira, Magha, Uttara Phalguni, Hasta, Swati, Anuradha, Mula-as-final-choice, Uttara Ashadha, Uttara Bhadrapada, Revati
+- **Pushya** is the most auspicious for nearly all beginnings
+- **Venus** (the natural karaka for marriage) and **Jupiter** (dharma, the husband in a woman's chart) must be unafflicted by malefics
+- **7th house & 7th lord** must be strong and unafflicted
+- **Avoid**: Rahu Kalam, Yama Ghantaka, Gulika Kalam, the 8th-house tithi, solar/lunar eclipse days
+- **Best weekday + hora**: Thursday + Jupiter's hora, or Friday + Venus's hora
+- **Tarabala**: the wedding Moon's nakshatra should be in a friendly count from the bride and groom's Janma Nakshatras (1, 3, 5, 7, 9 are the most favourable)
+
+Give the couple **2-3 candidate windows** with the specific reason for each
+(Pushya nakshatra + fixed Lagna + bright Moon = a classic best-bet), not
+one decree.
+
+### C.2 — Business launch / startup muhurtha
+
+- **Lagna**: a movable (Chara) sign — Aries, Cancer, Libra, Capricorn — for growth and movement
+- **10th house & 10th lord** strong; Mercury (commerce) and Jupiter (expansion) unafflicted
+- **Moon** in a *friendly* sign for the founder's Lagna, not in 6/8/12
+- **Nakshatra**: Pushya, Hasta, Rohini, or the founder's own Janma Nakshatra
+- **Avoid**: Mercury retrograde, lunar eclipse, Rahu Kalam
+- **The inception chart is the company's chart** — recommend the founder
+  cast it (`mode:"event"`) and keep it for all future transits/dashas
+- **BaZi date selection**: day branch favourable to founder's year animal;
+  day element feeds the founder's Day Master
+
+### C.3 — Surgery muhurtha (medical astrology)
+
+- **Avoid** the Moon in the sign ruling the body part being operated on (Aries = head, Taurus = throat, etc.)
+- **Avoid** lunar eclipses (2-week window)
+- **Prefer** Moon in a fixed sign (Taurus, Leo, Scorpio, Aquarius) for stability
+- **Waning Moon** preferred for surgery (less vital force "bleeding out")
+- **Mars** not afflicting the Moon or the Lagna
+- **Mercury** direct (and not combust)
+- If the surgeon is in the picture: traditional practice is to also check
+  the surgeon's chart and pick a window when the surgeon's Moon and the
+  patient's Moon are in friendly signs — though this is icing, not required
+
+### C.4 — Contract signing & emails
+
+- **Mercury direct** (the single most important rule — Mercury Rx famously muddles contracts)
+- **Moon** not in the 6/8/12 from the Lagna
+- **Mercury** unafflicted by Mars or Saturn
+- **Airy day** (Gemini, Libra, Aquarius rising) for the chart if casting one
+- For confrontational emails: avoid Mars day (Tuesday) and Mars hora
+
+### C.5 — House purchase / renovation
+
+- **4th house** strong, unafflicted; the 4th lord well-placed
+- **Moon** in a fixed sign (Taurus, Leo, Scorpio, Aquarius) for stability
+- **Venus** (the land, the home, the comfort) well-aspected
+- **Mars** not in the 4th (accidents, fires, disputes with neighbours)
+- **Rahu in the 4th** = traditional flag for property complications; check carefully
+
+## D. Horary (answering a specific question) — `mode:"horary"`
+
+Classical horary casts a chart for the *moment a question is asked*. The
+engine's `mode:"horary"` returns the chart plus a few classical signals
+(Ascendant + ruler, Moon + void-of-course status, planetary hour ruler,
+weekday ruler, big-six in houses).
+
+See `specialty-systems.md §2` for the full house-by-house method (which
+house rules which question), the lost-object rules, and the cardinal
+honesty about horary as the most interpretive branch.
 
 Classic uses: "Will my missing item be found?" (Moon + 2nd house), "Will I get this job?"
 (10th house lord's applying aspects to benefics), "Is my partner faithful?" (7th house lord

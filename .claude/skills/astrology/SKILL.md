@@ -126,20 +126,27 @@ matching the question type:
 | Karma, dasha, "when will X happen", Kundli | `vedic.md` |
 | BaZi, Chinese astrology, luck pillars | `bazi.md` |
 | Compatibility / synastry | `synastry-and-timing.md` |
-| Transits, forecasting, "why is life like this now" | `synastry-and-timing.md` + `vedic.md` (Sade Sati) |
-| Auspicious date / Muhurta / electional | `synastry-and-timing.md` |
-| Health, body, chronic illness, Ayurvedic dosha | **`health.md`** |
-| Children, fertility, naming, family, home | **`specialized.md`** section B |
-| Relocation, "where should I move" | **`specialized.md`** section A |
-| Past lives, South Node, evolutionary astrology | **`specialized.md`** section C |
-| Unknown birth time / rectification | **`specialized.md`** section D |
-| Corporate / startup / event chart | **`specialized.md`** section E |
-| Mundane / political / market astrology | **`specialized.md`** section E |
-| Pets | **`specialized.md`** section F |
-| Taboo / intimate questions | **`specialized.md`** section G |
-| Curse / evil eye / blocked energy | **`specialized.md`** section H |
-| Twin problem | **`specialized.md`** section I |
-| Nadi astrology | **`specialized.md`** section J |
+| Transits, forecasting, "why is life like this now" | `synastry-and-timing.md` + `vedic.md` |
+| Auspicious date / quick Muhurta guide | `synastry-and-timing.md §C` |
+| Electional astrology (deep) | `specialty-systems.md §3` |
+| Horary / Prasna / "will X happen" | `specialty-systems.md §2` |
+| Health, body, chronic illness, Ayurvedic dosha | `health.md` |
+| Surgical timing | `health.md` + `specialty-systems.md §3` (electional rules) |
+| Children, fertility, Putra Bhava timing | `specialty-systems.md §5` + `vedic.md §11` |
+| Naming / Namakaran (baby or business) | `specialty-systems.md §5` |
+| Family conflict / parental relationships | `specialty-systems.md §9` |
+| Relocation, "where should I move", astrocartography | `specialty-systems.md §1` |
+| Past lives, South Node, evolutionary astrology | `specialty-systems.md §10` |
+| Unknown birth time / rectification | `specialty-systems.md §4` |
+| Corporate / startup / event / wedding chart | `specialty-systems.md §9` |
+| Mundane / political / market astrology | `specialty-systems.md §7` |
+| Pets | `specialty-systems.md §9` |
+| Lost objects, "where did I lose it?" | `specialty-systems.md §6` |
+| Forensic / crime / "who did it?" | `specialty-systems.md §8` |
+| Taboo / intimate questions | `specialty-systems.md §11` |
+| Curse / evil eye / blocked energy | `specialty-systems.md §12` |
+| Twin problem | `specialty-systems.md §13` |
+| Nadi astrology | `specialty-systems.md §14` |
 | Human counseling craft, ethics | `consultation.md` — **always read for a real reading** |
 
 ### 4 — Synthesise (this is the skill)
@@ -155,44 +162,42 @@ and the held-back force turns inward as pressure on your own body."* Always look
 
 ### 5 — Counsel
 
-Answer the **real question** underneath the astrology one. Every question in ref/6.txt
-maps here. Respond to the *person*, not just the planets.
+Answer the **real question** underneath the astrology one. Respond to the *person*,
+not just the planets.
 
-**The five core anxieties:**
-- **Love / relationships (Q1–12)** → synastry + 7th house / Venus / Moon / Rahu axis;
+**The five core anxieties (what people are really asking):**
+- **Love / relationships** → synastry + 7th house / Venus / Moon / Rahu axis;
   honest about friction, never "doomed". For repeating patterns: South Node + Venus/Moon placement.
-  For love vs arranged: 5th/7th lords (see `vedic.md §10`). For "will they come back": 7th lord
+  For love vs arranged: 5th/7th lords (`vedic.md §10`). For "will they come back": 7th lord
   transits + Venus dasha timing.
-- **Career / money / power (Q13–24)** → 10th & 2nd house, Midheaven, current dasha, Day Master
-  wealth element; for relocation success (Q19): see `specialized.md §A`; for property (Q20, Q49):
-  4th house + Jupiter transit timing; for hidden talents (Q23): 5th house + Mercury/Venus dignities.
-- **Timing / crisis (Q25–34)** → transits + dasha/luck-pillar timeline; check Sade Sati
+- **Career / money / power** → 10th & 2nd house, Midheaven, current dasha, Day Master
+  wealth element; for relocation: `specialty-systems.md §1`; for property:
+  4th house + Jupiter transit timing; for hidden talents: 5th house + Mercury/Venus dignities.
+- **Timing / crisis** → transits + dasha/luck-pillar timeline; check Sade Sati
   (`vedic.md §8`, engine `sade_sati` field); *always name when it eases* — that certainty is
-  the relief. For "stuck in life" (Q34): Saturn return + 12th house emphasis + North Node timing.
-- **Soul / purpose / karma (Q35–44)** → North Node / Atmakaraka (engine field) / 9th house /
-  Ketu's past-life story; for ancestral karma (Q44): 4th house + Saturn + Ketu; for spiritual
-  awakening (Q41): Neptune/Uranus transits + 12th house activation.
-- **Family / children / home (Q45–50)** → 5th house for fertility/children; 4th house for home
-  and family conflict; see `specialized.md §B` for naming, children's charts, Putra Bhava.
+  the relief. For "stuck in life": Saturn return + 12th house emphasis + North Node timing.
+- **Soul / purpose / karma** → North Node / Atmakaraka (engine field) / 9th house /
+  Ketu's past-life story; for ancestral karma: 4th house + Saturn + Ketu; for spiritual
+  awakening: Neptune/Uranus transits + 12th house activation; for past lives: `specialty-systems.md §10`.
+- **Family / children / home** → 5th house for fertility/children; 4th house for home
+  and family conflict; `specialty-systems.md §5` for naming, children's charts, Putra Bhava.
 
 **The specialist questions:**
-- **Health / body (Q27–30)** → load `health.md`; 1st/6th/8th/12th + Saturn/Mars/Rahu/Chiron;
+- **Health / body** → load `health.md`; 1st/6th/8th/12th + Saturn/Mars/Rahu/Chiron;
   give the timing window; never a diagnosis; real medical concern → real doctor *first*.
-- **Relocation / "where to move" (Q19, Q31)** → `specialized.md §A`; identify the planetary line
+- **Relocation / "where to move"** → `specialty-systems.md §1`; identify the planetary line
   for the goal (Venus line for love, Jupiter MC for career); 9th house and its ruler for travel.
-- **Past lives / repeating patterns (Q36, Q37)** → `specialized.md §C`; South Node + Ketu story.
-- **Children, fertility, naming (Q45–47, Q50)** → `specialized.md §B`; 5th house + Jupiter timing.
-- **"I don't know my birth time" (Q rectification)** → `specialized.md §D`; run with `time_known:false`
+- **Past lives / repeating patterns** → `specialty-systems.md §10`; South Node + Ketu story.
+- **Children, fertility, naming** → `specialty-systems.md §5`; 5th house + Jupiter timing.
+- **"I don't know my birth time"** → `specialty-systems.md §4`; run with `time_known:false`
   and state explicitly what cannot be computed without a time (Ascendant, houses, hour pillar).
-- **Corporate / event / startup charts** → `specialized.md §E`; cast chart for the incorporation date.
-- **Mundane / political / market (Q specialized)** → `specialized.md §E`; outer-planet ingresses.
-- **Pets (Q specialized)** → `specialized.md §F`; cast chart for adoption/birth date.
-- **Taboo & intimate (Q6, Q specialized)** → `specialized.md §G`; hold non-judgmentally; read the chart.
-- **Curse / evil eye / blocked energy (Q29)** → `specialized.md §H`; reframe as Rahu/Saturn
+- **Corporate / event / startup / pet charts** → `specialty-systems.md §9`; cast chart for inception date.
+- **Mundane / political / market** → `specialty-systems.md §7`; outer-planet ingresses.
+- **Taboo & intimate questions** → `specialty-systems.md §11`; hold non-judgmentally; read the chart.
+- **Curse / evil eye / blocked energy** → `specialty-systems.md §12`; reframe as Rahu/Saturn
   transit pattern; give the end date and grounded remedies; never exploit fear.
-- **Surgical timing / medical electional (Q hyper-specific)** → `health.md §A` surgical timing;
-  avoid operating on the body part ruled by the Moon's current sign.
-- **Namakaran / business naming (Q specialized)** → `specialized.md §B` naming table by nakshatra.
+- **Surgical timing** → `health.md` surgical timing; avoid Moon in the sign ruling the body part.
+- **Namakaran / business naming** → `specialty-systems.md §5` nakshatra syllable table.
 
 ### 6 — Remember
 

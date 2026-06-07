@@ -1,6 +1,6 @@
 # Tibetan / Buddhist Astrology — interpretation guide
 
-A hybrid system (ref/1.txt: "Indian/Chinese" blend) used across Himalayan Buddhist
+A hybrid system — an Indian/Chinese blend — used across Himalayan Buddhist
 cultures — Tibet, Bhutan, Mongolia, parts of Nepal and Ladakh. It draws from:
 1. **Tibetan elemental astrology** (Jyung-khor) — the same five elements as Chinese BaZi
    but applied through a distinct 12-year animal cycle and 60-year sexagenary cycle.

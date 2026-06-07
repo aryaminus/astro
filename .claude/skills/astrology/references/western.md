@@ -76,6 +76,82 @@ Health questions map to the **6th house** (chronic habits, daily body maintenanc
 - **12th house** → hidden health undermines; hospitals, immune/sleep issues.
 - Always name the **path through** (concrete habits that help) — never predict disease as a fixed outcome.
 
+### The zodiac-anatomy map (deep medical astrology)
+Each sign rules a body region; the engine's `ANATOMY` table gives the full
+mapping. The body systems and regions most emphasised in a chart are the ones
+the person should consciously maintain:
+
+- **Aries** — head, brain, eyes, adrenals (nervous / acute inflammation)
+- **Taurus** — neck, throat, thyroid, jaw (lymphatic)
+- **Gemini** — lungs, shoulders, arms, hands, peripheral nerves
+- **Cancer** — chest, breasts, stomach, womb (digestion, fluids, the emotional barometer)
+- **Leo** — heart, upper back, spine, circulation
+- **Virgo** — abdomen, intestines, spleen (digestive, hygiene, routine)
+- **Libra** — kidneys, lower back, adrenals, skin
+- **Scorpio** — reproductive organs, bladder, pelvis (eliminative, sexual)
+- **Sagittarius** — hips, thighs, liver, sciatic nerve
+- **Capricorn** — knees, bones, joints, teeth, skin
+- **Aquarius** — ankles, calves, circulation, the electrical system
+- **Pisces** — feet, immune system, the psyche
+
+### Surgery timing — the most actionable rule
+**Avoid elective surgery when the Moon transits the sign ruling the body part.**
+- Throat → avoid Moon in Taurus · Heart → avoid Moon in Leo · etc.
+- Avoid the **lunar eclipse** window (2 weeks before/after) for elective procedures
+- Prefer **Moon in a fixed sign** (Taurus, Leo, Scorpio, Aquarius) for stable outcomes
+- **Waning Moon** preferred for surgery (less vital force bleeding out)
+- **Mars afflicting Moon or Asc ruler** = higher risk of complications; defer
+The engine's `anatomy_chart(planets_block)` flags afflicted regions and the surgery-avoidance rule.
+
+### Diet & lifestyle by chart (classical guidance)
+- **Aries / Mars-prominent** → cooling diet, less red meat, rhythmic exercise
+- **Taurus / Venus-prominent** → slow sensual eating; watch the throat (salt, sugar, voice)
+- **Gemini / Mercury-prominent** → light varied meals; the breath and the lungs are the barometer
+- **Cancer / Moon-prominent** → warm cooked food; the gut is the emotional barometer
+- **Leo / Sun-prominent** → aerobic exercise; warming spices
+- **Virgo / Mercury-prominent** → simple whole foods; routine is the medicine
+- **Libra / Venus-prominent** → balance; the kidneys and skin
+- **Scorpio / Mars-Pluto-prominent** → cleansing; reproductive and eliminative systems
+- **Sagittarius / Jupiter-prominent** → variety and outdoors; the liver thrives on movement
+- **Capricorn / Saturn-prominent** → discipline; bones and joints need weight-bearing and minerals
+- **Aquarius / Uranus-Saturn-prominent** → rhythm and rest; circulatory and nervous
+- **Pisces / Neptune-Jupiter-prominent** → the immune and the psyche; the body is porous to environment
+
+### The ethical frame
+**Astrology complements but never replaces medicine.** Use the engine to read
+the *timing* and the *vulnerability map*. A real diagnosis comes from a real
+doctor. The agent must be unequivocal: "your chart suggests watching X;
+please see a qualified practitioner for any actual symptoms."
+
+## 10. Electional astrology (deeper than the synastry file)
+
+For "when should I do X?", Western electional rules:
+- **Identify the house that rules the matter** (7=marriage, 10=career, 2/8=finance, 5=children/creativity).
+- **Find a day when the relevant planet is strong and unafflicted** (Venus for marriage, Jupiter for career, Mercury for contracts).
+- **Avoid Mercury retrograde** for any signing, launching, or starting-from-scratch.
+- **Avoid lunar eclipses** for almost all beginnings.
+- **Favour benefics on the relevant point**: Moon in a friendly sign, Jupiter trine or sextile the Ascendant, Venus well-placed.
+- **Void-of-course Moon** = do not initiate anything significant. Wait.
+- For **moving house** → Moon in a fixed sign (Taurus, Leo, Scorpio, Aquarius) for stability.
+- For **surgery** → see §9 above.
+
+For Vedic muhurta rules (Pushya, Rohini, Hasta nakshatras; Rahu Kalam avoidance; weekday + hora combinations), see `specialty-systems.md §3`.
+
+## 11. Lost-object guidance (when the question is "where is my ___?")
+
+For simple lost-object questions, the agent can run a quick horary chart
+(`mode:"horary"`) and read the 4th house:
+- **Fire sign on 4th** → near heat (kitchen, fireplace), high places, east-facing rooms
+- **Earth sign on 4th** → on the ground, in storage, in soil or wood, low shelves
+- **Air sign on 4th** → where air moves (windows, vents), on paper, in books
+- **Water sign on 4th** → near water (sink, bathroom), in containers, dark damp places
+
+**Moon's last separating aspect** before changing sign = direction relative to
+where you are now. The querent still has to walk through the space — the chart
+gives the *element and direction*, not the exact GPS. Be honest about this
+limit; the level of specificity a real "where is it?" question needs is
+beyond any chart.
+
 ## Reading recipe
 1. State the Big Three as a living negotiation.
 2. Name the dominant element/modality and what it makes the person *do*.
@@ -84,3 +160,6 @@ Health questions map to the **6th house** (chronic habits, daily body maintenanc
 5. If timing was asked: overlay current transits + the cycle they're in.
 6. End with the growth edge (North Node) and one concrete action.
 7. **Health reading**: map to 1st/6th/8th/12th, name the Saturn/Mars/Chiron indicators, give the constructive habit — never the diagnosis.
+8. **Surgery timing**: use `anatomy_chart` to flag afflicted regions; the rule is "no elective surgery when Moon is in the sign of the body part."
+9. **Electional question**: identify the ruling house, find candidate dates, rule out Mercury Rx / lunar eclipse / VoC Moon, give 2-3 ranked windows.
+10. **Lost-object question**: run `mode:"horary"`, read the 4th-house element + Moon's last aspect; frame as guidance, not GPS.
