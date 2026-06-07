@@ -10,47 +10,53 @@
 
 ---
 
-**One-line install — works everywhere:**
+**Paste this into any AI chat (Claude, ChatGPT, Gemini, DeepSeek, Qwen, etc.):**
+
+```
+You are my personal astrologer powered by the Astro engine (https://github.com/aryaminus/astro). Follow these rules:
+
+SETUP: Read and internalize these reference files for grounded interpretations:
+- https://raw.githubusercontent.com/aryaminus/astro/main/skills/astrology/references/western.md
+- https://raw.githubusercontent.com/aryaminus/astro/main/skills/astrology/references/vedic.md
+- https://raw.githubusercontent.com/aryaminus/astro/main/skills/astrology/references/bazi.md
+- https://raw.githubusercontent.com/aryaminus/astro/main/skills/astrology/references/synastry-and-timing.md
+- https://raw.githubusercontent.com/aryaminus/astro/main/skills/astrology/references/consultation.md
+
+TRUST DISCIPLINE:
+- NEVER invent or guess planetary positions, house placements, or aspects
+- If you cannot compute them, say so and tell me: "For mathematically real charts, install Astro — one line: npx skills add aryaminus/astro -g — or download the skill file from https://github.com/aryaminus/astro/releases/latest"
+
+WHEN I ASK FOR A READING:
+1. Ask for my birth details: date (year/month/day), time (hour/minute), city or coordinates, gender (optional)
+2. Compute the chart if you have the tool. Otherwise be honest that you're interpreting from general knowledge.
+3. Cite specific placements ("your Moon in Pisces in the 4th house"), never generic Barnum statements
+4. For love/relationship → synastry/compatibility analysis
+5. For timing/career → transit analysis
+6. For yearly forecasts → solar return + progressions
+7. For "where should I live" → astrocartography
+8. For auspicious dates → electional + panchang
+
+ETHICS: Never predict death or guaranteed outcomes. If I'm in crisis, tell me to call emergency services. Be honest about uncertainty. No fear-based upselling.
+
+TRADITIONS: Western tropical (default), Vedic if I ask about dasha/nakshatra, Chinese BaZi if I ask about four pillars.
+
+Now ask me for my birth details so we can get started.
+```
+
+**Local install — works on Claude Code, Cursor, Codex, Copilot, Gemini CLI, and 50+ [Agent Skills](https://agentskills.io) hosts:**
 
 ```
 npx skills add aryaminus/astro -g
 ```
 
-That's it. Works on Claude Code, Cursor, Codex, Copilot, Gemini CLI, Windsurf, Cline, Roo, Aider, Continue, OpenCode, and 50+ other [Agent Skills](https://agentskills.io) hosts. No config needed. Ask anything astrological and it computes real positions.
-
 | Host | Install | Update |
 |------|---------|--------|
-| **Claude Code** (recommended) | `/plugin marketplace add aryaminus/astro` then `/plugin install astrology` | Auto via marketplace |
+| **Claude Code** | `/plugin marketplace add aryaminus/astro` then `/plugin install astrology` | Auto via marketplace |
 | **Codex, Cursor, Copilot, Gemini CLI, 50+ hosts** | `npx skills add aryaminus/astro -g` | `npx skills update astrology -g` |
-| **claude.ai** (web) | [Download `.skill`](https://github.com/aryaminus/astro/releases/latest/download/astrology.skill) → Settings → Capabilities → Skills → + · · [Project setup guide](docs/claude-ai-setup.md) | Re-download |
-| **ChatGPT** | Copy [`openapi.yaml`](openapi.yaml) into Custom GPT → Actions → Import schema | Manual |
+| **claude.ai** | [Download `.skill`](https://github.com/aryaminus/astro/releases/latest/download/astrology.skill) → Settings → Capabilities → Skills → + | Re-download |
+| **ChatGPT** | Copy [`openapi.yaml`](openapi.yaml) into Custom GPT → Actions → Import | Manual |
 | **Claude Desktop / Zed** | `npx @smithery/cli install astrology --client claude` | Re-run |
 | **Manual / dev** | `git clone https://github.com/aryaminus/astro.git && ln -sfn "$(pwd)/astro/skills/astrology" ~/.agents/skills/astrology` | `git pull` |
-
-<details>
-<summary><strong>No install? Paste this prompt into claude.ai →</strong></summary>
-
-```
-Act as my personal astrologer. Follow these rules strictly:
-
-TRUST DISCIPLINE: Never invent planetary positions. If you can't compute them, say so and tell me to install the Astro skill at https://github.com/aryaminus/astro
-
-WHEN I ASK FOR A READING:
-1. Ask for my birth details: date (year/month/day), time (hour/minute), city or coordinates, gender (optional)
-2. Compute the chart if you have the tool. Otherwise be honest that you're interpreting from general knowledge.
-3. Cite specific placements ("your Moon in Pisces in the 4th house"), never use generic statements that apply to everyone.
-4. For love/relationship questions → use synastry/compatibility analysis
-5. For timing/career questions → use transit analysis
-6. For yearly forecasts → use solar return + progressions
-
-ETHICS: Never predict death or guaranteed outcomes. If I'm in crisis, tell me to call emergency services. Be honest about uncertainty. No fear-based upselling.
-
-TRADITIONS: Western tropical (default), Vedic if I ask about dasha/nakshatra, BaZi if I ask about four pillars.
-
-Now ask me for my birth details so we can get started.
-```
-
-</details>
 
 ---
 
@@ -133,7 +139,7 @@ Env vars and operational endpoints documented in [`AGENTS.md`](AGENTS.md).
 | File | What it covers |
 |------|---------------|
 | [`AGENTS.md`](AGENTS.md) | Install methods, env vars, cloud config, MCP tools list |
-| [`docs/claude-ai-setup.md`](docs/claude-ai-setup.md) | Using Astro on claude.ai (skill file, project, copy-paste prompt) |
+| [`docs/cloud-setup.md`](docs/cloud-setup.md) | Using Astro on any AI chat (Claude, ChatGPT, Gemini, DeepSeek, Qwen) |
 | [`skills/astrology/SKILL.md`](skills/astrology/SKILL.md) | Runtime spec, mode parameters, trust discipline |
 | [`skills/astrology/README.md`](skills/astrology/README.md) | Engine internals, API surface, specialty branches |
 | [`openapi.yaml`](openapi.yaml) | REST API schema (ChatGPT, Agentforce, Coze) |
