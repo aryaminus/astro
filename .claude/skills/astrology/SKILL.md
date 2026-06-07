@@ -21,7 +21,9 @@ when_to_use: >-
   conflict, past lives or South Node/Ketu karma, "will I have kids", "is my partner
   cheating", corporate/startup/event charts, "is my business chart good", pet charts,
   election or political astrology, medical astrology/surgical timing, Nadi astrology,
-  birth time rectification, evil eye or curse questions framed astrologically, and any
+  birth time rectification, evil eye or curse questions framed astrologically, Starseeds,
+  Galactic Center, Sirius/Pleiades, Black Moon Lilith, Pallas, planetary magic/talismans,
+  lottery/sports betting prediction, dream interpretation via astrology, and any
   question beginning "what do the stars say about…"
 allowed-tools: Bash(python3 *)
 argument-hint: "[birth details, or a question like 'am I compatible with…']"

@@ -581,19 +581,66 @@ difference (the longest plausible "twin" interval) can shift the Moon by
 
 ---
 
-## §14 — Out of scope (acknowledge honestly)
+## §14 — Planetary Magic & Talismans (Hermetic / Occult)
+
+**The questions it answers:** *"When should I forge a ring to capture Jupiter's wealth? What planetary spirit is causing my bad luck?"*
+
+This branch uses astrology not to *read* the stars, but to *capture* their power (based on medieval texts like the Picatrix).
+- **The method**: Finding the exact minute a planet is perfectly dignified (e.g. in its own sign, rising on the Ascendant, free from hard aspects) to create an object or perform a ritual.
+- **The honest frame**: The engine can compute the perfectly dignified moments (using the `event` mode or scanning transits), but the agent must state clearly that the skill maps the *astronomical geometry*, while the ritual/magical practice is beyond the scope of a structural reading.
+
+---
+
+## §15 — Galactic Origins & Starseeds (New Age)
+
+**The questions it answers:** *"Am I a Starseed from the Pleiades? Does my chart connect to the Galactic Center?"*
+
+A modern subculture focused on deep space, Black Holes, and Fixed Stars (Sirius, Arcturus, Pleiades, the Galactic Center at ~27° Sagittarius).
+- **The method**: Looking for exact conjunctions (within 1-2 degrees) between personal planets and specific fixed stars.
+- **The honest frame**: The base engine currently focuses on the solar system (classical and modern planets + Chiron). The agent should acknowledge the Starseed paradigm as a modern archetypal lens. If the user asks about the Galactic Center, the agent can check if they have planets at late Sagittarius. 
+
+---
+
+## §16 — Sports Betting & The Lottery (Speculative)
+
+**The questions it answers:** *"Who will win the Super Bowl? Will I win the lottery?"*
+
+Astrologers are often asked to beat the house. 
+- **Sports**: Horary/event charts cast for the starting whistle (Ascendant = favorite, Descendant = underdog).
+- **Lottery**: Examining the 8th house (others' money) and 11th house (sudden windfalls). Saturn in these houses usually means "stop buying tickets."
+- **The honest frame**: The agent must **strictly refuse** to provide gambling or financial betting advice. The geometry can be analyzed post-game for educational purposes, but predicting speculative outcomes for money violates the ethical core of the skill.
+
+---
+
+## §17 — Asteroids & Dark Points (Lilith, Chiron, Pallas)
+
+**The questions it answers:** *"Where is my Black Moon Lilith? What is my Chiron wound?"*
+
+When the main 10 planets don't explain a person's pain, astrology looks to asteroids and calculated points.
+- **Chiron**: The "Wounded Healer" — where we experience a chronic psychosomatic wound that eventually becomes our greatest medicine for others. (Computed by the engine).
+- **Black Moon Lilith**: The lunar apogee, representing repressed rage, raw feminine power, and parts of the psyche rejected by society.
+- **Pallas Athena**: Strategy, pattern recognition, and survival in male-dominated systems.
+- **The honest frame**: The engine computes Chiron. For Lilith, Pallas, Juno, Vesta, or Ceres, the agent must honestly state they are not currently calculated by the deterministic engine, but if the user provides their placements, the agent can interpret them based on the sign/house archetypes.
+
+---
+
+## §18 — Dream Interpretation (Oneiromancy via Astrology)
+
+**The questions it answers:** *"Why am I having apocalyptic nightmares? Was that dream a real visitation?"*
+
+People experience profound dreams during specific planetary alignments.
+- **The method**: Checking transits to the natal Moon (nightmares often correlate with Mars/Pluto/Neptune transits to the Moon) and the 12th House (the subconscious, the veil between worlds).
+- **The honest frame**: The agent validates the dream's emotional weight by linking it to the current transiting geometry, particularly emphasizing 12th house activations or hard aspects to the natal Moon.
+
+---
+
+## §19 — Out of scope (acknowledge honestly)
 
 Some branches the skill does **not** support, and the agent should say so:
 
-- **Nadi astrology** (Tamil palm-leaf reading) — requires physical access to
-  the Nadi libraries in Tamil Nadu; not computable from a birth chart. If a
-  user asks, explain the tradition and direct them to a practitioner.
-- **Astrometeorology** (weather/earthquake prediction from eclipses) — a
-  real historical branch but not a personal reading tool; the engine does
-  not model it.
-- **True automatic rectification** (no candidate-time scan against life
-  events) — the engine does not run progressions or solar arcs; the agent
-  can guide a manual rectification but does not automate it (see §4).
+- **Nadi astrology** (Tamil palm-leaf reading) — requires physical access to the Nadi libraries in Tamil Nadu; not computable from a birth chart. If a user asks, explain the tradition and direct them to a practitioner.
+- **Astrometeorology** (weather/earthquake prediction from eclipses) — a real historical branch but not a personal reading tool; the engine does not model it.
+- **True automatic rectification** (no candidate-time scan against life events) — the engine does not run progressions or solar arcs; the agent can guide a manual rectification but does not automate it (see §4).
+- **Calculated Asteroids/Dark Points** (Lilith, Pallas, etc. besides Chiron) — the engine calculates Chiron, but not Lilith or the thousands of minor asteroids.
 
-For these, the agent's job is to **acknowledge the tradition, explain the
-method, and refer** to a qualified practitioner.
+For these, the agent's job is to **acknowledge the tradition, explain the method, and refer** to a qualified practitioner or invite the user to provide the data themselves.
