@@ -1,8 +1,8 @@
 {
   "$schema": "https://cdn.modelcontextprotocol.io/schema/server.json",
-  "name": "io.github.aryaminus.astro",
+  "name": "io.github.aryaminus/astro",
   "display_name": "Astrology Engine",
-  "description": "Trustworthy multi-tradition astrology. 19 calculation modes (natal, transit, synastry, compatibility, composite, solar/lunar/planetary return, navamsa, varga D2-D60, panchang, moon phase, numerology, progressions, planetary hours, transit-natal aspects) across 3 traditions (Western tropical, Vedic/Jyotisha sidereal, Chinese BaZi). Deterministic ephemeris engine — zero hallucinated positions.",
+  "description": "Multi-tradition astrology. 19 modes, 18 tools. Deterministic ephemeris engine.",
   "version": "2.4.0",
   "homepage": "https://github.com/aryaminus/astro",
   "repository": {
