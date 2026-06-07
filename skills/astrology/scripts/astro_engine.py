@@ -736,7 +736,7 @@ def to_utc(data):
             local = naive_local.replace(tzinfo=ZoneInfo(tz))
             utc = local.astimezone(timezone.utc).replace(tzinfo=None)
             info["tz_used"] = tz
-            info["utc_offset_applied"] = round((naive_local - utc.replace(tzinfo=None)).total_seconds()/3600, 2) if False else local.utcoffset().total_seconds()/3600
+            info["utc_offset_applied"] = local.utcoffset().total_seconds()/3600
             return utc, info
         except Exception:
             pass
@@ -2480,8 +2480,8 @@ CITIES = {
     "Copenhagen":  (55.7, 12.6),    "Vienna":     (48.2, 16.4),
     "Zurich":      (47.4, 8.5),     "Geneva":     (46.2, 6.1),
     "Lisbon":      (38.7, -9.1),    "Edinburgh":  (55.9, -3.2),
-    "Dublin":      (53.3, -6.3),    "Vancouver":  (49.3, -123.1),
-    "Wellington":  (-41.3, 174.8),  "Anchorage":  (61.2, -149.9),
+    "Dublin":      (53.3, -6.3),    "Wellington":  (-41.3, 174.8),
+    "Anchorage":  (61.2, -149.9),
 }
 
 def _cities_on_line(target_lng, target_lat, tol_lng=10.0, tol_lat=8.0):
