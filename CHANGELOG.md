@@ -5,15 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.2.0] - 2026-06-07
-
-### Added
-- **MCP SSE endpoint on API** — MCP tools are now served at `/mcp/sse` alongside the REST API, no separate service needed.
-- Render deployment consolidated to a single free-tier service serving both API and MCP.
-
-### Removed
-- Separate `astro-mcp` Render service (MCP is now mounted into the main API).
-
 ## [2.5.0] - 2026-06-07
 
 ### Added
@@ -50,6 +41,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `openapi.yaml` server URL set to actual Render instance.
 - `.skill` download instructions updated from `tar xzf` to `unzip` (ZIP format since v2.1.3).
 - `api.py` VERSION constant synced to match manifest version.
+
+## [2.2.0] - 2026-06-07
+
+### Added
+- **MCP SSE endpoint on API** — MCP tools are now served at `/mcp/sse` alongside the REST API, no separate service needed.
+- Render deployment consolidated to a single free-tier service serving both API and MCP.
+
+### Removed
+- Separate `astro-mcp` Render service (MCP is now mounted into the main API).
 
 ## [2.1.3] - 2026-06-07
 
@@ -196,6 +196,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 1 REST endpoint, no MCP server
 - 2 reference rulesets (western, vedic basics)
 
+[2.5.0]: https://github.com/aryaminus/astro/compare/v2.4.0...v2.5.0
+[2.4.0]: https://github.com/aryaminus/astro/compare/v2.3.0...v2.4.0
+[2.3.0]: https://github.com/aryaminus/astro/compare/v2.2.0...v2.3.0
+[2.2.0]: https://github.com/aryaminus/astro/compare/v2.1.3...v2.2.0
 [2.1.0]: https://github.com/aryaminus/astro/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/aryaminus/astro/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/aryaminus/astro/releases/tag/v1.0.0

@@ -3,7 +3,7 @@
   "name": "io.github.aryaminus/astro",
   "display_name": "Astrology Engine",
   "description": "Multi-tradition astrology. 19 modes, 18 tools. Deterministic ephemeris engine.",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "homepage": "https://github.com/aryaminus/astro",
   "repository": {
     "url": "https://github.com/aryaminus/astro",
