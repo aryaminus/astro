@@ -95,8 +95,8 @@ Poke calls the Astro MCP server's 18 tools to compute real positions, then inter
 ## Option 3: Upload the skill file (claude.ai)
 
 1. Download [`astrology.skill`](https://github.com/aryaminus/astro/releases/latest/download/astrology.skill)
-2. Go to [Settings → Capabilities](https://claude.ai/settings/capabilities)
-3. Enable **Skills** → click **+** → drop the file in
+2. Go to [Customize → Skills](https://claude.ai/customize/skills)
+3. Click **+** → drop the file in
 4. Done.
 
 ## Option 4: Create a persistent Project (claude.ai)

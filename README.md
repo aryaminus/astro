@@ -50,7 +50,7 @@ npx skills add aryaminus/astro -g
 |------|---------|--------|
 | **Claude Code** | `/plugin marketplace add aryaminus/astro` then `/plugin install astrology` | Auto via marketplace |
 | **Codex, Cursor, Copilot, Gemini CLI, 50+ hosts** | `npx skills add aryaminus/astro -g` | `npx skills update astrology -g` |
-| **claude.ai** | [Download `.skill`](https://github.com/aryaminus/astro/releases/latest/download/astrology.skill) → Settings → Capabilities → Skills → + | Re-download |
+| **claude.ai** | [Download `.skill`](https://github.com/aryaminus/astro/releases/latest/download/astrology.skill) → [Customize → Skills](https://claude.ai/customize/skills) → + | Re-download |
 | **ChatGPT** | Copy [`openapi.yaml`](openapi.yaml) into Custom GPT → Actions → Import | Manual |
 | **Poke** (Messages/WhatsApp/Telegram) | [Add as MCP integration](https://poke.com/integrations/new) → URL: `https://your-render-url.onrender.com/sse` | — |
 | **Claude Desktop / Zed** | `npx @smithery/cli install astrology --client claude` | Re-run |
