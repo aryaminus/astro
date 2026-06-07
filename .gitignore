@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+
+# ControlKeel managed (do not edit) - artifacts that must not be committed
+/controlkeel/
+/.controlkeel/
+/.agents/skills/
+# End ControlKeel managed
