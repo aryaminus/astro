@@ -45,6 +45,25 @@ Or configure your MCP host manually:
 **ChatGPT Custom Actions (OpenAPI):**
 Paste the contents of `openapi.yaml` into your Custom GPT's Action schema, and update the URL to point to your hosted instance.
 
+## Monetization & API Deployment
+To monetize the skill (e.g. via Stripe, x402, or Coze), you must host it as an API instead of running it locally. 
+
+**1. FastAPI Server (For Coze, Dify, and ChatGPT):**
+We include a production-ready REST API gated by an optional API key.
+```bash
+pip install -r requirements.txt
+export ASTRO_API_KEY="your_stripe_issued_key" # Optional
+python3 skills/astrology/scripts/api.py
+```
+This runs a server on `http://localhost:8000/chart` matching the `openapi.yaml`.
+
+**2. Hosted MCP Server (For Cursor, Claude, Zed):**
+To charge for MCP tool calls using a proxy like MonetizedMCP, host the MCP server via SSE:
+```bash
+# Using the FastMCP CLI
+fastmcp run skills/astrology/scripts/mcp_server.py:mcp --transport sse
+```
+
 ## What it does
 
 **Core readings:**

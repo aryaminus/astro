@@ -76,5 +76,7 @@ def get_astrology_chart(
         return json.dumps({"error": str(e)})
 
 if __name__ == "__main__":
-    # Ensure sys.stdout is cleanly reserved for the MCP protocol when running stdio
+    # Ensure sys.stdout is cleanly reserved for the MCP protocol when running locally.
+    # To monetize and host this as an API, change transport to "sse" or run via FastMCP CLI:
+    # fastmcp dev mcp_server.py:mcp
     mcp.run(transport="stdio")
