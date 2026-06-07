@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 # Hardened base: non-root user, pinned deps, no cache
 ENV PYTHONDONTWRITEBYTECODE=1 \
