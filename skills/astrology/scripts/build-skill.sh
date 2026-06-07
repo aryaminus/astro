@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Build a .skill file for claude.ai web upload.
-# A .skill file is a tar.gz of the skill directory renamed to .skill.
+# A .skill file is a ZIP of the skill directory renamed to .skill.
 set -euo pipefail
 
 SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
@@ -14,13 +14,8 @@ OUTFILE="$OUTDIR/astrology-${VERSION}.skill"
 rm -rf "$OUTDIR"
 mkdir -p "$OUTDIR"
 
-tar czf "$OUTFILE" \
-  --exclude='__pycache__' \
-  --exclude='*.pyc' \
-  SKILL.md \
-  scripts/ \
-  references/ \
-  assets/
+find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+zip -r "$OUTFILE" SKILL.md scripts/ references/ assets/ -x '*.pyc'
 
 # Also create a latest alias for predictable download URL
 cp "$OUTFILE" "$OUTDIR/astrology.skill"

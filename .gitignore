@@ -6,4 +6,5 @@ dist/
 /controlkeel/
 /.controlkeel/
 /.agents/skills/
+.claude/
 # End ControlKeel managed
