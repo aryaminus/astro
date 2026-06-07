@@ -42,6 +42,8 @@ Now ask me for my birth details (date — and ideally exact time + city) and let
 npx skills add aryaminus/astro -g
 ```
 
+![Astro skill in action](claude.gif)
+
 | Host | Install | Update |
 |------|---------|--------|
 | **Claude Code** | `/plugin marketplace add aryaminus/astro` then `/plugin install astrology` | Auto via marketplace |
