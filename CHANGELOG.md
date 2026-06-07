@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2026-06-07
+
+### Fixed
+- **MCP server could not start** — `mcp.run()` was called with `host`/`port` kwargs it
+  doesn't accept (they belong on the `FastMCP` constructor), raising `TypeError` on every
+  transport. Boot is now correct; host/port resolve from `$PORT` (cloud) or `ASTRO_MCP_PORT`.
+- **MCP `streamable-http` transport** — alias normalization was inverted (`streamable-http`
+  → invalid `http`); `http`/`streamable-http`/`streamable_http` now all map correctly.
+- **`render.yaml` MCP service** — removed the invalid self-referencing `fromService` port
+  binding; the server now binds to Render's injected `$PORT`.
+- **`openapi.yaml`** — removed a duplicate server `description` key and a duplicate
+  `/profile/{name}` path that was silently dropping the `GET` operation from the published
+  contract; `GET` + `DELETE` are now both documented.
+- **Docs accuracy** — corrected the REST endpoint count (27 → 31), replaced a dead
+  advertised instance URL (`astro-api.onrender.com`) with placeholders, and restored an
+  astrology-qualified README H1 / repo description for discoverability.
+
+### Added
+- **Release automation** (`.github/workflows/release.yml`) — tagging `vX.Y.Z` now auto-builds
+  and publishes the `astrology.skill` asset, so `releases/latest/download/astrology.skill`
+  never goes stale. Verifies the tag matches `plugin.json`/`marketplace.json` versions.
+- **CI**: MCP-server SSE boot smoke-test, OpenAPI duplicate-key + api.py-parity checks, and a
+  skill-package build + cross-manifest version-agreement check.
+- **One-line SKILL.md setup** — point any URL-capable AI at the canonical `SKILL.md` spec.
+
+### Changed
+- Aligned all manifest versions (`SKILL.md` was stale at `2.0`) to a single coherent version.
+
 ## [2.1.0] - 2026-06-06
 
 ### Added

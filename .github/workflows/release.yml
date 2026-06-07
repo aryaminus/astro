@@ -1,0 +1,77 @@
+name: Release
+
+# Publishes the claude.ai-installable `astrology.skill` asset so that
+# https://github.com/aryaminus/astro/releases/latest/download/astrology.skill
+# always matches the tagged code. Without this, the asset was built by hand and
+# silently went stale (it once shipped a broken MCP server).
+#
+# To ship a release:
+#   1. Bump the version in .claude-plugin/plugin.json + marketplace.json (+ openapi.yaml, SKILL.md)
+#   2. git tag vX.Y.Z && git push origin vX.Y.Z
+# This workflow then builds the .skill and attaches it to the GitHub Release.
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to (re)build the .skill for, e.g. v2.1.1"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & publish astrology.skill
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Resolve tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+          echo "Releasing $TAG (version ${TAG#v})"
+
+      - name: Verify version consistency (tag == plugin.json == marketplace.json)
+        run: |
+          VER="${{ steps.tag.outputs.version }}"
+          PLUGIN=$(python -c "import json;print(json.load(open('.claude-plugin/plugin.json'))['version'])")
+          MARKET=$(python -c "import json;print(json.load(open('.claude-plugin/marketplace.json'))['plugins'][0]['version'])")
+          echo "tag=$VER  plugin.json=$PLUGIN  marketplace.json=$MARKET"
+          [ "$VER" = "$PLUGIN" ] || { echo "::error::tag v$VER != plugin.json version $PLUGIN"; exit 1; }
+          [ "$VER" = "$MARKET" ] || { echo "::error::tag v$VER != marketplace.json version $MARKET"; exit 1; }
+
+      - name: Build skill artifact
+        run: bash skills/astrology/scripts/build-skill.sh
+
+      - name: Sanity-check the artifact
+        run: |
+          test -f dist/astrology.skill || { echo "::error::astrology.skill not built"; exit 1; }
+          tar tzf dist/astrology.skill | grep -qx 'SKILL.md' || { echo "::error::SKILL.md missing from package"; exit 1; }
+          tar tzf dist/astrology.skill | grep -qx 'scripts/astro_engine.py' || { echo "::error::engine missing from package"; exit 1; }
+          tar tzf dist/astrology.skill | grep -qx 'scripts/mcp_server.py' || { echo "::error::mcp_server missing from package"; exit 1; }
+          echo "Package contents OK:"; tar tzf dist/astrology.skill
+
+      - name: Publish release with .skill asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: ${{ steps.tag.outputs.tag }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            dist/astrology.skill
+            dist/astrology-${{ steps.tag.outputs.version }}.skill

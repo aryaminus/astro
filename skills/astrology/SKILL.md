@@ -34,7 +34,7 @@ allowed-tools: Bash(python3 *)
 argument-hint: "[birth details, or a question like 'am I compatible with…']"
 metadata:
   author: getbamboo
-  version: "2.0"
+  version: "2.1.1"
   category: divination
 ---
 

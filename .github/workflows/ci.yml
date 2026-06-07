@@ -237,3 +237,33 @@ jobs:
             -d '{"year":2000,"month":1,"day":1,"hour":12,"minute":0,"lat":0,"lng":0,"tz":"UTC","time_known":false}')
           echo "with auth -> $code (expect 200)"
           [ "$code" = "200" ] || { echo "FAIL: valid auth rejected"; exit 1; }
+
+  package:
+    name: Skill package builds + versions agree
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Versions agree across manifests
+        run: |
+          python - <<'PY'
+          import json, re, sys
+          plugin = json.load(open('.claude-plugin/plugin.json'))['version']
+          market = json.load(open('.claude-plugin/marketplace.json'))['plugins'][0]['version']
+          oapi = re.search(r'^\s*version:\s*([0-9.]+)', open('openapi.yaml').read(), re.M).group(1)
+          skill = re.search(r'version:\s*"?([0-9.]+)"?', open('skills/astrology/SKILL.md').read()).group(1)
+          versions = {'plugin.json': plugin, 'marketplace.json': market, 'openapi.yaml': oapi, 'SKILL.md': skill}
+          print(versions)
+          if len(set(versions.values())) != 1:
+              print('::error::version mismatch across manifests', versions); sys.exit(1)
+          print('all manifests at', plugin)
+          PY
+      - name: build-skill.sh produces a valid package
+        run: |
+          bash skills/astrology/scripts/build-skill.sh
+          test -f dist/astrology.skill || { echo "::error::astrology.skill not built"; exit 1; }
+          tar tzf dist/astrology.skill | grep -qx 'SKILL.md' || { echo "::error::SKILL.md missing"; exit 1; }
+          tar tzf dist/astrology.skill | grep -qx 'scripts/astro_engine.py' || { echo "::error::engine missing"; exit 1; }
+          echo "skill package OK"
