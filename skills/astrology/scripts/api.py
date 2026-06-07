@@ -793,12 +793,16 @@ async def clear_interact_session(session_id: str):
     return {"status": "cleared" if existed else "no_such_session", "session_id": session_id}
 
 
-# ── MCP SSE mount ────────────────────────────────────────────────────────────
+# ── MCP mount ────────────────────────────────────────────────────────────────
 import skills.astrology.scripts.mcp_server as _mcp_mod
 
-_mcp_app = _mcp_mod.mcp.sse_app()
-app.mount("/mcp", _mcp_app)
+_mcp_sse_app = _mcp_mod.mcp.sse_app()
+app.mount("/mcp", _mcp_sse_app)
 log.info("MCP SSE endpoint mounted at /mcp/sse")
+
+_mcp_http_app = _mcp_mod.mcp.streamable_http_app()
+app.mount("/mcp-http", _mcp_http_app)
+log.info("MCP Streamable HTTP endpoint mounted at /mcp-http/mcp")
 
 
 # ── Entrypoint ──────────────────────────────────────────────────────────────
