@@ -787,6 +787,14 @@ async def clear_interact_session(session_id: str):
     return {"status": "cleared" if existed else "no_such_session", "session_id": session_id}
 
 
+# ── MCP SSE mount ────────────────────────────────────────────────────────────
+import skills.astrology.scripts.mcp_server as _mcp_mod
+
+_mcp_app = _mcp_mod.mcp.sse_app()
+app.mount("/mcp", _mcp_app)
+log.info("MCP SSE endpoint mounted at /mcp/sse")
+
+
 # ── Entrypoint ──────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     import uvicorn

@@ -23,19 +23,5 @@ services:
       retries: 3
       start_period: 10s
 
-  # Optional: MCP server over SSE for cloud MCP hosts.
-  # Uncomment to run alongside the API in the same compose network.
-  # mcp:
-  #   image: aryaminus/astro:latest
-  #   container_name: astro-mcp
-  #   restart: unless-stopped
-  #   ports:
-  #     - "${MCP_PORT:-8765}:8765"
-  #   environment:
-  #     ASTRO_MCP_TRANSPORT: "sse"
-  #     ASTRO_MCP_HOST: "0.0.0.0"
-  #     ASTRO_MCP_PORT: "8765"
-  #   command: ["python", "-m", "skills.astrology.scripts.mcp_server"]
-
 volumes:
   astro-profiles:
