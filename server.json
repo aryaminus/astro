@@ -1,5 +1,5 @@
 {
-  "$schema": "https://cdn.modelcontextprotocol.io/schema/server.json",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.aryaminus/astro",
   "display_name": "Astrology Engine",
   "description": "Multi-tradition astrology. 19 modes, 18 tools. Deterministic ephemeris engine.",
