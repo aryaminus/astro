@@ -1,10 +1,9 @@
 services:
   - type: web
     name: astro-api
-    runtime: python
+    env: docker
     plan: free
     branch: main
-    buildCommand: ""
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /ready
@@ -12,8 +11,6 @@ services:
     envVars:
       - key: PORT
         value: "8000"
-      - key: PYTHON_VERSION
-        value: "3.11.0"
       - key: ASTRO_LOG_LEVEL
         value: "INFO"
       - key: ASTRO_PROFILE_DIR
@@ -25,7 +22,3 @@ services:
       #   value: "100"
       # - key: ASTRO_RATE_WINDOW
       #   value: "3600"
-    disk:
-      name: astro-profiles
-      mountPath: /data/profiles
-      sizeGB: 1
