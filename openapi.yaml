@@ -18,8 +18,7 @@ servers:
   - url: http://localhost:8000
     description: Local development
   - url: https://astro-api-a2rc.onrender.com
-    description: Cloud (Render free tier — ~30s cold start)
-    description: Your hosted instance — replace with your Render/Docker deployment URL
+    description: Cloud (Render free tier — ~30s cold start). Replace with your own Render/Docker deployment URL.
 
 security:
   - ApiKeyAuth: []

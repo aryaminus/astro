@@ -283,6 +283,6 @@ jobs:
         run: |
           bash skills/astrology/scripts/build-skill.sh
           test -f dist/astrology.skill || { echo "::error::astrology.skill not built"; exit 1; }
-          tar tzf dist/astrology.skill | grep -qx 'SKILL.md' || { echo "::error::SKILL.md missing"; exit 1; }
-          tar tzf dist/astrology.skill | grep -qx 'scripts/astro_engine.py' || { echo "::error::engine missing"; exit 1; }
+          unzip -l dist/astrology.skill | grep -q 'SKILL.md' || { echo "::error::SKILL.md missing"; exit 1; }
+          unzip -l dist/astrology.skill | grep -q 'scripts/astro_engine.py' || { echo "::error::engine missing"; exit 1; }
           echo "skill package OK"
