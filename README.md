@@ -7,6 +7,7 @@
 [![MCP](https://img.shields.io/badge/MCP-18_tools-blueviolet)](https://modelcontextprotocol.io)
 [![REST](https://img.shields.io/badge/REST-31_endpoints-orange)](openapi.yaml)
 [![Deploy](https://img.shields.io/badge/Deploy-Render-46a2f1)](render.yaml)
+[![smithery badge](https://smithery.ai/badge/aryaminus/astrology)](https://smithery.ai/servers/aryaminus/astrology)
 
 ---
 
