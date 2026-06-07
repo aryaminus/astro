@@ -2,10 +2,16 @@
   "serverInfo": {
     "name": "Astrology Engine",
     "version": "2.4.0",
-    "description": "Trustworthy multi-tradition astrology. 19 modes, 3 traditions, 18 MCP tools. Deterministic ephemeris — zero hallucinated positions.",
+    "description": "Multi-tradition astrology. 19 modes, 18 tools. Deterministic ephemeris.",
     "repository": "https://github.com/aryaminus/astro",
     "homepage": "https://github.com/aryaminus/astro",
     "license": "MIT"
+  },
+  "mcpServers": {
+    "astrology": {
+      "transport": "sse",
+      "url": "https://astro-api-a2rc.onrender.com/mcp/sse"
+    }
   },
   "tools": [
     {"name": "get_astrology_chart", "description": "Calculate an astrological chart based on birth data."},
