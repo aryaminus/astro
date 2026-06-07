@@ -55,3 +55,53 @@ paths:
             application/json:
               schema:
                 type: object
+  /profile:
+    post:
+      operationId: saveProfile
+      summary: Save a user's birth profile to memory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - year
+                - month
+                - day
+              properties:
+                name:
+                  type: string
+                year:
+                  type: integer
+                month:
+                  type: integer
+                day:
+                  type: integer
+                hour:
+                  type: integer
+                minute:
+                  type: integer
+                lat:
+                  type: number
+                lng:
+                  type: number
+                tz:
+                  type: string
+      responses:
+        "200":
+          description: Profile saved successfully
+  /profile/{name}:
+    get:
+      operationId: getProfile
+      summary: Retrieve a saved birth profile
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Saved profile data

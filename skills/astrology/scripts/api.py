@@ -55,6 +55,55 @@ async def generate_chart(request: ChartRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+class ProfileRequest(BaseModel):
+    name: str
+    year: int
+    month: int
+    day: int
+    hour: int = 12
+    minute: int = 0
+    lat: float = 0.0
+    lng: float = 0.0
+    tz: str = "UTC"
+
+def get_profile_path():
+    import os
+    return os.path.expanduser("~/.astro_profiles.json")
+
+@app.post("/profile", dependencies=[Depends(get_api_key)])
+async def save_profile(request: ProfileRequest):
+    """Save a user's birth profile to memory."""
+    import json, os
+    profile_path = get_profile_path()
+    try:
+        profiles = {}
+        if os.path.exists(profile_path):
+            with open(profile_path, "r") as f:
+                profiles = json.load(f)
+        profiles[request.name] = request.model_dump()
+        with open(profile_path, "w") as f:
+            json.dump(profiles, f, indent=2)
+        return {"status": "success", "message": f"Profile '{request.name}' saved."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/profile/{name}", dependencies=[Depends(get_api_key)])
+async def load_profile(name: str):
+    """Retrieve a saved birth profile."""
+    import json, os
+    profile_path = get_profile_path()
+    try:
+        if os.path.exists(profile_path):
+            with open(profile_path, "r") as f:
+                profiles = json.load(f)
+            if name in profiles:
+                return profiles[name]
+        raise HTTPException(status_code=404, detail=f"Profile '{name}' not found.")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 if __name__ == "__main__":
     import uvicorn
     # Run the server locally

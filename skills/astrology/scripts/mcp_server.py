@@ -75,6 +75,78 @@ def get_astrology_chart(
     except Exception as e:
         return json.dumps({"error": str(e)})
 
+@mcp.tool()
+def get_astrology_reference(system: str) -> str:
+    """
+    Retrieve authentic interpretation guidelines for a specific astrological system.
+    Use this to ground your readings instead of hallucinating meanings.
+    Valid systems: 'western', 'vedic', 'bazi', 'health', 'synastry', 'consultation'.
+    """
+    import os
+    # Assume references are in skills/astrology/references/
+    ref_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "references")
+    # Mapping system names to standard files
+    file_map = {
+        "western": "western.md",
+        "vedic": "vedic.md",
+        "bazi": "bazi.md",
+        "health": "health.md",
+        "synastry": "synastry-and-timing.md",
+        "consultation": "consultation.md"
+    }
+    target = file_map.get(system.lower())
+    if not target:
+        return f"Error: Reference for '{system}' not found. Available: {list(file_map.keys())}"
+    
+    path = os.path.join(ref_dir, target)
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return f.read()
+    except Exception as e:
+        return f"Error reading reference: {e}"
+
+@mcp.tool()
+def save_profile(name: str, year: int, month: int, day: int, hour: int = 12, minute: int = 0, lat: float = 0.0, lng: float = 0.0, tz: str = "UTC") -> str:
+    """
+    Save a user's birth profile to local memory for future sessions.
+    """
+    import os, json
+    profile_path = os.path.expanduser("~/.astro_profiles.json")
+    try:
+        if os.path.exists(profile_path):
+            with open(profile_path, "r") as f:
+                profiles = json.load(f)
+        else:
+            profiles = {}
+            
+        profiles[name] = {
+            "year": year, "month": month, "day": day,
+            "hour": hour, "minute": minute,
+            "lat": lat, "lng": lng, "tz": tz
+        }
+        with open(profile_path, "w") as f:
+            json.dump(profiles, f, indent=2)
+        return f"Profile '{name}' saved successfully."
+    except Exception as e:
+        return f"Error saving profile: {e}"
+
+@mcp.tool()
+def get_profile(name: str) -> str:
+    """
+    Retrieve a saved birth profile.
+    """
+    import os, json
+    profile_path = os.path.expanduser("~/.astro_profiles.json")
+    try:
+        if os.path.exists(profile_path):
+            with open(profile_path, "r") as f:
+                profiles = json.load(f)
+            if name in profiles:
+                return json.dumps(profiles[name], indent=2)
+        return f"Profile '{name}' not found."
+    except Exception as e:
+        return f"Error loading profile: {e}"
+
 if __name__ == "__main__":
     # Ensure sys.stdout is cleanly reserved for the MCP protocol when running locally.
     # To monetize and host this as an API, change transport to "sse" or run via FastMCP CLI:
