@@ -1,0 +1,24 @@
+# CODEOWNERS — auto-assign reviewers for each surface
+# Lines starting with `#` are comments. The last match wins.
+
+# Default: maintainers get pinged on everything
+*                        @aryaminus
+
+# Engine (changes here ripple to all wrappers)
+skills/astrology/scripts/astro_engine.py   @aryaminus
+
+# MCP / REST / OpenAPI
+skills/astrology/scripts/mcp_server.py     @aryaminus
+skills/astrology/scripts/api.py            @aryaminus
+openapi.yaml                               @aryaminus
+
+# Cloud deploy
+Dockerfile                                 @aryaminus
+docker-compose.yml                         @aryaminus
+render.yaml                                @aryaminus
+
+# Reference texts (interpretations)
+/skills/astrology/references/              @aryaminus
+
+# CI / infra
+/.github/                                  @aryaminus
