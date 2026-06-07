@@ -60,3 +60,9 @@ credited in release notes.
 ## Past advisories
 
 _None._
+
+## Dependency versions
+
+- **Python**: 3.10+ (3.9 not supported — `mcp` SDK requires ≥ 3.10)
+- **Runtime deps**: `mcp`, `fastapi`, `uvicorn` (see `requirements.txt`)
+- **Optional**: `pyswisseph` (auto-upgrades engine precision if installed)

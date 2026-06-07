@@ -134,7 +134,7 @@ astrology/
 ## The engine (`scripts/astro_engine.py`)
 
 - **Zero dependencies** — pure-Python geocentric ephemeris (Schlyter algorithms
-  + perturbation terms). Runs anywhere with Python 3.9+. Exact to sign/house/nakshatra/dasha.
+  + perturbation terms). Runs anywhere with Python 3.10+. Exact to sign/house/nakshatra/dasha.
 - **Auto-upgrades** to Swiss Ephemeris arcsecond precision if `pyswisseph` is installed — no code change needed.
 - **19 modes** — natal, transit, synastry, compatibility, composite, astrocartography, horary, event, solar_return, lunar_return, planetary_return, navamsa, varga (D2–D60), panchang, moon_phase, numerology, progressions, planetary_hours, transit_natal_aspects.
 - **Auto-enriched natal** — aspect patterns, 10 Arabic Parts, 23 fixed stars, Black Moon Lilith, dignities, chart ruler, Descendant, IC, equal houses, navamsa D9, panchang, Mangal Dosha, Kaalsarpa Dosha.

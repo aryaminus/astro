@@ -17,7 +17,7 @@ The heart of the project is `skills/astrology/scripts/astro_engine.py`.
 
 - **No** `numpy`, `pandas`, `sweph`, `flatlib`, `pyephem`, or any other lib.
 - All math uses the Python stdlib (`math`, `datetime`, `calendar`).
-- `pyswisseph` is an **optional auto-upgrade**, not a required dependency.
+- The minimum Python version is **3.10** (required by the `mcp` SDK).
 - The engine **must not import** `mcp`, `fastapi`, `requests`, `urllib`, or
   any framework. It is pure math; wrappers handle I/O.
 

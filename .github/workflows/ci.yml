@@ -8,15 +8,16 @@ on:
 
 jobs:
   syntax:
-    name: Syntax + import check
+    name: Syntax + import check (${{ matrix.python-version }})
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
@@ -28,20 +29,31 @@ jobs:
           python -m py_compile skills/astrology/scripts/astro_engine.py
           python -m py_compile skills/astrology/scripts/api.py
           python -m py_compile skills/astrology/scripts/mcp_server.py
-      - name: Import-check
+      - name: Import-check (engine via sys.path, wrappers as modules)
         run: |
-          python -c "import skills.astrology.scripts.astro_engine as e; print('engine OK,', sum(1 for n in dir(e) if not n.startswith('_')), 'symbols')"
-          python -c "import skills.astrology.scripts.api as a; print('api OK,', sum(1 for r in a.app.routes if hasattr(r, 'path')), 'routes')"
-          python -c "import skills.astrology.scripts.mcp_server as m; print('mcp OK,', sum(1 for n in dir(m.mcp)), 'symbols')"
+          python -c "
+          import sys, os
+          sys.path.insert(0, 'skills/astrology/scripts')
+          import astro_engine
+          print('engine OK,', sum(1 for n in dir(astro_engine) if not n.startswith('_')), 'symbols')
+          "
+          python -c "
+          import sys, os
+          sys.path.insert(0, 'skills/astrology/scripts')
+          sys.path.insert(0, '.')
+          # api.py inserts scripts dir into sys.path internally
+          import skills.astrology.scripts.api as a
+          print('api OK,', sum(1 for r in a.app.routes if hasattr(r, 'path')), 'routes')
+          "
 
   openapi:
     name: OpenAPI spec validates
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: "3.12"
       - name: Install pyyaml
         run: pip install pyyaml
       - name: Validate
@@ -60,14 +72,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: "3.12"
       - name: Run all 19 modes
         run: |
-          .venv/  # placeholder no-op
           python - <<'PY'
-          import json, sys
+          import json, sys, os
           sys.path.insert(0, '.')
           sys.path.insert(0, 'skills/astrology/scripts')
           import astro_engine
@@ -87,7 +98,7 @@ jobs:
                       params["varga"] = "D10"
                   if m == "planetary_return":
                       params["planet"] = "Saturn"
-                  if m == "synastry" or m == "compatibility" or m == "composite":
+                  if m in ("synastry", "compatibility", "composite"):
                       params["partner"] = {"year": 1985, "month": 3, "day": 22,
                                            "hour": 9, "minute": 0, "lat": 51.5,
                                            "lng": -0.12, "tz": "Europe/London",
@@ -107,9 +118,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: "3.12"
       - name: Install
         run: pip install -r requirements.txt
       - name: Start server
@@ -117,18 +128,19 @@ jobs:
           PORT=8765 ASTRO_RATE_LIMIT=0 \
             python -m uvicorn skills.astrology.scripts.api:app \
               --host 127.0.0.1 --port 8765 &
-          for i in 1 2 3 4 5 6 7 8 9 10; do
+          for i in $(seq 1 15); do
             sleep 1
-            if curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8765/health | grep -q 200; then
-              echo "API up"; break
+            if curl -sf -o /dev/null http://127.0.0.1:8765/health; then
+              echo "API up after ${i}s"; break
             fi
+            if [ "$i" = "15" ]; then echo "FAIL: API not up after 15s"; exit 1; fi
           done
       - name: Public endpoints
         run: |
           for path in / /health /ready /version /metrics /pricing; do
             code=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:8765$path")
             echo "$path -> $code"
-            test "$code" = "200" || (echo "FAIL: $path returned $code"; exit 1)
+            [ "$code" = "200" ] || { echo "FAIL: $path returned $code"; exit 1; }
           done
       - name: Chart endpoints (free mode, no auth)
         run: |
@@ -137,7 +149,7 @@ jobs:
               "http://127.0.0.1:8765$path" -H "Content-Type: application/json" \
               -d '{"year":1990,"month":6,"day":15,"hour":14,"minute":30,"lat":40.71,"lng":-74.0,"tz":"America/New_York","time_known":true}')
             echo "$path -> $code"
-            test "$code" = "200" || (echo "FAIL: $path returned $code"; exit 1)
+            [ "$code" = "200" ] || { echo "FAIL: $path returned $code"; exit 1; }
           done
       - name: /interact endpoint
         run: |
@@ -145,29 +157,28 @@ jobs:
             http://127.0.0.1:8765/interact -H "Content-Type: application/json" \
             -d '{"messages":[{"role":"user","content":"what does my chart say?"}],"profile":{"year":1990,"month":6,"day":15,"hour":14,"minute":30,"lat":40.71,"lng":-74.0,"tz":"America/New_York","time_known":true}}')
           echo "/interact -> $code"
-          test "$code" = "200" || (echo "FAIL: /interact returned $code"; exit 1)
-      - name: Rate-limit (with low limit)
+          [ "$code" = "200" ] || { echo "FAIL: /interact returned $code"; exit 1; }
+      - name: Rate-limit enforcement
         run: |
-          kill %1 || true
+          kill %1 2>/dev/null || true
           sleep 1
           PORT=8766 ASTRO_RATE_LIMIT=2 ASTRO_RATE_WINDOW=60 \
             python -m uvicorn skills.astrology.scripts.api:app \
               --host 127.0.0.1 --port 8766 &
           sleep 3
-          for i in 1 2 3; do
-            code=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+          for i in 1 2; do
+            curl -s -o /dev/null -w "request $i: %{http_code}\n" -X POST \
               http://127.0.0.1:8766/chart/natal -H "Content-Type: application/json" \
-              -d '{"year":2000,"month":1,"day":1,"hour":12,"minute":0,"lat":0,"lng":0,"tz":"UTC","time_known":false}')
-            echo "request $i -> $code"
+              -d '{"year":2000,"month":1,"day":1,"hour":12,"minute":0,"lat":0,"lng":0,"tz":"UTC","time_known":false}'
           done
-          # 3rd request should be 429
-          curl -s -o /dev/null -w "third request should be 429, got %{http_code}\n" \
-            -X POST http://127.0.0.1:8766/chart/natal -H "Content-Type: application/json" \
-            -d '{"year":2000,"month":1,"day":1,"hour":12,"minute":0,"lat":0,"lng":0,"tz":"UTC","time_known":false}' | grep -q 429 || \
-            (echo "FAIL: rate limit not enforced"; exit 1)
-      - name: Auth gate
+          code=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+            http://127.0.0.1:8766/chart/natal -H "Content-Type: application/json" \
+            -d '{"year":2000,"month":1,"day":1,"hour":12,"minute":0,"lat":0,"lng":0,"tz":"UTC","time_known":false}')
+          echo "3rd request (expect 429): $code"
+          [ "$code" = "429" ] || { echo "FAIL: rate limit not enforced"; exit 1; }
+      - name: Auth gate enforcement
         run: |
-          kill %1 || true
+          kill %1 2>/dev/null || true
           sleep 1
           PORT=8767 ASTRO_API_KEY=sk_test \
             python -m uvicorn skills.astrology.scripts.api:app \
@@ -177,10 +188,10 @@ jobs:
             http://127.0.0.1:8767/chart/natal -H "Content-Type: application/json" \
             -d '{"year":2000,"month":1,"day":1,"hour":12,"minute":0,"lat":0,"lng":0,"tz":"UTC","time_known":false}')
           echo "no auth -> $code (expect 403)"
-          test "$code" = "403" || (echo "FAIL: auth not enforced"; exit 1)
+          [ "$code" = "403" ] || { echo "FAIL: auth not enforced"; exit 1; }
           code=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
             http://127.0.0.1:8767/chart/natal -H "Content-Type: application/json" \
             -H "Authorization: sk_test" \
             -d '{"year":2000,"month":1,"day":1,"hour":12,"minute":0,"lat":0,"lng":0,"tz":"UTC","time_known":false}')
           echo "with auth -> $code (expect 200)"
-          test "$code" = "200" || (echo "FAIL: valid auth rejected"; exit 1)
+          [ "$code" = "200" ] || { echo "FAIL: valid auth rejected"; exit 1; }

@@ -5,7 +5,7 @@
 > position to answer "what does my chart say?"
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-zero-brightgreen.svg)]())
 [![MCP](https://img.shields.io/badge/MCP-compatible-blueviolet)](https://modelcontextprotocol.io)
 [![MCP Tools](https://img.shields.io/badge/MCP_tools-18-purple)]())
@@ -53,7 +53,7 @@ Aspect patterns (Grand Trine, Kite, T-Square, Grand Cross, Yod, Mystic Rectangle
 
 ### Zero dependencies
 Pure-Python geocentric ephemeris (Schlyter algorithms + JPL perturbation
-terms). Runs anywhere with Python 3.9+. Auto-upgrades to Swiss Ephemeris
+terms). Runs anywhere with Python 3.10+. Auto-upgrades to Swiss Ephemeris
 arcsecond precision if `pyswisseph` is installed — no code change needed.
 
 ### Honest
