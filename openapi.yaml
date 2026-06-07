@@ -7,7 +7,7 @@ info:
     Zero hallucinated positions. Includes aspect patterns, Arabic Parts, fixed stars, dignities,
     Black Moon Lilith, Mangal Dosha, Kaalsarpa Dosha, composite charts, progressions,
     planetary returns, divisional charts (D2-D60), planetary hours, and numerology.
-  version: 2.0.0
+  version: 2.1.0
   contact:
     name: Astrology API Support
     url: https://github.com/aryaminus/astro
@@ -17,7 +17,8 @@ info:
 servers:
   - url: http://localhost:8000
     description: Local development
-  - url: https://astrology-api.yourdomain.com
+  - url: https://astrology-api.onrender.com
+    description: Render cloud (free tier)
     description: Production (replace with your hosted URL)
 
 security:
@@ -31,6 +32,33 @@ components:
       in: header
       name: Authorization
       description: "Optional. Free tier: no key needed. Set ASTRO_API_KEY env var on server to require keys."
+
+  responses:
+    TooManyRequests:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema: { type: integer }
+          description: Seconds until the rate-limit window resets
+        X-RateLimit-Limit:
+          schema: { type: integer }
+        X-RateLimit-Remaining:
+          schema: { type: integer }
+        X-RateLimit-Reset:
+          schema: { type: integer }
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: { type: string, example: rate_limited }
+              detail: { type: string }
+              retry_after_sec: { type: integer }
+    Unauthorized:
+      description: Invalid or missing API key
+      content:
+        application/json:
+          schema: { type: object }
 
   schemas:
     BirthData:
@@ -369,3 +397,132 @@ paths:
       security: []
       responses:
         "200": { description: Pricing table }
+
+  /:
+    get:
+      tags: [Utility]
+      operationId: root
+      summary: API root
+      security: []
+      responses:
+        "200": { description: Service banner with version + feature flags }
+
+  /version:
+    get:
+      tags: [Utility]
+      operationId: getVersion
+      summary: Service version
+      security: []
+      responses:
+        "200": { description: Version payload }
+
+  /ready:
+    get:
+      tags: [Utility]
+      operationId: readiness
+      summary: Readiness probe
+      description: Loads the engine and returns 200 only if it can compute. Suitable for k8s readinessProbe.
+      security: []
+      responses:
+        "200": { description: Engine ready }
+        "503": { description: Engine not loaded }
+
+  /metrics:
+    get:
+      tags: [Utility]
+      operationId: getMetrics
+      summary: Operational metrics
+      description: Counters only — rate-limit allow/block totals, active IPs, uptime, session count. No PII.
+      security: []
+      responses:
+        "200": { description: Metrics payload }
+
+  /interact:
+    post:
+      tags: [Interagent]
+      operationId: interact
+      summary: Chat-style poke endpoint (engine + grounding packet)
+      description: |
+        Host LLMs call this when a user "pokes" the agent with a natural-language
+        question. The endpoint detects the right engine mode(s) from the question,
+        runs the deterministic engine for each, and returns a structured
+        `grounding_packet` that the model interprets.
+
+        Multi-turn is supported via `session_id` — the engine caches the profile
+        for follow-up turns so the client doesn't have to re-send birth data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [messages]
+              properties:
+                messages:
+                  type: array
+                  minItems: 1
+                  maxItems: 50
+                  items:
+                    type: object
+                    required: [role, content]
+                    properties:
+                      role: { type: string, enum: [user, assistant] }
+                      content: { type: string }
+                profile:
+                  $ref: "#/components/schemas/BirthData"
+                session_id:
+                  type: string
+                  description: Opaque. Auto-generated on first call.
+                max_context_tokens:
+                  type: integer
+                  default: 4000
+      responses:
+        "200":
+          description: Structured results + grounding packet for the host LLM
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session_id: { type: string }
+                  detected_mode: { type: string }
+                  rationale: { type: string }
+                  actions_run: { type: array, items: { type: string } }
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        mode: { type: string }
+                        ok: { type: boolean }
+                        data: { type: object, additionalProperties: true }
+                        error: { type: string }
+                  errors: { type: array, items: { type: object } }
+                  grounding_packet: { type: object }
+
+  /interact/{session_id}:
+    delete:
+      tags: [Interagent]
+      operationId: clearInteractSession
+      summary: Clear an interact session
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Session cleared }
+
+  /profile/{name}:
+    delete:
+      tags: [Profiles]
+      operationId: deleteProfile
+      summary: Delete a saved profile
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Deleted }
+        "404": { description: Not found }

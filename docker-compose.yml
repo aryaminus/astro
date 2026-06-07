@@ -1,0 +1,41 @@
+services:
+  api:
+    build: .
+    image: aryaminus/astro:latest
+    container_name: astro-api
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      PORT: "8000"
+      # All optional — defaults are FREE + unlimited rate limit
+      # ASTRO_API_KEY: "sk_live_change_me_to_enable_metering"
+      # ASTRO_RATE_LIMIT: "100"
+      # ASTRO_RATE_WINDOW: "3600"
+      ASTRO_PROFILE_DIR: "/data/profiles"
+      ASTRO_LOG_LEVEL: "INFO"
+    volumes:
+      - astro-profiles:/data/profiles
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/ready', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # Optional: MCP server over SSE for cloud MCP hosts.
+  # Uncomment to run alongside the API in the same compose network.
+  # mcp:
+  #   image: aryaminus/astro:latest
+  #   container_name: astro-mcp
+  #   restart: unless-stopped
+  #   ports:
+  #     - "${MCP_PORT:-8765}:8765"
+  #   environment:
+  #     ASTRO_MCP_TRANSPORT: "sse"
+  #     ASTRO_MCP_HOST: "0.0.0.0"
+  #     ASTRO_MCP_PORT: "8765"
+  #   command: ["python", "-m", "skills.astrology.scripts.mcp_server"]
+
+volumes:
+  astro-profiles:

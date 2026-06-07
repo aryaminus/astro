@@ -208,3 +208,107 @@ medical, corporate, pet, Namakaran, past lives, twin problem, curse, taboo,
 lost objects) — with a hard ethical frame (no death predictions, real crisis
 overrides the chart, no fear-based upsell) and the anti-Barnum discipline
 (cite the specific placement, no generic fluff).
+
+## Cloud Hosting & Self-Hosting (v2.1)
+
+The skill works **three ways**:
+
+| Mode | Transport | Use case |
+|------|-----------|----------|
+| Local skill | `python3` CLI | Claude Code, Cursor, local dev |
+| MCP server | stdio (default) / SSE | Claude Desktop, Cursor, Zed, Cloudflare Agents, Smithery |
+| REST API | HTTP | ChatGPT Custom GPTs, Coze, Dify, webhooks, server-to-server |
+
+**All three are FREE by default. No auth required, no rate limits.** Set
+`ASTRO_API_KEY` env var to gate access when you're ready to monetize.
+
+### One-click deploy to Render (free tier)
+
+The repo ships a `render.yaml` for one-click deploy:
+
+1. Click "New +" → "Blueprint" in [Render](https://render.com)
+2. Connect this repo
+3. Render reads `render.yaml` and provisions the API + a 1 GB disk for saved profiles
+4. Get a public URL like `https://astro-api.onrender.com`
+5. Test: `curl https://astro-api.onrender.com/health`
+
+### Self-host with Docker
+
+```bash
+git clone https://github.com/aryaminus/astro.git
+cd astro
+docker compose up --build
+# API: http://localhost:8000
+# Docs: http://localhost:8000/docs
+```
+
+### Self-host with raw Python
+
+```bash
+git clone https://github.com/aryaminus/astro.git
+cd astro
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn skills.astrology.scripts.api:app --host 0.0.0.0 --port 8000
+```
+
+### Run the MCP server (stdio or SSE)
+
+```bash
+# stdio (Claude Desktop, Cursor, Zed — local)
+python3 -m skills.astrology.scripts.mcp_server
+
+# SSE (Smithery, Cloudflare, Render — cloud)
+ASTRO_MCP_TRANSPORT=sse ASTRO_MCP_PORT=8765 \
+  python3 -m skills.astrology.scripts.mcp_server
+```
+
+### Environment variables
+
+| Var | Default | Effect |
+|-----|---------|--------|
+| `PORT` | `8000` | HTTP port |
+| `ASTRO_API_KEY` | _unset_ | If set, requires `Authorization: <key>` on chart endpoints. **Free if unset.** |
+| `ASTRO_RATE_LIMIT` | `0` | Max requests per IP per window. `0` = unlimited. |
+| `ASTRO_RATE_WINDOW` | `3600` | Rate-limit window in seconds. |
+| `ASTRO_PROFILE_DIR` | `~` | Where saved profiles are persisted. **Set to `/data/profiles` in containers.** |
+| `ASTRO_LOG_LEVEL` | `INFO` | `DEBUG` / `INFO` / `WARNING` / `ERROR` |
+| `ASTRO_MCP_TRANSPORT` | `stdio` | `stdio` (local) / `sse` (cloud) / `http` (streamable) |
+| `ASTRO_MCP_HOST` | `0.0.0.0` | MCP bind host |
+| `ASTRO_MCP_PORT` | `8765` | MCP bind port (SSE/HTTP) |
+
+### Chat-style poke endpoint
+
+For agents that want to "poke" the engine with a natural-language question
+without deciding which mode to call, hit `POST /interact`:
+
+```bash
+curl -X POST $API/interact -H "Content-Type: application/json" -d '{
+  "messages": [{"role":"user","content":"what does my birth chart say about love?"}],
+  "profile": {"year":1990,"month":6,"day":15,"hour":14,"minute":30,
+              "lat":40.71,"lng":-74.0,"tz":"America/New_York","time_known":true}
+}'
+```
+
+The endpoint detects intent, runs the engine, and returns a
+`grounding_packet` the host LLM interprets. Multi-turn is supported via
+`session_id` (the profile is cached for follow-up calls).
+
+### Operational endpoints
+
+- `GET /health` — liveness, returns version + feature flags
+- `GET /ready` — readiness, loads engine before returning 200
+- `GET /version` — version payload
+- `GET /metrics` — rate-limit counters, active IPs, uptime, session count (no PII)
+- `GET /pricing` — per-call pricing table
+- `GET /docs` — interactive Swagger UI
+- `GET /openapi.json` — OpenAPI 3.1 spec
+
+### Response headers
+
+Every chart response carries:
+
+- `X-Request-Id` — request correlation id (also accepted from caller)
+- `X-API-Version` — `2.1.0`
+- `X-RateLimit-Limit` / `X-RateLimit-Remaining` / `X-RateLimit-Reset` — per-IP budget
+- `X-Tool-Price` / `X-Tool-Name` — billing/analytics headers (always present)

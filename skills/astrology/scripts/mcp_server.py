@@ -2,12 +2,21 @@
 """
 Model Context Protocol (MCP) server wrapper for the Astrology Engine.
 This allows the astrology engine to be used natively by MCP-compatible
-clients like Claude Desktop, Cursor, Zed, Devin, and Antigravity.
+clients like Claude Desktop, Cursor, Zed, Devin, and Antigravity, as well
+as cloud MCP hosts (Smithery, Cloudflare, Render) over HTTP+SSE.
 
 Requires the `mcp` SDK:
   pip install mcp
+
+Transport selection via env var ASTRO_MCP_TRANSPORT:
+  - stdio (default): local Claude Desktop / Cursor
+  - sse:              cloud MCP hosts (HTTP + Server-Sent Events)
+  - http:             Streamable HTTP (modern MCP transport)
+
+Set ASTRO_MCP_HOST (default 0.0.0.0) and ASTRO_MCP_PORT (default 8765) for network mode.
 """
 
+import os
 import sys
 import json
 import logging
@@ -19,11 +28,22 @@ except ImportError:
     print("ERROR: The 'mcp' package is required. Install it with: pip install mcp", file=sys.stderr)
     sys.exit(1)
 
+# Make this script's directory importable for `import astro_engine` so the
+# same code works whether invoked as `python -m skills.astrology.scripts.mcp_server`
+# or `python skills/astrology/scripts/mcp_server.py`.
+_SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
+if _SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, _SCRIPTS_DIR)
+
 # Import the core engine
-import astro_engine
+import astro_engine  # noqa: E402
 
 # Initialize the MCP server
-mcp = FastMCP("Astrology Engine")
+mcp = FastMCP(
+    "Astrology Engine",
+    host=os.environ.get("ASTRO_MCP_HOST", "0.0.0.0"),
+    port=int(os.environ.get("ASTRO_MCP_PORT", "8765")),
+)
 
 @mcp.tool()
 def get_astrology_chart(
@@ -448,7 +468,19 @@ def get_transit_aspects(
         return json.dumps({"error": str(e)})
 
 if __name__ == "__main__":
-    # Ensure sys.stdout is cleanly reserved for the MCP protocol when running locally.
-    # To monetize and host this as an API, change transport to "sse" or run via FastMCP CLI:
-    # fastmcp dev mcp_server.py:mcp
-    mcp.run(transport="stdio")
+    # Transport is env-driven so the same image works for stdio (local) and
+    # sse/http (cloud). Default to stdio for backward compatibility.
+    transport = os.environ.get("ASTRO_MCP_TRANSPORT", "stdio").lower()
+    if transport not in ("stdio", "sse", "http", "streamable-http"):
+        print(f"Unknown ASTRO_MCP_TRANSPORT={transport!r}, falling back to stdio", file=sys.stderr)
+        transport = "stdio"
+    if transport == "streamable-http":
+        transport = "http"
+    logging.basicConfig(level=logging.INFO)
+    logging.getLogger("astrology-mcp").info(
+        "Starting Astrology MCP server (transport=%s, host=%s, port=%s)",
+        transport,
+        os.environ.get("ASTRO_MCP_HOST", "0.0.0.0"),
+        os.environ.get("ASTRO_MCP_PORT", "8765"),
+    )
+    mcp.run(transport=transport)

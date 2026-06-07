@@ -74,3 +74,35 @@ Western tropical · Vedic/Jyotisha (Lahiri sidereal) · Chinese BaZi (Four Pilla
 
 ### Zero Dependencies
 Pure-Python ephemeris (stdlib only). Auto-upgrades to Swiss Ephemeris if `pyswisseph` is installed. No paid APIs.
+
+## Cloud Hosting (v2.1)
+
+The skill is deploy-ready out of the box. All three transport modes work:
+- **Local skill** — `python3` CLI
+- **MCP server** — stdio (default) or SSE for cloud hosts (set `ASTRO_MCP_TRANSPORT=sse`)
+- **REST API** — FastAPI, 27 endpoints including `/interact` for chat-style poke
+
+**One-click deploy to Render:** connect this repo via `render.yaml` (already committed). Public URL on Render free tier.
+
+**Self-host:** `docker compose up` or `uvicorn skills.astrology.scripts.api:app --host 0.0.0.0 --port 8000`.
+
+**FREE by default.** Set `ASTRO_API_KEY` to gate, `ASTRO_RATE_LIMIT` to throttle. Response headers `X-Tool-Price` / `X-Tool-Name` are always included for billing/analytics.
+
+### Operational endpoints (no auth)
+- `GET /health` — liveness
+- `GET /ready` — readiness (loads engine first)
+- `GET /version` — version payload
+- `GET /metrics` — rate-limit counters, no PII
+- `GET /pricing` — per-call pricing
+- `GET /docs` — interactive Swagger UI
+
+### Environment variables
+| Var | Default | Effect |
+|-----|---------|--------|
+| `PORT` | `8000` | HTTP port |
+| `ASTRO_API_KEY` | _unset_ | Gate chart endpoints. **Free if unset.** |
+| `ASTRO_RATE_LIMIT` | `0` | Per-IP cap per window. `0` = unlimited. |
+| `ASTRO_RATE_WINDOW` | `3600` | Rate-limit window (sec) |
+| `ASTRO_PROFILE_DIR` | `~` | Profile persistence dir. Set `/data/profiles` in containers. |
+| `ASTRO_MCP_TRANSPORT` | `stdio` | `stdio` / `sse` / `http` |
+| `ASTRO_MCP_PORT` | `8765` | MCP SSE/HTTP port |
