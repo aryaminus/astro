@@ -13,8 +13,9 @@ when_to_use: >-
   Activate whenever the user asks about astrology, their horoscope, sun/moon/rising
   sign, birth or natal chart, kundli/janma, zodiac, BaZi/Chinese astrology, feng-shui
   elements, nakshatra, dasha, planetary transits, Saturn return, "Mercury retrograde",
-  relationship compatibility, an auspicious date, "what's my luck this year", or
-  brings a love/career/money/crisis/purpose question they want read through the stars.
+  relationship compatibility, an auspicious date, "what's my luck this year", Tibetan
+  or Buddhist astrology, Losar animal, Kalachakra, Mewa, Chiron/wounded healer, or
+  brings a love/career/money/crisis/health/purpose question through the stars.
 allowed-tools: Bash(python3 *)
 argument-hint: "[birth details, or a question like 'am I compatible with…']"
 metadata:
@@ -112,11 +113,12 @@ change needed.
 Read the chart through the **reference rulesets**, not from vibes. Load the file(s)
 matching the systems you ran:
 
-- **[references/western.md](references/western.md)** — signs, planets, houses, aspects, dignities, the Big Three, transits, Saturn return.
-- **[references/vedic.md](references/vedic.md)** — lagna, rashi, nakshatra, the grahas, dashas, yogas, karma, remedies.
+- **[references/western.md](references/western.md)** — signs, planets, houses, aspects, dignities, the Big Three, Chiron, health indicators, transits, Saturn return.
+- **[references/vedic.md](references/vedic.md)** — lagna, rashi, nakshatra, the grahas, dashas, yogas, karma, health (6th/8th/12th), remedies.
 - **[references/bazi.md](references/bazi.md)** — four pillars, Day Master & strength, the five elements, useful/unfavourable element, luck pillars, Ten Gods, Tai Sui.
 - **[references/synastry-and-timing.md](references/synastry-and-timing.md)** — compatibility, transits/forecasting, electional (auspicious dates) and horary (specific questions).
-- **[references/consultation.md](references/consultation.md)** — the human craft: the four anxieties people actually bring, the anti-Barnum discipline, ethics, and how to deliver hard news. **Read this one for any real reading.**
+- **[references/tibetan.md](references/tibetan.md)** — Tibetan/Buddhist astrology: Losar animal cycle, Mewa nine-number fate system, Kalachakra Lung-ta, Parkha trigrams, Buddhist karmic frame, remedial practices.
+- **[references/consultation.md](references/consultation.md)** — the human craft: the five anxieties (love, vocation, timing, purpose, **health**), anti-Barnum discipline, ethics, and hard-news delivery. **Read this one for any real reading.**
 
 ### 4 — Synthesise (this is the skill)
 
@@ -138,6 +140,8 @@ of the four human anxieties and respond to the person, not just the planets:
 - **Career / money / power** → 10th & 2nd house, Midheaven, current dasha, Day Master's wealth element.
 - **Timing / crisis** → transits + dasha/luck-pillar timeline; *name when it eases* — certainty is the relief people seek.
 - **Purpose / self** → North Node / dharma (9th) / the chart's spine; validate without flattering.
+- **Health / body** → 1st/6th/8th/12th houses + Saturn/Mars/Rahu indicators + Chiron's house; give the timing window and 1–2 constructive practices; never a diagnosis; real medical concern → real doctor first.
+- **Tibetan/Buddhist angle** → use the birth year animal (from BaZi engine year pillar) + current year Lung-ta relationship + Mewa if known; frame as karma with Buddhist remedial practices.
 
 ### 6 — Remember
 

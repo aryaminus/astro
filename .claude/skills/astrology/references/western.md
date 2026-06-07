@@ -25,6 +25,9 @@ a diplomat. Name that negotiation.
 | Neptune | dreams, dissolution | where you idealise, escape, or attune spiritually (generational) |
 | Pluto | power, rebirth | where you transform through crisis and confront the shadow (generational) |
 | N/S Node | growth axis | North = unfamiliar growth edge; South = innate gift to release |
+| **Chiron** | wounded healer | your deepest wound (the sign/house it's in) that becomes your greatest teacher — the gift emerges *through* the wound, not despite it |
+
+**Chiron in brief** — Chiron transits one sign every 2–8 years (very eccentric orbit; fastest near Virgo/Libra, slowest near Pisces/Aries). Its natal sign describes the *wound-theme* of a generation; its natal **house** personalises which life arena the wound plays out. Chiron in a natal chart is often most powerful when a transit or progressed planet makes a hard aspect to it. The classic Chiron reading: the house it occupies is where the person *cannot help others most powerfully* — because it's where they bled first.
 
 ## 3. Sign qualities
 - **Elements**: Fire (spirit/action), Earth (matter/practicality), Air (mind/relation), Water (emotion/intuition). The engine gives the element & modality balance — a chart lacking an element craves it; an over-loaded element runs the show.
@@ -65,6 +68,14 @@ reworks itself (Mercury Rx: thinks before speaks, non-linear mind). Not "bad."
 - **Nodal Return (~18.6, 37, 56)** — karmic re-orientation of direction & relationships.
 - Transiting **Saturn/Jupiter/Pluto** aspects to natal planets time the major chapters; the engine lists the tightest. Always name **when a hard transit eases** — that timeline is the relief people came for.
 
+## 9. Health in the Western chart
+Health questions map to the **6th house** (chronic habits, daily body maintenance), **1st house/Ascendant** (vitality, constitution), and **8th house** (crises, surgery, transformation). Specific indicators:
+- **Saturn** in the 6th or afflicting the Ascendant ruler → chronic conditions, structural/skeletal issues, need for discipline in body maintenance.
+- **Mars** in the 6th or 8th → inflammation, fever, accidents; read the sign for which body system (Aries=head, Taurus=throat, etc.).
+- **Chiron's house** → the arena where chronic wounding lives (often psychosomatic); also the theme the person eventually heals *in others*.
+- **12th house** → hidden health undermines; hospitals, immune/sleep issues.
+- Always name the **path through** (concrete habits that help) — never predict disease as a fixed outcome.
+
 ## Reading recipe
 1. State the Big Three as a living negotiation.
 2. Name the dominant element/modality and what it makes the person *do*.
@@ -72,3 +83,4 @@ reworks itself (Mercury Rx: thinks before speaks, non-linear mind). Not "bad."
 4. Locate it in houses (which life arenas light up).
 5. If timing was asked: overlay current transits + the cycle they're in.
 6. End with the growth edge (North Node) and one concrete action.
+7. **Health reading**: map to 1st/6th/8th/12th, name the Saturn/Mars/Chiron indicators, give the constructive habit — never the diagnosis.

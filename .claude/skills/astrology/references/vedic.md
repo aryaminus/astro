@@ -68,6 +68,24 @@ aligned to the planet, gemstones (only on a competent astrologer's advice — th
 strong), strengthening the dasha lord's significations through right action. Present
 these as supportive practices, not as "pay to avoid doom." (See `consultation.md` ethics.)
 
+## 7. Health in the Vedic chart
+Jyotish gives a detailed health map. The primary indicators:
+- **1st bhava (Lagna)** — constitution, overall vitality; afflicted Lagna or Lagna lord = weaker body.
+- **6th bhava (Shatru/Roga)** — diseases, debt, enemies; planets here or its lord's condition show chronic ailment tendencies. The *sign* of the 6th narrows the body system.
+- **8th bhava (Ayu)** — longevity, hidden/chronic conditions, surgeries; Rahu in 8th or an afflicted 8th lord can bring sudden health disruptions.
+- **12th bhava (Vyaya)** — hospitalisation, hidden enemies to the body, sleep quality.
+
+**Graha health signatures**:
+- **Surya (Sun)**: vitality, heart, spine, right eye; afflicted Sun → authority/ego injuries.
+- **Chandra (Moon)**: mind, lungs, chest, left eye, hormonal tides; afflicted Moon → emotional/mental instability.
+- **Mangal (Mars)**: blood, inflammation, fever, accidents, muscles; a strong Mars protects; afflicted → operations.
+- **Shani (Saturn)**: bones, joints, nervous system, chronic ailments, teeth; its mahadasha often tests health through depletion.
+- **Rahu**: mysterious/unusual conditions, foreign substances, poisons; Ketu → past-life ailments, separative surgeries.
+
+**Timing health events**: The 6th/8th/12th lord dashas, or a transit of a malefic over the Lagna/Moon, can activate latent patterns. Always pair with "when does the dasha ease" — that's the recovery window.
+
+**Remedies for health**: Strengthening the Lagna lord (mantra, right lifestyle for that planet); Saturn afflictions → discipline, service, cold water routines; Mars → non-violence, cooling diet.
+
 ## Reading recipe
 1. Lagna + its lord's placement → the life's frame and direction.
 2. Moon sign + nakshatra → mind, emotion, character seed.
@@ -75,3 +93,4 @@ these as supportive practices, not as "pay to avoid doom." (See `consultation.md
 4. **Current mahadasha + antardasha with dates** → the chapter they're living now and what it asks.
 5. Tie the question's house(s) to the active dasha lord → the specific, timed answer.
 6. Frame as karma-with-agency; offer a constructive remedy if apt.
+7. **Health reading**: check 1st/6th/8th/12th + Saturn/Mars/Rahu; give the dasha timing and a practical remedy — never a diagnosis.

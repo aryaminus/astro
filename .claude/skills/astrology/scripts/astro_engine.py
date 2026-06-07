@@ -478,6 +478,20 @@ def _node_lon(d):
     """Mean ascending lunar node (Rahu)."""
     return norm360(125.1228 - 0.0529538083*d)
 
+def _chiron_geo_lon(d, sun):
+    """Chiron geocentric longitude via Keplerian orbit. ~3° accuracy, sign-level reliable.
+    Elements calibrated to JPL J2000 position (~267° Sagittarius). Perihelion ~mid-1994."""
+    N = 208.70               # longitude of ascending node (degrees)
+    i = 6.93                 # inclination
+    w = 339.62               # argument of perihelion
+    a = 13.648               # semi-major axis AU
+    e = 0.3786               # eccentricity
+    M = norm360(39.2 + 0.01955178*d)   # mean anomaly; 39.2° at J2000
+    xh, yh, zh, r, v = _orbit_xyz(N, i, w, a, e, M)
+    xg = xh + sun["xs"]
+    yg = yh + sun["ys"]
+    return norm360(_atan2(yg, xg))
+
 def _pluto_geo_lon(d):
     """Schlyter's approximation, valid roughly 1800–2050."""
     S = 50.03 + 0.033459652*d
@@ -494,7 +508,7 @@ def _pluto_geo_lon(d):
 
 # Tropical geocentric longitudes for all bodies at JD ──────────────────────────
 PLANET_ORDER = ["Sun","Moon","Mercury","Venus","Mars","Jupiter","Saturn",
-                "Uranus","Neptune","Pluto","North Node","South Node"]
+                "Uranus","Neptune","Pluto","North Node","South Node","Chiron"]
 
 def tropical_longitudes(jd):
     """Return {body: longitude_deg} (tropical/geocentric) via builtin ephemeris."""
@@ -507,6 +521,7 @@ def tropical_longitudes(jd):
     node = _node_lon(d)
     out["North Node"] = node
     out["South Node"] = norm360(node+180)
+    out["Chiron"] = _chiron_geo_lon(d, sun)
     return out
 
 def longitudes_swe(jd):
@@ -514,7 +529,8 @@ def longitudes_swe(jd):
     swe.set_ephe_path(None)
     ids = {"Sun":swe.SUN,"Moon":swe.MOON,"Mercury":swe.MERCURY,"Venus":swe.VENUS,
            "Mars":swe.MARS,"Jupiter":swe.JUPITER,"Saturn":swe.SATURN,"Uranus":swe.URANUS,
-           "Neptune":swe.NEPTUNE,"Pluto":swe.PLUTO,"North Node":swe.TRUE_NODE}
+           "Neptune":swe.NEPTUNE,"Pluto":swe.PLUTO,"North Node":swe.TRUE_NODE,
+           "Chiron":swe.CHIRON}
     out = {}
     speed = {}
     for name, pid in ids.items():
@@ -683,7 +699,7 @@ def western_chart(jd, lat, lng, time_known=True):
     lons, speed, backend = body_longitudes(jd)
     asc_lon, mc_lon = ascendant_mc(jd, lat, lng) if time_known else (lons["Sun"], norm360(lons["Sun"]+270))
     names = ["Sun","Moon","Mercury","Venus","Mars","Jupiter","Saturn",
-             "Uranus","Neptune","Pluto","North Node","South Node"]
+             "Uranus","Neptune","Pluto","North Node","South Node","Chiron"]
     planets = _planet_block(lons, speed, asc_lon, names, vedic=False)
     asc_sign,_,asc_deg = sign_of(asc_lon)
     mc_sign,_,mc_deg = sign_of(mc_lon)
