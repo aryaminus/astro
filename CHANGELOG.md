@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.2] - 2026-06-07
+
+### Fixed
+- **Silent wrong chart on `lon`/`longitude` input** — `calculate_full_profile` read only
+  `lng` and defaulted the missing field to `0.0°`, producing a completely wrong ascendant
+  with no error signal. `lon`, `long`, and `longitude` are now accepted as aliases.
+- **`KeyError: 'year'` on ISO date input** — LLMs naturally pass `{"date":"1990-06-15","time":"14:30"}`;
+  the engine hard-required `year`/`month`/`day` with no fallback. ISO `date`/`time` strings are
+  now normalized to canonical fields before processing.
+- Added `_normalize_birth()` normalizer (called at the top of `calculate_full_profile`) that
+  coerces `lon`/`long`/`longitude` → `lng`, `latitude` → `lat`, and ISO `date`/`time` → integer
+  fields. Recurses into `partner` for synastry/compatibility. Canonical fields always win.
+
+### Added
+- **CI: input-tolerance regression test** — asserts that `lon`, `longitude`, and ISO `date+time`
+  variants all produce the same ascendant as the canonical `lng`/`year/month/day` form.
+  Prevents the silent-wrong-chart regression from ever shipping again.
+
+### Changed
+- Prompt in README and docs/cloud-setup.md now lists `git clone` first (most reliable in
+  sandboxes) and annotates the `curl`/release-CDN path as potentially blocked in restricted
+  environments. Explicit engine schema (`year/month/day/lat/lng/tz`) is now inline in the
+  prompt so AIs don't guess alias field names.
+
 ## [2.1.1] - 2026-06-07
 
 ### Fixed
